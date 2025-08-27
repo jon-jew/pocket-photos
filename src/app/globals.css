@@ -24,3 +24,27 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+header {
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+}
+
+.expandable {
+  /* opacity: 0;
+  line-height: 50px;
+
+  transition: width .5s ease-in-out;
+  width: 0; */
+    line-height: 36.5px;
+
+  overflow: hidden;
+  max-width: 0px;
+  -webkit-transition: max-width .5s ease;
+  transition: max-width .5s ease;
+ }
+ 
+ .expandable.expanded {
+  /* opacity: 1;
+  width: auto; */
+  max-width: 300px;
+}

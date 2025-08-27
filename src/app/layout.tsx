@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import PermMediaIcon from '@mui/icons-material/PermMedia';
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -27,6 +29,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <header className="fixed items-center content-center top-0 left-0 w-full h-12 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 animate-gradient-x">
+          <Link href="/">
+            <div className="flex items-center gap-1 text-white font-bold p-1">
+              <PermMediaIcon className="text-white m-1" />
+              <h2>PP</h2>
+            </div>
+          </Link>
+        </header>
+
         {children}
       </body>
     </html>
