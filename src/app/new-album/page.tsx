@@ -4,7 +4,11 @@ import React, { useRef, useState } from 'react';
 
 import Link from 'next/link';
 import Image from 'next/image';
+
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 import { uploadImageAlbum } from '@/library/firebase/image';
 import { generateQR } from '@/library/utils';
@@ -61,17 +65,17 @@ const NewAlbumPage: React.FC = () => {
   const Done = () => (
     <div>
       <Link href={`/album/${albumId}`}>View Album</Link>
-      { qrCode && <Image width={200} height={200} src={qrCode} /> }
+      {qrCode && <Image width={200} height={200} src={qrCode} />}
     </div>
   )
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start border border-opacity-20	 p-8 rounded-lg shadow-lg">
         {loading ? <CircularProgress /> :
           albumId !== null ? <Done /> : (
             <>
-              <h1 className="text-2xl font-bold mb-4">Create New Album</h1>
+              <h1 className="text-2xl font-bold">Create New Album</h1>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block font-medium mb-1" htmlFor="albumName">
@@ -88,18 +92,37 @@ const NewAlbumPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block font-medium mb-1" htmlFor="images">
+                  {/* <Button
+                    variant="outlined"
+                    component="label"
+                    role={undefined}
+                  >
                     Upload Images
-                  </label>
-                  <input
-                    id="images"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    ref={fileInputRef}
-                    onChange={handleFilesChange}
-                    className="block"
-                  />
+                    <input
+                      id="images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={handleFilesChange}
+                      className="hidden"
+                    />
+                  </Button> */}
+                  <IconButton
+                    component="label"
+                    role={undefined}
+                  >
+                    <AddPhotoAlternateIcon htmlColor='#FFF' />
+                    <input
+                      id="images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={handleFilesChange}
+                      className="hidden"
+                    />
+                  </IconButton>
                 </div>
                 {previewUrls.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 mt-4">
@@ -113,12 +136,14 @@ const NewAlbumPage: React.FC = () => {
                     ))}
                   </div>
                 )}
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Create Album
-                </button>
+                <div className="flex justify-end mt-8">
+                  <button
+                    type="submit"
+                    className="text-white px-4 py-2 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 animate-gradient-x"
+                  >
+                    Create
+                  </button>
+                </div>
               </form>
             </>
           )

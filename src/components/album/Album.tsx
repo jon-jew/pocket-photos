@@ -10,24 +10,6 @@ type Photo = {
   title: string;
 };
 
-const mockPhotos: Photo[] = [
-  {
-    id: "1",
-    url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=400",
-    title: "Mountain View",
-  },
-  {
-    id: "2",
-    url: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=400",
-    title: "Forest Path",
-  },
-  {
-    id: "3",
-    url: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=400",
-    title: "City Lights",
-  },
-];
-
 export default function AlbumPage({ albumId }: { albumId: string }) {
   const [images, setImages] = useState<Photo[]>([]);
   const [albumName, setAlbumName] = useState<string>('');
