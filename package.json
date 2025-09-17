@@ -19,6 +19,7 @@
     "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "sass": "^1.92.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

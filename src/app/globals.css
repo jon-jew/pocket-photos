@@ -3,26 +3,47 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #BD9CEA;
+  --primary-hover: #A475F9;
+  --secondary: #070217;
+  --secondary-hover: #1C0E3E;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --font-primary: var(--font-comico);
+  --font-secondary: var(--font-manrope);
 }
 
 body {
-  background: #000;
+  background: linear-gradient(0deg, #070217, #070217), radial-gradient(111.1% 37.09% at 49.87% 0%, #130249 0%, #070217 100%);
   color: #FFF;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-comico);
+}
+
+.centered-col {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  font-size: 48px;
+}
+
+h3 {
+  font-size: 19px;
+}
+
+p {
+  font-size: 12px;
 }
 
 button {

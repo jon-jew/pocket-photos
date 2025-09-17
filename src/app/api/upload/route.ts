@@ -12,10 +12,10 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     console.log(formData)
-    const file = formData.get('image') as File; 
+    const file = formData.get('image') as File;
     console.log(file)
-      const data = Object.fromEntries(formData);
-      console.log(data)
+    const data = Object.fromEntries(formData);
+    console.log(data)
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }

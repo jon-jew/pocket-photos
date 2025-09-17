@@ -1,0 +1,17 @@
+.textfield {
+  transition-property: background-color;
+  transition-duration: 200ms;
+  border-style: solid;
+  border-width: 2px;
+  max-width: 400px;
+  min-height: 51px;
+}
+
+.textfield:has(input:focus) {
+  background-color: #a784d88a;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+}
+
+.textfield input:focus {
+  outline: none;
+}

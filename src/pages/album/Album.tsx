@@ -30,8 +30,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
         <CircularProgress />
       </main>
     );
-  };
-
+  }
   if (images.length === 0) {
     return (
       <main className="max-w-4xl mx-auto p-6">
@@ -40,6 +39,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
       </main>
     );
   }
+  
   return (
     <main className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{albumName}</h1>
