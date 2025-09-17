@@ -1,17 +1,12 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { getAlbumImages } from "@/library/firebase/image";
 
-type Photo = {
-  id: string;
-  url: string;
-  title: string;
-};
-
 export default function AlbumPage({ albumId }: { albumId: string }) {
-  const [images, setImages] = useState<Photo[]>([]);
+  const [images, setImages] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [albumName, setAlbumName] = useState<string>('');
 
   const getImages = async () => {
@@ -20,22 +15,42 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
       setImages(imageRes.imageList);
       setAlbumName(imageRes.albumName);
     }
+    setLoading(false);
   }
 
-  getImages();
+  useEffect(() => {
+    getImages();
+  }, []);
 
+  if (loading) {
+    return (
+      <main className="max-w-4xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Loading...</h1>
+        <p>Loading images...</p>
+      </main>
+    );
+  };
+
+  if (images.length === 0) {
+    return (
+      <main className="max-w-4xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">{albumName || 'Loading...'}</h1>
+        <p>No images in album</p>
+      </main>
+    );
+  }
   return (
     <main className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{albumName}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {images.map((image) => (
+        {images.map((image, idx) => (
           <div
-            key={'test'}
+            key={image}
             className="rounded shadow hover:shadow-lg transition overflow-hidden bg-white"
           >
             <img
               src={image}
-              // alt={photo.title}
+              alt={`Photo ${idx + 1}`}
               className="w-full h-48 object-cover"
             />
             {/* <div className="p-4">

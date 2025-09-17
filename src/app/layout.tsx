@@ -33,12 +33,13 @@ export default function RootLayout({
           <Link href="/">
             <div className="flex items-center gap-1 text-white font-bold p-1">
               <PermMediaIcon className="text-white m-1" />
-              <h2>PP</h2>
+              <h2>pluur.io</h2>
             </div>
           </Link>
         </header>
-
-        {children}
+        <div className="pt-8">
+          {children}
+        </div>
       </body>
     </html>
   );

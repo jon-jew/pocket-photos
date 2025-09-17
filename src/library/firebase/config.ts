@@ -7,7 +7,6 @@ const config: configType = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
-console.log(config)
 
 Object.keys(config).forEach((key: string) => {
   const configValue = config[key as keyof configType] + "";

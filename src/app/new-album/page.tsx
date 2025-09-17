@@ -5,7 +5,6 @@ import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import CircularProgress from '@mui/material/CircularProgress';
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
@@ -65,22 +64,23 @@ const NewAlbumPage: React.FC = () => {
   const Done = () => (
     <div>
       <Link href={`/album/${albumId}`}>View Album</Link>
-      {qrCode && <Image width={200} height={200} src={qrCode} />}
+      {qrCode && <Image alt="QR code" width={200} height={200} src={qrCode} />}
     </div>
   )
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start border border-opacity-20	 p-8 rounded-lg shadow-lg">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start
+      bg-gradient-to-br from-purple-500/30 via-pink-400/20 to-red-400/30 backdrop-blur-md p-8 rounded-lg shadow-lg">
         {loading ? <CircularProgress /> :
           albumId !== null ? <Done /> : (
             <>
               <h1 className="text-2xl font-bold">Create New Album</h1>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block font-medium mb-1" htmlFor="albumName">
+                  {/* <label className="block font-medium mb-1" htmlFor="albumName">
                     Album Name
-                  </label>
+                  </label> */}
                   <input
                     id="albumName"
                     type="text"

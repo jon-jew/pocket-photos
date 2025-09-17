@@ -63,6 +63,7 @@ export const getAlbumImages = async (albumId: string) => {
   try {
     const albumRef = doc(db, 'albums', albumId);
     const docSnap = await getDoc(albumRef);
+    console.log(docSnap.data())
     if (docSnap.exists()) {
       const data = docSnap.data();
       return data;
