@@ -5,7 +5,7 @@ import Button from '@/components/ui/button';
 import './textfield.scss';
 
 interface TextfieldProps {
-  intialValue?: any;
+  intialValue?: string;
   placeholder?: string;
   buttonLabel?: string;
   label?: string;

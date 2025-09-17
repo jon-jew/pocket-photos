@@ -86,7 +86,7 @@ const NewAlbumPage: React.FC = () => {
       <div className="flex flex-col min-h-screen items-center justify-center">
         <div className="centered-col h-[225px] mb-4">
           <h1 className="text-primary">
-            That's it<br/>
+            That&apos;s it<br/>
             Your lobby<br/>
             is ready!
           </h1>
