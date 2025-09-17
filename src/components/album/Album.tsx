@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { getAlbumImages } from "@/library/firebase/image";
 
@@ -25,8 +26,8 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
   if (loading) {
     return (
       <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Loading...</h1>
-        <p>Loading images...</p>
+        <h1 className="text-3xl font-bold mb-6">{albumName}</h1>
+        <CircularProgress />
       </main>
     );
   };
