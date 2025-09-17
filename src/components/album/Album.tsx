@@ -21,7 +21,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
 
   useEffect(() => {
     getImages();
-  }, []);
+  }, [getImages]);
 
   if (loading) {
     return (

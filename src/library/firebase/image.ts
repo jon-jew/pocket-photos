@@ -1,26 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
 
 import {
-  collection,
   doc,
-  arrayUnion,
-  serverTimestamp,
-  addDoc,
   getDoc,
-  getFirestore,
-  getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
-  updateDoc,
-  getDocsFromCache,
-  deleteDoc,
   setDoc,
-  QueryDocumentSnapshot,
-  DocumentData,
 } from "firebase/firestore";
-import { ref, uploadString, deleteObject, getDownloadURL } from "firebase/storage";
+import { ref, uploadString, getDownloadURL } from "firebase/storage";
 
 import { storage, db } from "./clientApp";
 
