@@ -10,7 +10,7 @@ runConfig:
 # Environment variables and secrets.
 env:
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    secret: firebaseApiKey
+    secret: firebaseSecretKey
 
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
     value: pocket-photos.firebaseapp.com
