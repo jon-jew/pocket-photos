@@ -1,4 +1,4 @@
-import NewAlbum from "@/pages/newAlbum";
+import NewAlbum from "@/views/newAlbum";
 
 const NewAlbumPage: React.FC = () => {
   return <NewAlbum />

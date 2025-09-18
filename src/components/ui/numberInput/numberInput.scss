@@ -1,0 +1,23 @@
+.number-input {
+  --otc-digits: 6; /* length */
+  --otc-ls: 2ch;
+  --otc-gap: 1.25;
+  /* private consts */
+  --_otp-bgsz: calc(var(--otc-ls) + 1ch);
+
+  all: unset;
+  text-align: left;
+  background: linear-gradient(90deg, 
+    var(--otc-bg, var(--secondary)) calc(var(--otc-gap) * var(--otc-ls)),
+    transparent 0
+  ) 0 0 / var(--_otp-bgsz) 100%;
+  caret-color: var(--otc-cc, var(--primary));
+  clip-path: inset(0% calc(var(--otc-ls) / 2) 0% 0%);
+  font-family: var(--font-monomaniac);
+  font-size: var(--otc-fz, 2.0em);
+  color: var(--primary);
+  inline-size: calc(var(--otc-digits) * var(--_otp-bgsz));
+  letter-spacing: var(--otc-ls);
+  padding-block: var(--otc-pb, 0.4ch);
+  padding-inline-start: calc(((var(--otc-ls) - 0.72ch) / 2) * var(--otc-gap));
+}

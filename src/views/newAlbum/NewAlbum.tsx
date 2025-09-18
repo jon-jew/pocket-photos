@@ -1,14 +1,19 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+import { toast } from 'react-toastify';
 
 import CollectionsIcon from '@mui/icons-material/Collections';
 
 import { uploadImageAlbum } from '@/library/firebase/image';
 import { generateQR } from '@/library/utils';
+
+import useUser from '@/components/hooks/useUser';
 
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer';
@@ -23,6 +28,16 @@ const NewAlbumPage: React.FC = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const router = useRouter();
+  const { user, userLoading } = useUser();
+
+  useEffect(() => {
+    if (!user && !userLoading) {
+      router.push('/');
+      toast.info('Please login to create album.');
+    }
+  }, [userLoading, router, user]);
 
   const fileToDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -68,12 +83,7 @@ const NewAlbumPage: React.FC = () => {
       setAlbumId(uploadRes);
     }
   };
-  const Done = () => (
-    <div>
-      <Link href={`/album/${albumId}`}>View Album</Link>
-      {qrCode && <Image alt="QR code" width={200} height={200} src={qrCode} />}
-    </div>
-  )
+
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
@@ -86,8 +96,8 @@ const NewAlbumPage: React.FC = () => {
       <div className="flex flex-col min-h-screen items-center justify-center">
         <div className="centered-col h-[225px] mb-4">
           <h1 className="text-primary">
-            That&apos;s it<br/>
-            Your lobby<br/>
+            That&apos;s it<br />
+            Your lobby<br />
             is ready!
           </h1>
         </div>
@@ -100,13 +110,15 @@ const NewAlbumPage: React.FC = () => {
       </div>
     )
   }
+
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
-      <IconHeader />
-      <TornContainer>
+      <IconHeader isLoading={userLoading} showLogin />
+      <TornContainer hideChildren={userLoading}>
         <>
           <h3 className="mb-2">
-            Create New Album Lobby
+            Create New<br />
+            Album Lobby
           </h3>
           <form onSubmit={handleSubmit} className="centered-col space-y-4 w-full">
             <Textfield
@@ -115,6 +127,8 @@ const NewAlbumPage: React.FC = () => {
               fullWidth
               onChange={handleAlbumNameChange}
               LeadingIcon={<CollectionsIcon sx={{ fontSize: '18px' }} />}
+              buttonLabel="Create"
+              buttonType="submit"
             />
             {previewUrls.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mt-4">
@@ -153,18 +167,13 @@ const NewAlbumPage: React.FC = () => {
                 className="hidden"
               />
             </div>
-            <Button type="submit">
-              Create
-            </Button>
           </form>
           <Link href="/" className="mt-4 text-sm underline">
             Go Back
           </Link>
         </>
       </TornContainer>
-
     </div>
-
   );
 };
 

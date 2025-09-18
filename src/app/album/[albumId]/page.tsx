@@ -1,4 +1,4 @@
-import Album from "@/pages/album";
+import Album from "@/views/album";
 
 export default async function AlbumPage({
   params,

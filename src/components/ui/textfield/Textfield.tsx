@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import CircularProgress from '@mui/material/CircularProgress';
+
 import Button from '@/components/ui/button';
 
 import './textfield.scss';
@@ -7,12 +9,18 @@ import './textfield.scss';
 interface TextfieldProps {
   intialValue?: string;
   placeholder?: string;
-  buttonLabel?: string;
   label?: string;
+  type?: string;
+  maxLength?: number;
   variant?: 'primary' | 'secondary';
+  isLoading?: boolean;
   fullWidth?: boolean;
   required?: boolean;
   LeadingIcon?: React.ReactNode;
+  buttonLabel?: string;
+  buttonType?: 'button' | 'submit' | 'reset';
+  buttonId?: string;
+  buttonDisabled?: boolean;
   onButtonClick?: (value: string) => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -20,21 +28,27 @@ interface TextfieldProps {
 const Textfield: React.FC<TextfieldProps> = ({
   intialValue,
   placeholder,
-  buttonLabel,
   label,
+  type,
+  maxLength,
   variant = 'primary',
+  isLoading = false,
   fullWidth = false,
   required = false,
   LeadingIcon,
-  onChange,
+  buttonLabel,
+  buttonType = 'button',
+  buttonId,
+  buttonDisabled = false,
   onButtonClick,
+  onChange,
 }) => {
   const baseStyle = "textfield flex relative items-center rounded-lg px-1 py-1 space-x-2";
   const variantStyle =
     variant === 'primary'
       ? 'border-secondary text-secondary'
       : 'border-primary text-primary';
-  
+
   const labelBaseStyle = "text-xs absolute top-[-10px] left-[22px]"
   const labelVariantStyle =
     variant === 'primary'
@@ -57,11 +71,14 @@ const Textfield: React.FC<TextfieldProps> = ({
   return (
     <div className={`${baseStyle} ${variantStyle} ${fullWidth ? 'w-full' : ''}`}>
       <div className="flex grow items-start pl-4">
-        {LeadingIcon && LeadingIcon}
+        {isLoading && <CircularProgress color="secondary" size={18} />}
+        {LeadingIcon && !isLoading && LeadingIcon}
         <input
           required={required}
+          maxLength={maxLength ? maxLength : 9999}
+          disabled={isLoading}
+          type={type || 'text'}
           className="ml-2 text-sm font-secondary font-bold grow"
-          type="text"
           value={value}
           onChange={handleInputChange}
           placeholder={placeholder}
@@ -72,8 +89,10 @@ const Textfield: React.FC<TextfieldProps> = ({
       </span>
       {buttonLabel &&
         <Button
-          type="button"
+          type={buttonType}
+          disabled={isLoading || buttonDisabled}
           variant={variant}
+          id={buttonId}
           onClick={handleButtonClick}
         >
           {buttonLabel}

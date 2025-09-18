@@ -7,6 +7,8 @@
   --primary-hover: #A475F9;
   --secondary: #070217;
   --secondary-hover: #1C0E3E;
+  --toastify-color-success: var(--primary);
+  --toastify-font-family: var(--font-manrope);
 }
 
 @theme inline {
@@ -21,7 +23,8 @@
 }
 
 body {
-  background: linear-gradient(0deg, #070217, #070217), radial-gradient(111.1% 37.09% at 49.87% 0%, #130249 0%, #070217 100%);
+  /* background: linear-gradient(0deg, #070217, #070217), radial-gradient(111.1% 37.09% at 49.87% 0%, #130249 0%, #070217 100%); */
+  background: var(--secondary);
   color: #FFF;
   font-family: var(--font-comico);
 }
