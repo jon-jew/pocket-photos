@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
+import clx from 'classnames';
 import { toast } from 'react-toastify';
 
 import CollectionsIcon from '@mui/icons-material/Collections';
@@ -17,17 +18,21 @@ import useUser from '@/components/hooks/useUser';
 
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer';
+import ImageGallery from '@/components/imageGallery';
 import Button from '@/components/ui/button';
 import Textfield from '@/components/ui/textfield';
 
 const NewAlbumPage: React.FC = () => {
   const [albumName, setAlbumName] = useState('');
-  const [images, setImages] = useState<File[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [albumId, setAlbumId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>([]);
+  const [isStuck, setIsStuck] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const stickyRef = useRef(null);
+  const sentinelRef = useRef(null);
 
   const router = useRouter();
   const { user, userLoading } = useUser();
@@ -38,6 +43,24 @@ const NewAlbumPage: React.FC = () => {
       toast.info('Please login to create album.');
     }
   }, [userLoading, router, user]);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // If the sentinel is no longer intersecting, the sticky element is stuck
+        setIsStuck(!entry.isIntersecting);
+      },
+      { threshold: 0 } // Observe when the sentinel enters or exits the viewport
+    );
+
+    observer.observe(sentinelRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const fileToDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -52,29 +75,24 @@ const NewAlbumPage: React.FC = () => {
     setAlbumName(e.target.value);
   };
 
-  const handleRemoveImage = (index: number) => () => {
-    const newImages = images.filter((_, idx) => idx !== index);
-    setImages(newImages);
-    const newPreviewUrls = previewUrls.filter((_, idx) => idx !== index);
-    setPreviewUrls(newPreviewUrls);
-  };
+  // const handleRemoveImage = (index: number) => () => {
+  //   const newImages = images.filter((_, idx) => idx !== index);
+  //   setImages(newImages);
+  //   const newPreviewUrls = previewUrls.filter((_, idx) => idx !== index);
+  //   setPreviewUrls(newPreviewUrls);
+  // };
 
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newImages = [...files, ...images];
-    setImages(newImages);
-
-    // Generate preview URLs
-    const urls = await Promise.all(newImages.map(fileToDataUrl));
-
-    setPreviewUrls(urls);
+    const newImages = await Promise.all(files.map(fileToDataUrl));
+    setImages(prevImages => [...prevImages, ...newImages]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement upload logic
     setLoading(true)
-    const uploadRes = await uploadImageAlbum(albumName, previewUrls);
+    const uploadRes = await uploadImageAlbum(albumName, images);
     setLoading(false)
     if (uploadRes) {
       const qrRes = await generateQR(`${window.location.hostname}/album/${uploadRes}`);
@@ -114,59 +132,63 @@ const NewAlbumPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
       <IconHeader isLoading={userLoading} showLogin />
-      <TornContainer hideChildren={userLoading}>
+      <TornContainer smallXPadding={images.length > 0} hideChildren={userLoading}>
         <>
-          <h3 className="mb-2">
+          <h3 className={clx({
+            'mb-2': images.length === 0,
+          })}>
             Create New<br />
             Album Lobby
           </h3>
-          <form onSubmit={handleSubmit} className="centered-col space-y-4 w-full">
-            <Textfield
-              label="Enter Album Name"
-              required
-              fullWidth
-              onChange={handleAlbumNameChange}
-              LeadingIcon={<CollectionsIcon sx={{ fontSize: '18px' }} />}
-              buttonLabel="Create"
-              buttonType="submit"
-            />
-            {previewUrls.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                {previewUrls.map((url, idx) => (
-                  <div className="relative" key={idx}>
-                    <img
-                      key={idx}
-                      src={url}
-                      alt={`Preview ${idx + 1}`}
-                      className="w-full h-24 object-cover rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleRemoveImage(idx)}
-                      className="bg-primary absolute top-0 color-secondary right-0 m-1 p-1 rounded-full"
-                    >
-                      x
-                    </button>
-                  </div>
-                ))}
+          <form onSubmit={handleSubmit} className="centered-col w-full">
+            <div ref={sentinelRef} style={{ height: '1px' }} /> {/* Sentinel */}
+            <div
+              ref={stickyRef}
+              className={clx({
+                "w-full bg-primary transition-colors duration-200": true,
+                "!bg-secondary": isStuck,
+                "sticky w-screen top-0 z-2 py-4 px-6 flex flex-col justify-center items-center max-w-[576px]": images.length > 0,
+              })}
+            >
+              <Textfield
+                label="Enter Album Name"
+                required
+                fullWidth
+                variant={isStuck ? "secondary" : "primary"}
+                onChange={handleAlbumNameChange}
+                LeadingIcon={<CollectionsIcon sx={{ fontSize: '18px' }} />}
+                buttonLabel="Create"
+                buttonType="submit"
+                buttonDisabled={images.length === 0 || albumName === ''}
+              />
+
+            </div>
+            {images.length > 0 && (
+              <div className="mt-1 mb-4 w-full">
+                <ImageGallery images={images} setImages={setImages} />
               </div>
             )}
-            <div className="mt-2 w-full">
+            {/* {images.length === 0 && */}
+            <div className={clx({
+              "sticky bottom-4 z-3 w-full flex items-center justify-center": true,
+              "mt-6": images.length == 0,
+              "px-4": images.length > 0,
+            })}>
               <Button fullWidth>
                 <label htmlFor="image-upload">
                   + Add Photos
                 </label>
               </Button>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleFilesChange}
-                className="hidden"
-              />
             </div>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              ref={fileInputRef}
+              onChange={handleFilesChange}
+              className="hidden"
+            />
           </form>
           <Link href="/" className="mt-4 text-sm underline">
             Go Back

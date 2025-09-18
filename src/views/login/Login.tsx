@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { toast } from 'react-toastify';
+import Script from 'next/script';
 import { useRouter } from 'next/navigation';
+
+import { signInWithPhoneNumber as _signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { toast } from 'react-toastify';
+
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 
 import { auth } from '@/library/firebase/clientApp';
-import { signInWithPhoneNumber as _signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer/TornContainer';
@@ -82,6 +85,10 @@ const Login: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
+      <Script
+        strategy="lazyOnload"
+        src="https://www.google.com/recaptcha/enterprise.js?render=6LcRkcwrAAAAAGM5FKmXxQ2fVBWX8cQmX1zrtH7y"
+      />
       <IconHeader isLoading={loading} />
       <TornContainer>
         {mode == 'phone' &&

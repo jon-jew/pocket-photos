@@ -1,4 +1,8 @@
+'use client';
+
 import React, { useState } from 'react';
+
+import clx from 'classnames';
 
 import CircularProgress from '@mui/material/CircularProgress';
 
@@ -43,19 +47,20 @@ const Textfield: React.FC<TextfieldProps> = ({
   onButtonClick,
   onChange,
 }) => {
-  const baseStyle = "textfield flex relative items-center rounded-lg px-1 py-1 space-x-2";
-  const variantStyle =
-    variant === 'primary'
-      ? 'border-secondary text-secondary'
-      : 'border-primary text-primary';
-
-  const labelBaseStyle = "text-xs absolute top-[-10px] left-[22px]"
-  const labelVariantStyle =
-    variant === 'primary'
-      ? 'text-secondary bg-primary'
-      : 'text-primary bg-secondary';
-
   const [value, setValue] = useState(intialValue || '');
+
+  const inputClasses = clx({
+    'textfield flex relative items-center rounded-lg px-1 py-1': true,
+    'w-full': fullWidth,
+    'primary border-secondary text-secondary': variant === 'primary',
+    'secondary border-primary text-primary': variant === 'secondary',
+  });
+
+  const labelClasses = clx({
+    'text-xs absolute top-[-10px] left-[22px] transition-colors duration-200': true,
+    'text-secondary bg-primary': variant === 'primary',
+    'text-primary bg-secondary': variant === 'secondary',
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
@@ -69,7 +74,7 @@ const Textfield: React.FC<TextfieldProps> = ({
   };
 
   return (
-    <div className={`${baseStyle} ${variantStyle} ${fullWidth ? 'w-full' : ''}`}>
+    <div className={inputClasses}>
       <div className="flex grow items-start pl-4">
         {isLoading && <CircularProgress color="secondary" size={18} />}
         {LeadingIcon && !isLoading && LeadingIcon}
@@ -84,7 +89,7 @@ const Textfield: React.FC<TextfieldProps> = ({
           placeholder={placeholder}
         />
       </div>
-      <span className={`${labelBaseStyle} ${labelVariantStyle}`}>
+      <span className={labelClasses}>
         {label}
       </span>
       {buttonLabel &&

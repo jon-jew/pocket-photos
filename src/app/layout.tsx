@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from 'next/font/local';
 import Head from "next/head";
-import Script from 'next/script';
 import { ToastContainer } from 'react-toastify';
 
 import { Manrope, Monomaniac_One } from 'next/font/google';
@@ -45,10 +44,6 @@ export default function RootLayout({
       <body
         className={`${comicoRegular.variable} ${manrope.variable} ${monomaniac.variable} antialiased`}
       >
-        <Script
-          strategy="lazyOnload"
-          src="https://www.google.com/recaptcha/enterprise.js?render=6LcRkcwrAAAAAGM5FKmXxQ2fVBWX8cQmX1zrtH7y"
-        />
         <ToastContainer theme="dark" />
         {children}
       </body>

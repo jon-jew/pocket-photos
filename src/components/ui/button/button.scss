@@ -1,0 +1,26 @@
+.btn {
+  transition-property: background-color;
+  transition-duration: 200ms;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  label {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  &:focus {
+    outline: none;
+
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}

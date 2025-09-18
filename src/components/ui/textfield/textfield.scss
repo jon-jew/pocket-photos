@@ -1,5 +1,6 @@
 .textfield {
   transition-property: background-color;
+  transition-property: border-color;
   transition-duration: 200ms;
   border-style: solid;
   border-width: 2px;
@@ -7,9 +8,13 @@
   min-height: 51px;
 }
 
-.textfield:has(input:focus) {
+.textfield.primary:has(input:focus) {
   background-color: #a784d88a;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+}
+.textfield.secondary:has(input:focus) {
+  background-color: #100631;
+  box-shadow: rgba(206, 206, 206, 0.507) 0px 4px 12px;
 }
 
 .textfield input:focus {
