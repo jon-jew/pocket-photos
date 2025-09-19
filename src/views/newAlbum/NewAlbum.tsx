@@ -10,6 +10,7 @@ import clx from 'classnames';
 import imageCompression from 'browser-image-compression';
 import { toast } from 'react-toastify';
 
+import LinearProgress from '@mui/material/LinearProgress';
 import CollectionsIcon from '@mui/icons-material/Collections';
 
 import { uploadImageAlbum } from '@/library/firebase/image';
@@ -34,6 +35,7 @@ const NewAlbumPage: React.FC = () => {
   const [albumId, setAlbumId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [images, setImages] = useState<UploadedImage[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const [isStuck, setIsStuck] = useState(false);
 
@@ -71,8 +73,8 @@ const NewAlbumPage: React.FC = () => {
 
   const compressFile = async (file: File): Promise<UploadedImage> => {
     const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 1920,
+      maxSizeMB: 0.75,
+      maxWidthOrHeight: 1500,
       useWebWorker: true,
     };
 
@@ -109,7 +111,12 @@ const NewAlbumPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     if (user) {
-      const uploadRes = await uploadImageAlbum(albumName, images.map((image) => image.file), user.uid);
+      const uploadRes = await uploadImageAlbum(
+        albumName,
+        images.map((image) => image.file),
+        user.uid,
+        setUploadProgress,
+      );
       if (uploadRes) {
         const qrRes = await generateQR(`${window.location.hostname}/album/${uploadRes}`);
         if (qrRes) setQrCode(qrRes);
@@ -141,6 +148,9 @@ const NewAlbumPage: React.FC = () => {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
         <Image src="/loading.gif" alt="loading" width={100} height={100} />
+        <div className="w-7/10 max-w-[400px] mt-12">
+          <LinearProgress color="secondary" variant="determinate" value={uploadProgress} />
+        </div>
       </div>
     )
   }

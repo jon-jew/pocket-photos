@@ -6,6 +6,8 @@ import clx from 'classnames';
 
 import DownloadIcon from '@mui/icons-material/Download';
 
+import Button from '../ui/button';
+
 import './imageGallery.scss';
 
 interface UploadedImage {
@@ -16,6 +18,7 @@ interface UploadedImage {
 interface ImageGalleryProps {
   images: string[];
   hideRemove?: boolean;
+  showDownload?: boolean;
   setImages?: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
   handleRemoveImage?: (idx: number) => void;
   handleReorderImage?: (idx: number, direction: number) => void;
@@ -24,6 +27,7 @@ interface ImageGalleryProps {
 const ImageGallery: React.FC<ImageGalleryProps> = ({
   images,
   hideRemove = false,
+  showDownload = false,
   setImages,
   handleRemoveImage,
   handleReorderImage,
@@ -147,14 +151,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               />
             </div>
 
-            <div className="h-[30px] rounded-sm w-full flex justify-center items-center">
-              <button>
-                <DownloadIcon />
-              </button>
+            <div className="h-[50px] rounded-sm w-full flex justify-center items-center">
+              {showDownload &&
+                <a href={images[currentIndex]} download>
+                  <Button>
+                    <DownloadIcon />
+                  </Button>
+                </a>
+              }
             </div>
 
           </div>
-          <div className="absolute grow bottom-0 w-full flex flex-row gap-10 pb-5 justify-center items-center">
+          <div className="absolute bottom-0 w-full flex flex-row gap-5 pb-5 justify-center items-center">
             <button
               onClick={showPrev}
               className="gallery-btn text-4xl border-none cursor-pointer"
@@ -163,6 +171,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             >
               {'<'}
             </button>
+            <span>
+              {currentIndex + 1} / {images.length}
+            </span>
             <button
               onClick={showNext}
               className="gallery-btn text-4xl  border-none cursor-pointer"

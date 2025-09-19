@@ -16,6 +16,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [albumName, setAlbumName] = useState<string>('');
+  const [createdOn, setCreatedOn] = useState<string>('');
 
   const getImages = async () => {
     const imageRes = await getAlbumImages(albumId);
@@ -24,6 +25,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
       setImages(imageRes.imageList);
       setAlbumName(imageRes.albumName);
       setLoading(false);
+      setCreatedOn(new Date(imageRes.created).toDateString());
     } else {
       toast.error('Album not found');
       router.push('/');
@@ -51,10 +53,13 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl text-primary font-bold mb-6">{albumName}</h1>
+    <main className="max-w-4xl mx-auto px-2 py-6">
+      <div className="px-3">
+        <h2 className="text-4xl text-primary font-bold mb-4">{albumName}</h2>
+        <p className="pl-3 text-md">{createdOn}</p>
+      </div>
       <div className="">
-        <ImageGallery images={images} hideRemove />
+        <ImageGallery images={images} hideRemove showDownload />
       </div>
     </main>
   );

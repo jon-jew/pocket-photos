@@ -8,23 +8,27 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { storage, db } from './clientApp';
+import { toast } from 'react-toastify';
 
-const uploadImages = async (albumId: string, images: File[]) => {
-  const imageList: string[] = [];
-  for (const [index, image] of images.entries()) {
-    const imageRef = ref(storage, `/${albumId}/${index}`);
-    const uploadRes = await uploadBytes(imageRef, image);
-    const imageUrl = await getDownloadURL(imageRef);
-    imageList.push(imageUrl);
-
-  }
-  return imageList;
-}
-
-export const uploadImageAlbum = async (albumName: string, images: File[], userUid: string) => {
+export const uploadImageAlbum = async (
+  albumName: string,
+  images: File[],
+  userUid: string,
+  setUploadProgress: React.Dispatch<React.SetStateAction<number>>
+) => {
   try {
     const albumId = uuidv4();
-    const imageList: string[] = await uploadImages(albumId, images);
+    const imageList: string[] = [];
+    const progressIncrement: number = 1 / (images.length * 2) * 100;
+
+    for (const [index, image] of images.entries()) {
+      const imageRef = ref(storage, `/${albumId}/${index}`);
+      const uploadRes = await uploadBytes(imageRef, image);
+      setUploadProgress((prev) => prev + progressIncrement);
+      const imageUrl = await getDownloadURL(imageRef);
+      setUploadProgress((prev) => prev + progressIncrement);
+      imageList.push(imageUrl);
+    }
     const albumData = {
       albumName: albumName,
       ownerId: userUid,
@@ -39,7 +43,23 @@ export const uploadImageAlbum = async (albumName: string, images: File[], userUi
     console.error(error);
     return false;
   }
-}
+};
+
+const XHRRequest = (imageUrl: string): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.responseType = 'blob';
+    xhr.onload = () => {
+      const blob = xhr.response;
+      resolve(blob);
+    };
+    xhr.onerror = () => {
+      toast.error('Failed to get image');
+    }
+    xhr.open('GET', imageUrl);
+    xhr.send();
+  });
+};
 
 export const getAlbumImages = async (albumId: string) => {
   try {
@@ -47,7 +67,12 @@ export const getAlbumImages = async (albumId: string) => {
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      return data;
+      const blobs = await Promise.all(data.imageList.map(XHRRequest))
+      return ({
+        created: data.created,
+        albumName: data.albumName,
+        imageList: blobs.map((blob) => URL.createObjectURL(blob)),
+      });
     } else {
       // docSnap.data() will be undefined in this case
       console.log('No such document!');
@@ -58,4 +83,4 @@ export const getAlbumImages = async (albumId: string) => {
     console.error(error)
     return false;
   }
-}
+};

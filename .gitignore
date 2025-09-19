@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+cors.json
 
 # next.js
 /.next/
