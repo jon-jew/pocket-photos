@@ -52,7 +52,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages, hideRemo
               "thumbnail-container shadow-xl": true,
             })}
           >
-            {hideRemove &&
+            {!hideRemove &&
               <button
                 type="button"
                 onClick={handleRemoveImage(idx)}

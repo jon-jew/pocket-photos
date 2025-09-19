@@ -54,7 +54,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
     <main className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl text-primary font-bold mb-6">{albumName}</h1>
       <div className="">
-        <ImageGallery images={images} />
+        <ImageGallery images={images} hideRemove />
       </div>
     </main>
   );
