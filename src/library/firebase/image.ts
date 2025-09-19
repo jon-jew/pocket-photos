@@ -45,7 +45,6 @@ export const uploadImageAlbum = async (albumName: string, images: string[], user
 }
 
 export const getAlbumImages = async (albumId: string) => {
-
   try {
     const albumRef = doc(db, 'albums', albumId);
     const docSnap = await getDoc(albumRef);
@@ -56,6 +55,7 @@ export const getAlbumImages = async (albumId: string) => {
     } else {
       // docSnap.data() will be undefined in this case
       console.log("No such document!");
+      return null;
     }
 
   } catch (error) {

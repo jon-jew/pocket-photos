@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation'; // For App Router
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 import DialpadIcon from '@mui/icons-material/Dialpad';

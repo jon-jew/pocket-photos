@@ -9,9 +9,10 @@ import './imageGallery.scss';
 interface ImageGalleryProps {
   images: string[];
   setImages?: React.Dispatch<React.SetStateAction<string[]>>;
+  hideRemove?: boolean;
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages, hideRemove = false, }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -45,20 +46,21 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
     <>
       <ul className="py-3 polaroids w-full gallery-container">
         {images.map((src, idx) => (
-
           <li
             key={`img-container-${idx}`}
             className={clx({
               "thumbnail-container shadow-xl": true,
             })}
           >
-            <button
-              type="button"
-              onClick={handleRemoveImage(idx)}
-              className="delete-btn"
-            >
-              X
-            </button>
+            {hideRemove &&
+              <button
+                type="button"
+                onClick={handleRemoveImage(idx)}
+                className="delete-btn"
+              >
+                X
+              </button>
+            }
             <button
               type="button"
               onClick={() => openModal(idx)}
