@@ -1,0 +1,21 @@
+.gallery-slide {
+  background-color: #e7e9e5;
+  padding: 15px 10px 0px 10px;
+
+  .img-container {
+    width: 80vw;
+    max-width: 500px;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.gallery-btn {
+  background-color: var(--primary);
+  font-family: var(--font-gloria);
+  color: var(--secondary);
+  padding: 5px 20px;
+  border-radius: 8px;
+}
