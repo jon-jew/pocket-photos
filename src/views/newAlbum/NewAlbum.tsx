@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import clx from 'classnames';
+import imageCompression from 'browser-image-compression';
 import { toast } from 'react-toastify';
 
 import CollectionsIcon from '@mui/icons-material/Collections';
@@ -22,12 +23,18 @@ import ImageGallery from '@/components/imageGallery';
 import Button from '@/components/ui/button';
 import Textfield from '@/components/ui/textfield';
 
+interface UploadedImage {
+  file: File;
+  previewUrl: string;
+};
+
 const NewAlbumPage: React.FC = () => {
   const [albumName, setAlbumName] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
   const [albumId, setAlbumId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<UploadedImage[]>([]);
+
   const [isStuck, setIsStuck] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -62,13 +69,26 @@ const NewAlbumPage: React.FC = () => {
     };
   }, []);
 
-  const fileToDataUrl = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
+  const compressFile = async (file: File): Promise<UploadedImage> => {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return ({
+        file: compressedFile,
+        previewUrl: URL.createObjectURL(compressedFile),
+      });
+    } catch (error) {
+      console.error(error);
+      return ({
+        file: file,
+        previewUrl: URL.createObjectURL(file),
+      })
+    }
   };
 
   const handleAlbumNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,27 +98,43 @@ const NewAlbumPage: React.FC = () => {
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length + images.length > 75) {
-      toast.error('Image count limit is 75.')
+      toast.error('Image count limit is 75.');
     } else {
-      const newImages = await Promise.all(files.map(fileToDataUrl));
+      const newImages = await Promise.all(files.map(compressFile));
       setImages(prevImages => [...prevImages, ...newImages]);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement upload logic
-    setLoading(true)
+    setLoading(true);
     if (user) {
-      const uploadRes = await uploadImageAlbum(albumName, images, user.uid);
+      const uploadRes = await uploadImageAlbum(albumName, images.map((image) => image.file), user.uid);
       if (uploadRes) {
         const qrRes = await generateQR(`${window.location.hostname}/album/${uploadRes}`);
-        console.log(qrRes)
         if (qrRes) setQrCode(qrRes);
         setAlbumId(uploadRes);
       }
     }
-    setLoading(false)
+    setLoading(false);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = images.filter((_, idx) => idx !== index);
+    setImages(newImages);
+  };
+
+  const handleReorderImage = (idx: number, direction: number) => {
+    if (idx > 0 && direction == -1) {
+      const newImages = [...images];
+      [newImages[idx - 1], newImages[idx]] = [newImages[idx], newImages[idx - 1]];
+      setImages(newImages);
+    }
+    else if (idx < images.length - 1 && direction === 1) {
+      const newImages = [...images];
+      [newImages[idx + 1], newImages[idx]] = [newImages[idx], newImages[idx + 1]];
+      setImages(newImages);
+    }
   };
 
   if (loading) {
@@ -164,7 +200,12 @@ const NewAlbumPage: React.FC = () => {
             </div>
             {images.length > 0 && (
               <div className="mt-1 mb-4 w-full">
-                <ImageGallery images={images} setImages={setImages} />
+                <ImageGallery
+                  images={images.map((image) => image.previewUrl)}
+                  setImages={setImages}
+                  handleRemoveImage={handleRemoveImage}
+                  handleReorderImage={handleReorderImage}
+                />
               </div>
             )}
             {/* {images.length === 0 && */}

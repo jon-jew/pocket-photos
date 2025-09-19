@@ -4,15 +4,30 @@ import Image from 'next/image';
 
 import clx from 'classnames';
 
+import DownloadIcon from '@mui/icons-material/Download';
+
 import './imageGallery.scss';
+
+interface UploadedImage {
+  file: File;
+  previewUrl: string;
+};
 
 interface ImageGalleryProps {
   images: string[];
-  setImages?: React.Dispatch<React.SetStateAction<string[]>>;
   hideRemove?: boolean;
-}
+  setImages?: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
+  handleRemoveImage?: (idx: number) => void;
+  handleReorderImage?: (idx: number, direction: number) => void;
+};
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages, hideRemove = false, }) => {
+const ImageGallery: React.FC<ImageGalleryProps> = ({
+  images,
+  hideRemove = false,
+  setImages,
+  handleRemoveImage,
+  handleReorderImage,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -35,27 +50,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages, hideRemo
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  const handleRemoveImage = (index: number) => () => {
-    if (setImages) {
-      const newImages = images.filter((_, idx) => idx !== index);
-      setImages(newImages);
-    }
-  };
-
   return (
     <>
       <ul className="py-3 polaroids w-full gallery-container">
-        {images.map((src, idx) => (
+        {images.map((image, idx) => (
           <li
             key={`img-container-${idx}`}
             className={clx({
               "thumbnail-container shadow-xl": true,
             })}
           >
-            {!hideRemove &&
+            {!hideRemove && handleRemoveImage &&
               <button
                 type="button"
-                onClick={handleRemoveImage(idx)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveImage(idx);
+                }}
                 className="delete-btn"
               >
                 X
@@ -67,7 +78,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages, hideRemo
               className="thumbnail w-38 h-38 relative rounded-sm overflow-hidden"
             >
               <Image
-                src={src}
+                src={image}
                 quality={10}
                 alt={`Gallery ${idx}`}
                 fill
@@ -80,34 +91,26 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages, hideRemo
               "justify-between": idx !== 0,
               "justify-end": idx === 0,
             })}>
-              {idx !== 0 && setImages &&
+              {idx !== 0 && setImages && handleReorderImage &&
                 <button
                   type="button"
                   className="thumbnail-control"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
-                    if (idx > 0) {
-                      const newImages = [...images];
-                      [newImages[idx - 1], newImages[idx]] = [newImages[idx], newImages[idx - 1]];
-                      setImages(newImages);
-                    }
+                    handleReorderImage(idx, -1);
                   }}
                   aria-label="Move left"
                 >
                   {'<'}
                 </button>
               }
-              {idx !== images.length - 1 && setImages &&
+              {idx !== images.length - 1 && setImages && handleReorderImage &&
                 <button
                   type="button"
                   className="thumbnail-control"
-                  onClick={e => {
+                  onClick={(e) => {
                     e.stopPropagation();
-                    if (idx < images.length - 1) {
-                      const newImages = [...images];
-                      [newImages[idx + 1], newImages[idx]] = [newImages[idx], newImages[idx + 1]];
-                      setImages(newImages);
-                    }
+                    handleReorderImage(idx, 1);
                   }}
                   disabled={idx === images.length - 1}
                   aria-label="Move right"
@@ -125,36 +128,50 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages, hideRemo
           onClick={closeModal}
           className="modal fixed inset-0 flex items-center justify-center z-[1000]"
         >
-          <button
-            onClick={showPrev}
-            className="absolute left-10 top-1/2 -translate-y-1/2 text-4xl text-white bg-none border-none cursor-pointer"
-            aria-label="Previous"
-            type="button"
-          >
-            &#8592;
-          </button>
-          <img
-            src={images[currentIndex]}
-            alt={`Modal ${currentIndex}`}
-            className="max-h-[80vh] max-w-[80vw] rounded-lg shadow-lg"
-            onClick={e => e.stopPropagation()}
-          />
-          <button
-            onClick={showNext}
-            className="absolute right-10 top-1/2 -translate-y-1/2 text-4xl text-white bg-none border-none cursor-pointer"
-            aria-label="Next"
-            type="button"
-          >
-            &#8594;
-          </button>
-          <button
-            onClick={closeModal}
-            className="absolute top-8 right-8 text-3xl text-white bg-none border-none cursor-pointer"
-            aria-label="Close"
-            type="button"
-          >
-            &times; <span className="text-sm">Close</span>
-          </button>
+          <div className="relative gallery-image">
+            <button
+              onClick={closeModal}
+              className="absolute !top-[-10px] text-3xl delete-btn cursor-pointer"
+              aria-label="Close"
+              type="button"
+            >
+              &times;
+            </button>
+            <div className="img-container">
+
+              <img
+                src={images[currentIndex]}
+                alt={`Modal ${currentIndex}`}
+                className="max-h-[70vh] max-w-[85vw]"
+                onClick={e => e.stopPropagation()}
+              />
+            </div>
+
+            <div className="h-[30px] rounded-sm w-full flex justify-center items-center">
+              <button>
+                <DownloadIcon />
+              </button>
+            </div>
+
+          </div>
+          <div className="absolute grow bottom-0 w-full flex flex-row gap-10 pb-5 justify-center items-center">
+            <button
+              onClick={showPrev}
+              className="gallery-btn text-4xl border-none cursor-pointer"
+              aria-label="Previous"
+              type="button"
+            >
+              {'<'}
+            </button>
+            <button
+              onClick={showNext}
+              className="gallery-btn text-4xl  border-none cursor-pointer"
+              aria-label="Next"
+              type="button"
+            >
+              {'>'}
+            </button>
+          </div>
         </div>
       )}
     </>
