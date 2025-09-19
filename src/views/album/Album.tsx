@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from "react";
-import CircularProgress from '@mui/material/CircularProgress';
+
+import Image from 'next/image';
 
 import { getAlbumImages } from "@/library/firebase/image";
+import ImageGallery from "@/components/imageGallery";
 
 export default function AlbumPage({ albumId }: { albumId: string }) {
   const [images, setImages] = useState<string[]>([]);
@@ -25,10 +27,9 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
 
   if (loading) {
     return (
-      <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">{albumName}</h1>
-        <CircularProgress />
-      </main>
+      <div className="flex flex-col min-h-screen items-center justify-center">
+        <Image src="/loading.gif" alt="loading" width={100} height={100} />
+      </div>
     );
   }
   if (images.length === 0) {
@@ -39,26 +40,12 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
       </main>
     );
   }
-  
+
   return (
     <main className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">{albumName}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {images.map((image, idx) => (
-          <div
-            key={image}
-            className="rounded shadow hover:shadow-lg transition overflow-hidden bg-white"
-          >
-            <img
-              src={image}
-              alt={`Photo ${idx + 1}`}
-              className="w-full h-48 object-cover"
-            />
-            {/* <div className="p-4">
-              <h2 className="text-lg font-semibold">{photo.title}</h2>
-            </div> */}
-          </div>
-        ))}
+        <ImageGallery images={images} />
       </div>
     </main>
   );

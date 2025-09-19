@@ -17,7 +17,7 @@ const TornContainer: React.FC<TornContainerProps> = ({ children, hideChildren, s
       <div className={clx({
         "centered-col grow !justify-start bg-primary text-secondary": true,
         "gap-3 w-full px-6 pt-1 pb-5": true,
-        "[&>*]:transition [&>*]:duration-150": true,
+        // "[&>*]:transition-opacity [&>*]:duration-150": true,
         "!px-2 !gap-1": smallXPadding,
         "[&>*]:opacity-0 [&>*]:pointer-events-none": hideChildren,
         "[&>*]:opacity-100": !hideChildren,

@@ -3,7 +3,7 @@ import localFont from 'next/font/local';
 import Head from "next/head";
 import { ToastContainer } from 'react-toastify';
 
-import { Manrope, Monomaniac_One } from 'next/font/google';
+import { Manrope, Monomaniac_One, Gloria_Hallelujah } from 'next/font/google';
 
 import "./globals.css";
 
@@ -20,6 +20,12 @@ const manrope = Manrope({
 
 const monomaniac = Monomaniac_One({
   variable: '--font-monomaniac',
+  subsets: ['latin'],
+  weight: ['400'],
+});
+
+const gloria = Gloria_Hallelujah({
+  variable: '--font-gloria',
   subsets: ['latin'],
   weight: ['400'],
 });
@@ -42,7 +48,7 @@ export default function RootLayout({
         <meta name="description" content="Create a photo album together, instantly" />
       </Head>
       <body
-        className={`${comicoRegular.variable} ${manrope.variable} ${monomaniac.variable} antialiased`}
+        className={`${comicoRegular.variable} ${manrope.variable} ${monomaniac.variable} ${gloria.variable} antialiased`}
       >
         <ToastContainer theme="dark" />
         {children}

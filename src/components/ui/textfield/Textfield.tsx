@@ -50,7 +50,7 @@ const Textfield: React.FC<TextfieldProps> = ({
   const [value, setValue] = useState(intialValue || '');
 
   const inputClasses = clx({
-    'textfield flex relative items-center rounded-lg px-1 py-1': true,
+    'textfield transition-colors duration-200 flex relative items-center rounded-lg px-1 py-1': true,
     'w-full': fullWidth,
     'primary border-secondary text-secondary': variant === 'primary',
     'secondary border-primary text-primary': variant === 'secondary',

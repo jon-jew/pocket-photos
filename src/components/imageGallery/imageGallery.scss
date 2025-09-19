@@ -1,30 +1,58 @@
 .gallery-container {
   display: grid;
+  position: relative;
   grid-template-columns: repeat(auto-fit, 165px);
   align-items: flex-start;
   justify-content: center;
-  row-gap: 15px;
+  row-gap: 25px;
   column-gap: 10px;
+
+
+  // .thumbnail-container.maximize {
+  //   position: fixed;
+  //   width: 80%;
+  //   height: 300px;
+  //   z-index: 2000;
+  //   top: 50%;
+  //   left: 50%;
+  //   transform: translate(-50%, -50%);
+  // }
 
   .thumbnail-container {
     background: #f4f5f2;
+    position: relative;
     padding: 5px;
 
-    .thumbnail-control {
-      background-color: var(--primary);
-      color: var(--secondary);
-      border: #A475F9 solid 2px;
-      transition: background-color 200ms;
+    .delete-btn {
+      position: absolute;
+      top: -0px;
+      left: -10px;
+      z-index: 2;
+      background-color: rgb(202, 2, 2);
+      color: #ffffffc9;
       font-weight: bold;
-      font-size: 14px;
-      padding: 2px 10px;
-      border-radius: 50%;
-      
+      padding: 2px 12px;
+      border-radius: 2px;
+    }
+
+    .thumbnail-control {
+      background-color: #070217;
+      color: var(--primary);
+      font-weight: bold;
+      font-size: 16px;
+      font-family: var(--font-gloria);
+      padding: 2px 15px;
+      border-radius: 5px;
+
       &:hover {
-        background-color: var(--primary-hover);
+        background-color: var(--secondary-hover);
       }
     }
   }
+}
+
+.modal {
+  background-color: #07021798;
 }
 
 /* By default, we tilt all our images -2 degrees */

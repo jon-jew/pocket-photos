@@ -23,13 +23,14 @@ const uploadImages = async (albumId: string, images: string[]) => {
   return imageList;
 }
 
-export const uploadImageAlbum = async (albumName: string, images: string[]) => {
+export const uploadImageAlbum = async (albumName: string, images: string[], userUid: string) => {
   try {
     const albumId = uuidv4();
     const imageList: string[] = await uploadImages(albumId, images);
     console.log('after image list')
     const albumData = {
       albumName: albumName,
+      ownerId: userUid,
       created: Date.now(),
       imageList: imageList,
     };

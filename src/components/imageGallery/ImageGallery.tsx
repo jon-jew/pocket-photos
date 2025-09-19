@@ -12,15 +12,17 @@ interface ImageGalleryProps {
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const openModal = (index: number) => {
     setCurrentIndex(index);
     setIsModalOpen(true);
   };
 
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+  }
 
   const showPrev = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -31,22 +33,46 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
     e.stopPropagation();
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
+
+  const handleRemoveImage = (index: number) => () => {
+    if (setImages) {
+      const newImages = images.filter((_, idx) => idx !== index);
+      setImages(newImages);
+    }
+  };
+
   return (
     <>
       <ul className="py-3 polaroids w-full gallery-container">
         {images.map((src, idx) => (
-          <li key={`img-container-${Math.random()}`} className="thumbnail-container shadow-xl">
+
+          <li
+            key={`img-container-${idx}`}
+            className={clx({
+              "thumbnail-container shadow-xl": true,
+            })}
+          >
+            <button
+              type="button"
+              onClick={handleRemoveImage(idx)}
+              className="delete-btn"
+            >
+              X
+            </button>
             <button
               type="button"
               onClick={() => openModal(idx)}
-              className="thumbnail w-38 h-38 relative rounded-sm overflow-hidden">
+              className="thumbnail w-38 h-38 relative rounded-sm overflow-hidden"
+            >
               <Image
                 src={src}
+                quality={10}
                 alt={`Gallery ${idx}`}
                 fill
                 style={{ objectFit: 'cover' }}
               />
             </button>
+
             <div className={clx({
               "flex items-center h-[20px]": true,
               "justify-between": idx !== 0,
@@ -66,7 +92,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
                   }}
                   aria-label="Move left"
                 >
-                  &lt;
+                  {'<'}
                 </button>
               }
               {idx !== images.length - 1 && setImages &&
@@ -84,7 +110,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
                   disabled={idx === images.length - 1}
                   aria-label="Move right"
                 >
-                  &gt;
+                  {'>'}
                 </button>
               }
             </div>
@@ -95,7 +121,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
       {isModalOpen && (
         <div
           onClick={closeModal}
-          className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[1000]"
+          className="modal fixed inset-0 flex items-center justify-center z-[1000]"
         >
           <button
             onClick={showPrev}
@@ -125,7 +151,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, setImages }) => {
             aria-label="Close"
             type="button"
           >
-            &times;
+            &times; <span className="text-sm">Close</span>
           </button>
         </div>
       )}

@@ -75,31 +75,30 @@ const NewAlbumPage: React.FC = () => {
     setAlbumName(e.target.value);
   };
 
-  // const handleRemoveImage = (index: number) => () => {
-  //   const newImages = images.filter((_, idx) => idx !== index);
-  //   setImages(newImages);
-  //   const newPreviewUrls = previewUrls.filter((_, idx) => idx !== index);
-  //   setPreviewUrls(newPreviewUrls);
-  // };
-
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newImages = await Promise.all(files.map(fileToDataUrl));
-    setImages(prevImages => [...prevImages, ...newImages]);
+    if (files.length + images.length > 75) {
+      toast.error('Image count limit is 75.')
+    } else {
+      const newImages = await Promise.all(files.map(fileToDataUrl));
+      setImages(prevImages => [...prevImages, ...newImages]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement upload logic
     setLoading(true)
-    const uploadRes = await uploadImageAlbum(albumName, images);
-    setLoading(false)
-    if (uploadRes) {
-      const qrRes = await generateQR(`${window.location.hostname}/album/${uploadRes}`);
-      console.log(qrRes)
-      if (qrRes) setQrCode(qrRes);
-      setAlbumId(uploadRes);
+    if (user) {
+      const uploadRes = await uploadImageAlbum(albumName, images, user.uid);
+      if (uploadRes) {
+        const qrRes = await generateQR(`${window.location.hostname}/album/${uploadRes}`);
+        console.log(qrRes)
+        if (qrRes) setQrCode(qrRes);
+        setAlbumId(uploadRes);
+      }
     }
+    setLoading(false)
   };
 
   if (loading) {
@@ -145,9 +144,9 @@ const NewAlbumPage: React.FC = () => {
             <div
               ref={stickyRef}
               className={clx({
-                "w-full bg-primary transition-colors duration-200": true,
+                "w-full bg-primary centered-col transition-colors duration-200": true,
                 "!bg-secondary": isStuck,
-                "sticky w-screen top-0 z-2 py-4 px-6 flex flex-col justify-center items-center max-w-[576px]": images.length > 0,
+                "sticky w-screen top-0 z-4 py-4 px-6 flex flex-col justify-center items-center max-w-[576px]": images.length > 0,
               })}
             >
               <Textfield
