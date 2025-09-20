@@ -34,9 +34,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   handleReorderImage,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-  const openModal = () => {
+  const openModal = (idx: number) => {
     setIsModalOpen(true);
+    setSelectedIndex(idx);
   };
 
   const closeModal = () => {
@@ -67,7 +69,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             }
             <button
               type="button"
-              onClick={() => openModal()}
+              onClick={() => openModal(idx)}
               className="thumbnail w-38 h-38 relative rounded-sm overflow-hidden"
             >
               <Image
@@ -124,7 +126,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           onClick={closeModal}
           className="modal fixed inset-0 flex items-center justify-center z-[1000]"
         >
-          <Carousel images={images} showDownload={showDownload} />
+          <Carousel initialCurrent={selectedIndex} images={images} showDownload={showDownload} />
           <button
             onClick={closeModal}
             className="absolute !top-[30px] !left-[20px] text-3xl delete-btn cursor-pointer"
