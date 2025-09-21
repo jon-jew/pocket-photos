@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import {
   doc,
   getDoc,
@@ -10,6 +8,12 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage, db } from './clientApp';
 import { toast } from 'react-toastify';
 
+const doesAlbumExist = async (albumId: string) => {
+  const albumRef = doc(db, 'albums', albumId);
+  const docSnap = await getDoc(albumRef);
+  if (docSnap.exists()) return true;
+  return false;
+}
 export const uploadImageAlbum = async (
   albumName: string,
   images: File[],
@@ -17,7 +21,11 @@ export const uploadImageAlbum = async (
   setUploadProgress: React.Dispatch<React.SetStateAction<number>>
 ) => {
   try {
-    const albumId = uuidv4();
+    let albumId = '';
+    do {
+      albumId = Math.random().toString(36).substring(2, 8);
+    } while (!doesAlbumExist(albumId))
+
     const imageList: string[] = [];
     const progressIncrement: number = 1 / (images.length * 2) * 100;
 
