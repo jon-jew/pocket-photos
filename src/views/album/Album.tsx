@@ -78,10 +78,11 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
         </div>
         <div className={clx({
           "h-0": !isQrOpen,
-          "h-[200px]": isQrOpen,
-          "w-full transition-[height] duration-200 ease-in-out overflow-hidden flex items-center justify-center": true,
+          "h-[225px]": isQrOpen,
+          "w-full transition-[height] duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
         })}>
           {qrCode && <Image alt="QR code" width={200} height={200} src={qrCode} />}
+          <p className="!text-md font-secondary text-black">Code: {albumId}</p>
         </div>
         <div className="mt-1 w-full flex items-center justify-center">
           <button
@@ -94,8 +95,10 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
               height="20"
               viewBox="0 0 20 20"
               fill="none"
-              className="ml-1"
               aria-hidden="true"
+              className={clx({
+                'rotate-180': isQrOpen,
+              })}
             >
               <path
                 d="M5 8l5 5 5-5"

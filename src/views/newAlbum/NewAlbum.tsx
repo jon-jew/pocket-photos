@@ -157,7 +157,7 @@ const NewAlbumPage: React.FC = () => {
   if (qrCode) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
-        <div className="centered-col h-[225px] mb-4">
+        <div className="centered-col h-[225px] mt-8 mb-4">
           <h1 className="text-primary">
             That&apos;s it<br />
             Your lobby<br />
@@ -169,6 +169,7 @@ const NewAlbumPage: React.FC = () => {
             <h3>View Album Lobby</h3>
           </Link>
           {qrCode && <Image alt="QR code" width={200} height={200} src={qrCode} />}
+          <p className="!text-md font-secondary">Code: {albumId}</p>
         </TornContainer>
       </div>
     )

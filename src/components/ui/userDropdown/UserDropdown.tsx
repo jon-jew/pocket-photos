@@ -59,7 +59,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
         type="button"
       >
         <span
-          className={`w-8 h-8 rounded-full !bg-${variant} flex items-center justify-center font-bold text-[18px] text-[${iconColor}] select-none`}
+          style={{ backgroundColor: backgroundColor }}
+          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-[18px] text-[${iconColor}] select-none`}
         >
           {/* Simple user icon SVG */}
           <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
