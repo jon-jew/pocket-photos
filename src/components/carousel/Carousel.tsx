@@ -37,7 +37,7 @@ const Carousel: React.FC<CarouselProps> = ({
         className="flex flex-col h-[100vh] relative overflow-hidden mx-auto"
       >
         <ul
-          className="polaroids flex items-center transition-transform duration-500 ease-in-out h-full"
+          className="polaroids flex items-center transition-transform duration-500 ease-in-out h-[100vh]"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {images.map((src, idx) => (
@@ -64,7 +64,8 @@ const Carousel: React.FC<CarouselProps> = ({
             </li>
           ))}
         </ul>
-        {/* <div className="gallery">
+      </div>
+      {/* <div className="gallery">
         {images.map((src, idx) => (
           <div
             key={`gallery-img-${idx}`}
@@ -98,44 +99,42 @@ const Carousel: React.FC<CarouselProps> = ({
           </div>
         ))}
       </div> */}
-        <div className=" w-full z-10">
-          <div className="h-[20px] w-full relative">
-            <Image
-              priority
-              src="/tornEdge.png"
-              alt="torn edge"
-              fill
-            />
-          </div>
-          <div className="bg-primary w-full flex flex-row gap-5 pb-4 justify-center items-center">
+      <div className="absolute bottom-0 w-full z-10">
+        <div className="h-[20px] w-full relative">
+          <Image
+            priority
+            src="/tornEdge.png"
+            alt="torn edge"
+            fill
+          />
+        </div>
+        <div className="bg-primary w-full flex flex-row gap-5 pb-4 justify-center items-center">
 
-            <button
-              onClick={prevSlide}
-              className="gallery-btn text-4xl cursor-pointer"
-              aria-label="Previous"
-              type="button"
-            >
-              {'<'}
-            </button>
-            {showDownload &&
-              <a href={images[current]} download>
-                <button className="text-black" type="button">
-                  <DownloadIcon />
-                </button>
-              </a>
-            }
-            <button
-              onClick={nextSlide}
-              className="gallery-btn text-4xl cursor-pointer"
-              aria-label="Next"
-              type="button"
-            >
-              {'>'}
-            </button>
-          </div>
+          <button
+            onClick={prevSlide}
+            className="gallery-btn text-4xl cursor-pointer"
+            aria-label="Previous"
+            type="button"
+          >
+            {'<'}
+          </button>
+          {showDownload &&
+            <a href={images[current]} download>
+              <button className="text-black" type="button">
+                <DownloadIcon />
+              </button>
+            </a>
+          }
+          <button
+            onClick={nextSlide}
+            className="gallery-btn text-4xl cursor-pointer"
+            aria-label="Next"
+            type="button"
+          >
+            {'>'}
+          </button>
         </div>
       </div>
-
     </>
   );
 };

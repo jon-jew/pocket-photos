@@ -46,7 +46,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   const closeModal = () => {
     setIsModalOpen(false);
-  }
+  };
 
   return (
     <>
@@ -121,27 +121,26 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           </li>
         ))}
       </ul>
-
       <Modal
         open={isModalOpen}
         onClose={closeModal}
       >
-          <Slide direction="up" in={isModalOpen} mountOnEnter unmountOnExit>
-            <div
+        <Slide direction="up" in={isModalOpen} mountOnEnter unmountOnExit>
+          <div
+            onClick={closeModal}
+            className="fixed inset-0 flex items-center justify-center z-[1000]"
+          >
+            <Carousel initialCurrent={selectedIndex} images={images} showDownload={showDownload} />
+            <button
               onClick={closeModal}
-              className="fixed inset-0 flex items-center justify-center z-[1000]"
+              className="absolute !top-[30px] !left-[20px] text-3xl delete-btn cursor-pointer"
+              aria-label="Close"
+              type="button"
             >
-              <Carousel initialCurrent={selectedIndex} images={images} showDownload={showDownload} />
-              <button
-                onClick={closeModal}
-                className="absolute !top-[30px] !left-[20px] text-3xl delete-btn cursor-pointer"
-                aria-label="Close"
-                type="button"
-              >
-                &times;
-              </button>
-            </div>
-          </Slide>
+              &times;
+            </button>
+          </div>
+        </Slide>
       </Modal>
     </>
   );

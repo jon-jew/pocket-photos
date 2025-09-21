@@ -47,7 +47,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
   }, [open]);
 
   if (userLoading) return null;
-  if (!userLoading && !user) return <Link href="/login">Login</Link>;
+  if (!userLoading && !user) return <Link className={`text-${variant}`} href="/login">Login</Link>;
 
   return (
     <div ref={dropdownRef} className="relative inline-block">
@@ -59,7 +59,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
         type="button"
       >
         <span
-          className={`w-8 h-8 rounded-full !bg-[${backgroundColor}] flex items-center justify-center font-bold text-[18px] text-[${iconColor}] select-none`}
+          className={`w-8 h-8 rounded-full !bg-${variant} flex items-center justify-center font-bold text-[18px] text-[${iconColor}] select-none`}
         >
           {/* Simple user icon SVG */}
           <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -95,9 +95,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                 setOpen(false);
                 item.onClick();
               }}
-              className={`w-full px-4 py-2 bg-none border-none text-left cursor-pointer text-[15px] text-[#333] ${
-                idx < menuItems.length - 1 ? "border-b border-[#eee]" : ""
-              }`}
+              className={`w-full px-4 py-2 bg-none border-none text-left cursor-pointer text-[15px] text-[#333] ${idx < menuItems.length - 1 ? "border-b border-[#eee]" : ""
+                }`}
               type="button"
             >
               {item.label}
