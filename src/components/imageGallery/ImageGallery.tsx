@@ -6,6 +6,7 @@ import Image from 'next/image';
 import clx from 'classnames';
 
 import Modal from '@mui/material/Modal';
+import { Slide } from '@mui/material';
 
 import Carousel from '@/components/carousel';
 
@@ -20,6 +21,7 @@ interface ImageGalleryProps {
   images: string[];
   hideRemove?: boolean;
   showDownload?: boolean;
+  variant?: 'primary' | 'secondary';
   setImages?: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
   handleRemoveImage?: (idx: number) => void;
   handleReorderImage?: (idx: number, direction: number) => void;
@@ -29,6 +31,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   images,
   hideRemove = false,
   showDownload = false,
+  variant = 'primary',
   setImages,
   handleRemoveImage,
   handleReorderImage,
@@ -47,12 +50,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   return (
     <>
-      <ul className="py-5 polaroids w-full gallery-container">
+      <ul className="py-8 polaroids w-full gallery-container">
         {images.map((image, idx) => (
           <li
             key={`img-container-${idx}`}
             className={clx({
               "thumbnail-container shadow-xl": true,
+              "shadow-indigo-500/50": variant === 'secondary',
             })}
           >
             {!hideRemove && handleRemoveImage &&
@@ -122,20 +126,22 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         open={isModalOpen}
         onClose={closeModal}
       >
-        <div
-          onClick={closeModal}
-          className="modal fixed inset-0 flex items-center justify-center z-[1000]"
-        >
-          <Carousel initialCurrent={selectedIndex} images={images} showDownload={showDownload} />
-          <button
-            onClick={closeModal}
-            className="absolute !top-[30px] !left-[20px] text-3xl delete-btn cursor-pointer"
-            aria-label="Close"
-            type="button"
-          >
-            &times;
-          </button>
-        </div>
+          <Slide direction="up" in={isModalOpen} mountOnEnter unmountOnExit>
+            <div
+              onClick={closeModal}
+              className="fixed inset-0 flex items-center justify-center z-[1000]"
+            >
+              <Carousel initialCurrent={selectedIndex} images={images} showDownload={showDownload} />
+              <button
+                onClick={closeModal}
+                className="absolute !top-[30px] !left-[20px] text-3xl delete-btn cursor-pointer"
+                aria-label="Close"
+                type="button"
+              >
+                &times;
+              </button>
+            </div>
+          </Slide>
       </Modal>
     </>
   );

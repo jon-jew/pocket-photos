@@ -17,8 +17,53 @@
 
 .gallery-btn {
   font-family: var(--font-gloria);
-  color: var(--primary);
+  color: var(--secondary);
   padding: 5px 20px;
+}
+
+ul.polaroids li {
+  -webkit-transform: rotate(-2deg);
+  -moz-transform: rotate(-2deg);
+  transform: rotate(-2deg);
+}
+
+/* Rotate all even images 2 degrees */
+ul.polaroids li:nth-child(even) {
+  -webkit-transform: rotate(2deg);
+  -moz-transform: rotate(2deg);
+  transform: rotate(2deg);
+}
+
+/* Don't rotate every third image, but offset its position */
+ul.polaroids li:nth-child(3n) {
+  -webkit-transform: none;
+  -moz-transform: none;
+  transform: none;
+  position: relative;
+  top: -5px;
+}
+
+/* Rotate every fifth image by 5 degrees and offset it */
+ul.polaroids li:nth-child(5n) {
+  -webkit-transform: rotate(5deg);
+  -moz-transform: rotate(5deg);
+  transform: rotate(5deg);
+  position: relative;
+  right: 5px;
+}
+
+/* Keep default rotate for every eighth, but offset it */
+ul.polaroids li:nth-child(8n) {
+  position: relative;
+  top: 8px;
+  right: 5px;
+}
+
+/* Keep default rotate for every eleventh, but offset it */
+ul.polaroids li:nth-child(11n) {
+  position: relative;
+  top: 3px;
+  left: -5px;
 }
 
 

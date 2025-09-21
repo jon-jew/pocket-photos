@@ -6,11 +6,12 @@ import { logoutUser } from "@/library/firebase/auth";
 interface MenuItem {
   label: string;
   onClick: () => void;
-}
+};
 
 interface UserDropdownProps {
   menuItems?: MenuItem[];
-}
+  variant?: 'primary' | 'secondary';
+};
 
 const defaultMenuItems: MenuItem[] = [
   { label: "Profile", onClick: () => alert("Profile clicked") },
@@ -19,10 +20,13 @@ const defaultMenuItems: MenuItem[] = [
 
 export const UserDropdown: React.FC<UserDropdownProps> = ({
   menuItems = defaultMenuItems,
+  variant = 'primary',
 }) => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const backgroundColor = variant === 'primary' ? '#BD9CEA' : '#070217';
+  const iconColor = variant === 'primary' ? '#070217' : '#BD9CEA'
   const { user, userLoading } = useUser();
 
   useEffect(() => {
@@ -55,12 +59,12 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
         type="button"
       >
         <span
-          className="w-8 h-8 rounded-full bg-[#BD9CEA] flex items-center justify-center font-bold text-[18px] text-[#070217] select-none"
+          className={`w-8 h-8 rounded-full !bg-[${backgroundColor}] flex items-center justify-center font-bold text-[18px] text-[${iconColor}] select-none`}
         >
           {/* Simple user icon SVG */}
           <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4" fill="#070217" />
-            <rect x="6" y="14" width="12" height="6" rx="3" fill="#070217" />
+            <circle cx="12" cy="8" r="4" fill={iconColor} />
+            <rect x="6" y="14" width="12" height="6" rx="3" fill={iconColor} />
           </svg>
         </span>
         <svg
@@ -73,7 +77,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
         >
           <path
             d="M5 8l5 5 5-5"
-            stroke="#BD9CEA"
+            stroke={backgroundColor}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
