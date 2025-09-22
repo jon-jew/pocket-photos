@@ -31,7 +31,7 @@ const IconHeader: React.FC<IconHeaderProps> = ({ isLoading, showLogin = false })
           src="/logo.svg"
         />
       }
-      <h1 className="leading-[48px]">PLURR</h1>
+      <h1 className="leading-[48px]">PLUUR</h1>
       <p className="leading-[20px]">
         Create a photo album<br />together, instantly
       </p>

@@ -32,6 +32,7 @@ interface UploadedImage {
 const NewAlbumPage: React.FC = () => {
   const [albumName, setAlbumName] = useState('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [uploadLoading, setUploadLoading] = useState<boolean>(false);
   const [albumId, setAlbumId] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [images, setImages] = useState<UploadedImage[]>([]);
@@ -102,8 +103,10 @@ const NewAlbumPage: React.FC = () => {
     if (files.length + images.length > 75) {
       toast.error('Image count limit is 75.');
     } else {
+      setUploadLoading(true);
       const newImages = await Promise.all(files.map(compressFile));
       setImages(prevImages => [...prevImages, ...newImages]);
+      setUploadLoading(false);
     }
   };
 
@@ -168,7 +171,7 @@ const NewAlbumPage: React.FC = () => {
           <Link href={`/album/${albumId}`} className="underline mb-3">
             <h3>View Album Lobby</h3>
           </Link>
-          {qrCode && <Image alt="QR code" width={200} height={200} src={qrCode} />}
+          {qrCode && <Image className="rounded-lg" alt="QR code" width={200} height={200} src={qrCode} />}
           <p className="!text-md font-secondary">Code: {albumId}</p>
         </TornContainer>
       </div>
@@ -177,7 +180,7 @@ const NewAlbumPage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
-      <IconHeader isLoading={userLoading} showLogin />
+      <IconHeader isLoading={userLoading || uploadLoading} showLogin />
       <TornContainer smallXPadding={images.length > 0} hideChildren={userLoading}>
         <>
           <h3 className={clx({

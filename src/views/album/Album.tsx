@@ -81,7 +81,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
           "h-[225px]": isQrOpen,
           "w-full transition-[height] duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
         })}>
-          {qrCode && <Image alt="QR code" width={200} height={200} src={qrCode} />}
+          {qrCode && <Image className="rounded-lg" alt="QR code" width={175} height={175} src={qrCode} />}
           <p className="!text-md font-secondary text-black">Code: {albumId}</p>
         </div>
         <div className="mt-1 w-full flex items-center justify-center">
