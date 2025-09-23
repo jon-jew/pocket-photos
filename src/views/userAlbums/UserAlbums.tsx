@@ -62,7 +62,7 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId }) => {
       </div>
       <div className="flex flex-row flex-wrap gap-6 px-2 py-6 justify-center items-center">
         {albums.map((album, index) => (
-          <Link href={`/album/${album.id}`} className="max-w-[150px] relative">
+          <Link key={`album-${index}`}href={`/album/${album.id}`} className="max-w-[150px] relative">
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] relative z-3">
               <div className="h-[140px] w-[140px] relative">
                 <Image
