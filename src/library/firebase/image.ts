@@ -2,11 +2,24 @@ import {
   doc,
   getDoc,
   setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 import { storage, db } from './clientApp';
 import { toast } from 'react-toastify';
+
+declare global {
+  interface UserAlbum {
+    id: string;
+    albumName: string;
+    created: string;
+    thumbnailImage: string;
+  }
+}
 
 const doesAlbumExist = async (albumId: string) => {
   const albumRef = doc(db, 'albums', albumId);
@@ -26,17 +39,20 @@ export const uploadImageAlbum = async (
       albumId = Math.random().toString(36).substring(2, 8);
     } while (!doesAlbumExist(albumId))
 
-    const imageList: string[] = [];
     const progressIncrement: number = 1 / (images.length * 2) * 100;
 
-    for (const [index, image] of images.entries()) {
+    const promises = images.map(async (image, index) => {
       const imageRef = ref(storage, `/${albumId}/${index}`);
       const uploadRes = await uploadBytes(imageRef, image);
       setUploadProgress((prev) => prev + progressIncrement);
       const imageUrl = await getDownloadURL(imageRef);
       setUploadProgress((prev) => prev + progressIncrement);
-      imageList.push(imageUrl);
-    }
+      return imageUrl;
+    });
+    console.log(promises)
+
+    const imageList = await Promise.all(promises);
+
     const albumData = {
       albumName: albumName,
       ownerId: userUid,
@@ -92,3 +108,30 @@ export const getAlbumImages = async (albumId: string) => {
     return false;
   }
 };
+
+export const getUserAlbums = async (userId: string) => {
+  try {
+    const albumsRef = collection(db, 'albums');
+    const q = query(albumsRef, where("ownerId", "==", userId));
+
+    const querySnapshot = await getDocs(q);
+    const promises = querySnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      if (data.imageList.length !== 0) {
+        const thumbnailImage = await XHRRequest(data.imageList[0]);
+        return ({
+          id: doc.id,
+          albumName: data.albumName as string,
+          thumbnailImage: URL.createObjectURL(thumbnailImage),
+          created: new Date(data.created).toDateString(),
+        });
+      }
+    });
+    const res = await Promise.all(promises);
+    return res as UserAlbum[];
+
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}

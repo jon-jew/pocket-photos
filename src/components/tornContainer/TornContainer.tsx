@@ -4,11 +4,10 @@ import clx from 'classnames';
 
 interface TornContainerProps {
   children: React.ReactNode;
-  hideChildren?: boolean;
   smallXPadding?: boolean;
 };
 
-const TornContainer: React.FC<TornContainerProps> = ({ children, hideChildren, smallXPadding }) => {
+const TornContainer: React.FC<TornContainerProps> = ({ children, smallXPadding }) => {
   return (
     <div className="flex flex-col max-w-xl grow w-full">
       <div className="h-[35px] w-full relative">
@@ -19,8 +18,6 @@ const TornContainer: React.FC<TornContainerProps> = ({ children, hideChildren, s
         "gap-3 w-full px-6 pt-1 pb-5": true,
         // "[&>*]:transition-opacity [&>*]:duration-150": true,
         "!px-2 !gap-1": smallXPadding,
-        "[&>*]:opacity-0 [&>*]:pointer-events-none": hideChildren,
-        "[&>*]:opacity-100": !hideChildren,
       })}>
         {children}
       </div>

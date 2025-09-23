@@ -1,6 +1,7 @@
 "use client";
 import { redirect } from "next/navigation";
 import { RecaptchaVerifier, onAuthStateChanged, signOut, ConfirmationResult } from "firebase/auth";
+import { toast } from "react-toastify";
 
 import { auth } from "./clientApp";
 
@@ -14,6 +15,7 @@ declare global {
 export const logoutUser = () => {
   console.log('logout')
   signOut(auth).then(() => {
+    toast.info('Logged out');
     redirect('/');
   }).catch((error) => {
     console.error(error);

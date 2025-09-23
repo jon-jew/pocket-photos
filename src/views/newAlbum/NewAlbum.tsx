@@ -10,7 +10,6 @@ import clx from 'classnames';
 import imageCompression from 'browser-image-compression';
 import { toast } from 'react-toastify';
 
-import LinearProgress from '@mui/material/LinearProgress';
 import CollectionsIcon from '@mui/icons-material/Collections';
 
 import { uploadImageAlbum } from '@/library/firebase/image';
@@ -21,6 +20,7 @@ import useUser from '@/components/hooks/useUser';
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer';
 import ImageGallery from '@/components/imageGallery';
+import Loading from '@/components/loading';
 import Button from '@/components/ui/button';
 import Textfield from '@/components/ui/textfield';
 
@@ -126,6 +126,7 @@ const NewAlbumPage: React.FC = () => {
         setAlbumId(uploadRes);
       }
     }
+    window.scrollTo(0, 0);
     setLoading(false);
   };
 
@@ -147,16 +148,8 @@ const NewAlbumPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen items-center justify-center">
-        <Image src="/loading.gif" alt="loading" width={100} height={100} />
-        <div className="w-7/10 max-w-[400px] mt-12">
-          <LinearProgress color="secondary" variant="determinate" value={uploadProgress} />
-        </div>
-      </div>
-    )
-  }
+  if (loading || userLoading) return <Loading progress={!userLoading ? uploadProgress : null} />;
+
   if (qrCode) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
@@ -181,7 +174,7 @@ const NewAlbumPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
       <IconHeader isLoading={userLoading || uploadLoading} showLogin />
-      <TornContainer smallXPadding={images.length > 0} hideChildren={userLoading}>
+      <TornContainer smallXPadding={images.length > 0}>
         <>
           <h3 className={clx({
             'mb-2': images.length === 0,

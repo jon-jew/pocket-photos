@@ -1,33 +1,36 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useUser from '@/components/hooks/useUser';
 import { logoutUser } from "@/library/firebase/auth";
 
 interface MenuItem {
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
+  href?: string;
 };
 
 interface UserDropdownProps {
-  menuItems?: MenuItem[];
   variant?: 'primary' | 'secondary';
 };
 
-const defaultMenuItems: MenuItem[] = [
-  { label: "Profile", onClick: () => alert("Profile clicked") },
-  { label: "Logout", onClick: () => logoutUser() },
-];
-
 export const UserDropdown: React.FC<UserDropdownProps> = ({
-  menuItems = defaultMenuItems,
   variant = 'primary',
 }) => {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const backgroundColor = variant === 'primary' ? '#BD9CEA' : '#070217';
   const iconColor = variant === 'primary' ? '#070217' : '#BD9CEA'
   const { user, userLoading } = useUser();
+
+  const menuItems: MenuItem[] = [
+    { label: "Albums", href: `/user-albums/${user ? user.uid : ''}` },
+    { label: "Logout", onClick: () => logoutUser() },
+  ];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -94,7 +97,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
               key={item.label}
               onClick={() => {
                 setOpen(false);
-                item.onClick();
+                if (item.onClick) item.onClick();
+                if (item.href) router.push(item.href);
               }}
               className={`w-full px-4 py-2 bg-none border-none text-left cursor-pointer text-[15px] text-[#333] ${idx < menuItems.length - 1 ? "border-b border-[#eee]" : ""
                 }`}

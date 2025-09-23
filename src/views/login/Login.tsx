@@ -11,15 +11,17 @@ import { toast } from 'react-toastify';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 
 import { auth } from '@/library/firebase/clientApp';
-
+import useUser from '@/components/hooks/useUser';
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer/TornContainer';
+import Loading from '@/components/loading';
 import Textfield from '@/components/ui/textfield';
 import Button from '@/components/ui/button';
 import NumberInput from '@/components/ui/numberInput';
 
 const Login: React.FC = () => {
   const router = useRouter();
+  const { user, userLoading } = useUser();
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
@@ -78,10 +80,17 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
-      'size': 'invisible',
-    });
-  }, []);
+    if (user && !userLoading) {
+      toast.info('User already logged in');
+      router.push('/');
+    } else if (!userLoading && !user) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
+        'size': 'invisible',
+      });
+    }
+  }, [user, userLoading]);
+
+  if (userLoading) return <Loading />;
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">

@@ -7,6 +7,7 @@
   --primary-hover: #A475F9;
   --secondary: #070217;
   --secondary-hover: #1C0E3E;
+  --polaroid: #f4f5f2;
   --toastify-color-success: var(--primary);
   --toastify-font-family: var(--font-manrope);
 }
@@ -18,6 +19,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
+  --color-polaroid: var(--polaroid);
   --font-primary: var(--font-comico);
   --font-secondary: var(--font-manrope);
 }
