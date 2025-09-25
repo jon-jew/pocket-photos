@@ -4,8 +4,6 @@ import Image from "next/image";
 
 import UserDropdown from '@/components/ui/userDropdown';
 
-import './iconHeader.scss';
-
 interface IconHeaderProps {
   showLogin?: boolean;
 };
@@ -27,11 +25,6 @@ const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false }) => {
       <p className="leading-[20px]">
         Create a photo album<br />together, instantly
       </p>
-      <div className="bubbles">
-        {Array.from({ length: 50 }).map((_, index) => (
-          <div key={`bubble-${index}`} className="bubble" />
-        ))}
-      </div>
     </div>
   );
 };

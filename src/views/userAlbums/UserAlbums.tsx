@@ -36,7 +36,6 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId }) => {
     if (!userLoading) {
       if (!user || user.uid !== userId) router.push('/');
       else if (user && user.uid === userId) {
-        console.log('test2')
         fetchUserAlbums();
       }
     }

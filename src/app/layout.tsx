@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 
 import { Manrope, Monomaniac_One, Gloria_Hallelujah } from 'next/font/google';
 
+import Bubbles from "@/components/bubbles";
 import "./globals.css";
 
 const comicoRegular = localFont({
@@ -51,6 +52,7 @@ export default function RootLayout({
         className={`${comicoRegular.variable} ${manrope.variable} ${monomaniac.variable} ${gloria.variable} antialiased`}
       >
         <ToastContainer theme="dark" />
+        <Bubbles />
         {children}
       </body>
     </html>
