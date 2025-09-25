@@ -100,7 +100,7 @@ const Carousel: React.FC<CarouselProps> = ({
         ))}
       </div> */}
       <div className="absolute bottom-0 w-full z-10">
-        <div className="h-[20px] w-full relative">
+        <div className="h-[15px] w-full relative">
           <Image
             priority
             src="/tornEdge.png"
@@ -108,8 +108,7 @@ const Carousel: React.FC<CarouselProps> = ({
             fill
           />
         </div>
-        <div className="bg-primary w-full flex flex-row gap-5 pb-4 justify-center items-center">
-
+        <div className="bg-primary w-full flex flex-row gap-8 pb-2 justify-center items-center">
           <button
             onClick={prevSlide}
             className="gallery-btn text-4xl cursor-pointer"
@@ -119,7 +118,7 @@ const Carousel: React.FC<CarouselProps> = ({
             {'<'}
           </button>
           {showDownload &&
-            <a href={images[current]} download>
+            <a href={images[current]} download={`pluur-${current}`}>
               <button className="text-black" type="button">
                 <DownloadIcon />
               </button>

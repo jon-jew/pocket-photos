@@ -6,8 +6,9 @@ import {
   query,
   where,
   getDocs,
+  updateDoc,
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 import { storage, db } from './clientApp';
 import { toast } from 'react-toastify';
@@ -19,6 +20,21 @@ declare global {
     created: string;
     thumbnailImage: string;
   }
+  interface Image {
+    id: string;
+    imageUrl: string;
+    uploaderId: string | null;
+  }
+
+  interface ImageEntry extends Image {
+    previewImageUrl: string;
+  }
+
+  interface ImageChange extends ImageEntry {
+    uploaded: boolean;
+    change: string | null;
+    file?: File;
+  }
 }
 
 const doesAlbumExist = async (albumId: string) => {
@@ -28,27 +44,33 @@ const doesAlbumExist = async (albumId: string) => {
   return false;
 };
 
+const generateRandomId = (length = 6) => {
+  return Math.random().toString(36).substring(2, length + 2);
+};
+
 export const uploadImageAlbum = async (
   albumName: string,
   images: File[],
   userUid: string,
+  viewersCanEdit: boolean,
   setUploadProgress: React.Dispatch<React.SetStateAction<number>>
 ) => {
   try {
     let albumId = '';
     do {
-      albumId = Math.random().toString(36).substring(2, 8);
+      albumId = generateRandomId();
     } while (!doesAlbumExist(albumId))
 
     const progressIncrement: number = 1 / (images.length * 2) * 100;
 
-    const promises = images.map(async (image, index) => {
-      const imageRef = ref(storage, `/${albumId}/${index}`);
+    const promises = images.map(async (image) => {
+      const imageId = generateRandomId();
+      const imageRef = ref(storage, `/${albumId}/${imageId}`);
       const uploadRes = await uploadBytes(imageRef, image);
       setUploadProgress((prev) => prev + progressIncrement);
       const imageUrl = await getDownloadURL(imageRef);
       setUploadProgress((prev) => prev + progressIncrement);
-      return imageUrl;
+      return ({ id: imageId, creatorId: userUid, imageUrl, });
     });
 
     const imageList = await Promise.all(promises);
@@ -56,6 +78,7 @@ export const uploadImageAlbum = async (
     const albumData = {
       albumName: albumName,
       ownerId: userUid,
+      viewersCanEdit: viewersCanEdit,
       created: Date.now(),
       imageList: imageList,
     };
@@ -91,11 +114,20 @@ export const getAlbumImages = async (albumId: string) => {
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const blobs = await Promise.all(data.imageList.map(XHRRequest))
+      const blobs = await Promise.all(data.imageList.map(
+        (image: Image) => XHRRequest(image.imageUrl)
+      ));
       return ({
         created: data.created,
         albumName: data.albumName,
-        imageList: blobs.map((blob) => URL.createObjectURL(blob)),
+        ownerId: data.ownerId,
+        viewersCanEdit: data.viewersCanEdit,
+        imageList: blobs.map((blob, index) => ({
+          id: data.imageList[index].id,
+          uploaderId: data.imageList[index].uploaderId,
+          imageUrl: data.imageList[index].imageUrl,
+          previewImageUrl: URL.createObjectURL(blob),
+        })),
       });
     } else {
       // docSnap.data() will be undefined in this case
@@ -118,7 +150,7 @@ export const getUserAlbums = async (userId: string) => {
     const promises = querySnapshot.docs.map(async (doc) => {
       const data = doc.data();
       if (data.imageList.length !== 0) {
-        const thumbnailImage = await XHRRequest(data.imageList[0]);
+        const thumbnailImage = await XHRRequest(data.imageList[0].imageUrl);
         return ({
           id: doc.id,
           albumName: data.albumName as string,
@@ -132,6 +164,46 @@ export const getUserAlbums = async (userId: string) => {
 
   } catch (error) {
     console.error(error);
+    return false;
+  }
+};
+
+export const editAlbum = async (albumId: string, userId: string | undefined, changes: ImageChange[]) => {
+  try {
+    const imageLength = changes.filter((change) => change.change !== 'delete').length;
+    const newImageList: Image[] = new Array(imageLength);
+    const promises = changes.map(async (change, index) => {
+      if (change.file && !change.uploaded) {
+        const imageId = generateRandomId();
+        const imageRef = ref(storage, `/${albumId}/${imageId}`);
+        await uploadBytes(imageRef, change.file);
+        const imageUrl = await getDownloadURL(imageRef);
+        newImageList[index] = {
+          id: imageId,
+          uploaderId: userId ? userId : 'anonymous',
+          imageUrl,
+        };
+      } else if (change.change === 'delete') {
+        const imageRef = ref(storage, `/${albumId}/${change.id}`);
+        await deleteObject(imageRef);
+      } else {
+        newImageList[index] = {
+          id: change.id,
+          uploaderId: change.uploaderId ? change.uploaderId : null,
+          imageUrl: change.imageUrl,
+        };
+      }
+    });
+
+    await Promise.all(promises);
+    const albumRef = doc(db, 'albums', albumId);
+    await updateDoc(albumRef, {
+      imageList: newImageList,
+    });
+
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to save changes');
     return false;
   }
 };

@@ -53,6 +53,12 @@ p {
 
 button {
   cursor: pointer;
+
+  &:disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.5;
+  }
 }
 
 header {

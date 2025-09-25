@@ -7,7 +7,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import clx from 'classnames';
-import imageCompression from 'browser-image-compression';
 import { toast } from 'react-toastify';
 
 import Switch from '@mui/material/Switch';
@@ -15,7 +14,7 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 import TuneIcon from '@mui/icons-material/Tune';
 
 import { uploadImageAlbum } from '@/library/firebase/image';
-import { generateQR } from '@/library/utils';
+import { generateQR, compressFile } from '@/library/utils';
 
 import useUser from '@/components/hooks/useUser';
 
@@ -27,10 +26,6 @@ import Button from '@/components/ui/button';
 import IconButton from '@/components/ui/iconButton';
 import Textfield from '@/components/ui/textfield';
 
-interface UploadedImage {
-  file: File;
-  previewUrl: string;
-};
 
 const NewAlbumPage: React.FC = () => {
   const [albumName, setAlbumName] = useState('');
@@ -44,6 +39,7 @@ const NewAlbumPage: React.FC = () => {
   const [images, setImages] = useState<UploadedImage[]>([]);
 
   const [isStuck, setIsStuck] = useState(false);
+  const [viewersCanEdit, setViewersCanEdit] = useState(true);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,28 +74,6 @@ const NewAlbumPage: React.FC = () => {
     };
   }, []);
 
-  const compressFile = async (file: File): Promise<UploadedImage> => {
-    const options = {
-      maxSizeMB: 0.75,
-      maxWidthOrHeight: 1500,
-      useWebWorker: true,
-    };
-
-    try {
-      const compressedFile = await imageCompression(file, options);
-      return ({
-        file: compressedFile,
-        previewUrl: URL.createObjectURL(compressedFile),
-      });
-    } catch (error) {
-      console.error(error);
-      return ({
-        file: file,
-        previewUrl: URL.createObjectURL(file),
-      })
-    }
-  };
-
   const handleAlbumNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAlbumName(e.target.value);
   };
@@ -124,6 +98,7 @@ const NewAlbumPage: React.FC = () => {
         albumName,
         images.map((image) => image.file),
         user.uid,
+        viewersCanEdit,
         setUploadProgress,
       );
       if (uploadRes) {
@@ -141,7 +116,7 @@ const NewAlbumPage: React.FC = () => {
     setImages(newImages);
   };
 
-  const handleReorderImage = (idx: number, direction: number) => {
+  const handleReorderImage = (idx: number, direction: -1 | 1) => {
     if (idx > 0 && direction == -1) {
       const newImages = [...images];
       [newImages[idx - 1], newImages[idx]] = [newImages[idx], newImages[idx - 1]];
@@ -176,6 +151,7 @@ const NewAlbumPage: React.FC = () => {
       </div>
     )
   }
+  console.log(isStuck)
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
@@ -211,26 +187,35 @@ const NewAlbumPage: React.FC = () => {
               />
 
             </div>
-            <IconButton
-              chevronState={optionsOpen ? 'up' : 'down'}
-              onClick={() => setOptionsOpen(!optionsOpen)}
-            >
-              <TuneIcon />
-            </IconButton>
             <div className={clx({
-              "h-[150px]": optionsOpen,
-              "transition-[height] duration-150 h-0 overflow-hidden": true,
+              'w-full centered-col': true,
+              'mt-4': images.length === 0,
             })}>
-              <div>
-                <Switch color="secondary" />
-                <span className="font-secondary">Viewers can add images</span>
+              <IconButton
+                chevronState={optionsOpen ? 'up' : 'down'}
+                onClick={() => setOptionsOpen(!optionsOpen)}
+              >
+                <span className="text-xs mr-1">options</span><TuneIcon />
+              </IconButton>
+              <div className={clx({
+                "h-[40px]": optionsOpen,
+                "transition-[height] duration-150 h-0 overflow-hidden": true,
+              })}>
+                <div>
+                  <Switch
+                    checked={viewersCanEdit}
+                    onChange={() => setViewersCanEdit(!viewersCanEdit)}
+                    color="secondary"
+                  />
+                  <span className="font-secondary text-sm">Viewers can add images</span>
+                </div>
               </div>
             </div>
             {images.length > 0 && (
-              <div className="mt-1 mb-4 w-full">
+              <div className="mb-4 w-full">
                 <ImageGallery
                   images={images.map((image) => image.previewUrl)}
-                  setImages={setImages}
+                  editMode
                   handleRemoveImage={handleRemoveImage}
                   handleReorderImage={handleReorderImage}
                 />

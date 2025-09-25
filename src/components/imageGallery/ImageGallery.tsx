@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import clx from 'classnames';
 
+import ImageIcon from '@mui/icons-material/Image';
 import Modal from '@mui/material/Modal';
 import { Slide } from '@mui/material';
 
@@ -12,29 +13,21 @@ import Carousel from '@/components/carousel';
 
 import './imageGallery.scss';
 
-interface UploadedImage {
-  file: File;
-  previewUrl: string;
-};
-
 interface ImageGalleryProps {
   images: string[];
   editMode?: boolean;
   hideRemove?: boolean;
   showDownload?: boolean;
   variant?: 'primary' | 'secondary';
-  setImages?: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
   handleRemoveImage?: (idx: number) => void;
-  handleReorderImage?: (idx: number, direction: number) => void;
+  handleReorderImage?: (idx: number, direction: -1 | 1) => void;
 };
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({
   images,
   editMode = false,
-  hideRemove = false,
   showDownload = false,
   variant = 'primary',
-  setImages,
   handleRemoveImage,
   handleReorderImage,
 }) => {
@@ -57,20 +50,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           <li
             key={`img-container-${idx}`}
             className={clx({
-              "thumbnail-container shadow-xl": true,
-              "shadow-indigo-500/50": variant === 'secondary',
+              "thumbnail-container shadow-lg": true,
+              "shadow-indigo-100/50": variant === 'secondary',
             })}
           >
-            {editMode &&
+            {handleRemoveImage &&
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemoveImage(idx);
                 }}
-                className="delete-btn"
+                className={clx({
+                  "hide": !editMode,
+                  "delete-btn fade-component": true,
+                })}
               >
-                X
+                <span>x</span><ImageIcon sx={{ fontSize: '18px' }}/>
               </button>
             }
             <button
@@ -92,10 +88,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               "justify-between": idx !== 0,
               "justify-end": idx === 0,
             })}>
-              {idx !== 0 && editMode &&
+              {idx !== 0 && handleReorderImage &&
                 <button
                   type="button"
-                  className="thumbnail-control"
+                  className={clx({
+                    "hide": !editMode,
+                    "thumbnail-control fade-component": true,
+                  })}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleReorderImage(idx, -1);
@@ -105,10 +104,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   {'<'}
                 </button>
               }
-              {idx !== images.length - 1 && editMode &&
+              {idx !== images.length - 1 && handleReorderImage &&
                 <button
                   type="button"
-                  className="thumbnail-control"
+                  className={clx({
+                    "hide": !editMode,
+                    "thumbnail-control fade-component": true,
+                  })}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleReorderImage(idx, 1);
@@ -135,7 +137,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             <Carousel initialCurrent={selectedIndex} images={images} showDownload={showDownload} />
             <button
               onClick={closeModal}
-              className="absolute !top-[30px] !left-[20px] text-3xl delete-btn cursor-pointer"
+              className="absolute !top-[30px] !left-[20px] !text-3xl delete-btn cursor-pointer"
               aria-label="Close"
               type="button"
             >
