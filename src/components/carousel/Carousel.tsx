@@ -37,7 +37,7 @@ const Carousel: React.FC<CarouselProps> = ({
         className="flex flex-col h-[100vh] relative overflow-hidden mx-auto"
       >
         <ul
-          className="polaroids flex items-center transition-transform duration-500 ease-in-out h-[100vh]"
+          className="flex items-center transition-transform duration-500 ease-in-out h-[100vh]"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {images.map((src, idx) => (

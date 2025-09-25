@@ -42,6 +42,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isChanged, setIsChanged] = useState<boolean>(false);
   const [imageChanges, setImageChanges] = useState<ImageChange[]>([]);
+  const [deletedImages, setDeletedImages] = useState<ImageChange[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,6 +80,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
       setImageChanges([]);
       setIsChanged(false);
     } else {
+      setDeletedImages([]);
       setEditMode(true);
       setIsChanged(false);
       setIsQrOpen(false);
@@ -93,26 +95,17 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
 
   const handleRemoveImage = (idx: number) => {
     if (!isChanged) setIsChanged(true);
-    setImageChanges((prev) => {
-      return prev.map((imageChange, index) => {
-        if (index === idx) {
-          return { ...imageChange, change: 'delete' }
-        }
-        return imageChange;
-      })
-    });
+    if (imageChanges[idx].uploaded) {
+      setDeletedImages((prev) => [...prev, imageChanges[idx]]);
+    }
+    setImageChanges((prev) => prev.filter((item, index) => index !== idx));
   };
 
   const handleReorderImage = (idx: number, direction: -1 | 1) => {
     if (!isChanged) setIsChanged(true);
-
     const newImageChanges = [...imageChanges];
-    let i = idx;
-    do {
-      i += direction;
-    } while (imageChanges[i].change === 'delete')
-    [newImageChanges[i], newImageChanges[idx]] = [newImageChanges[idx], newImageChanges[i]];
-    newImageChanges[i].change = 'moved';
+    [newImageChanges[idx + direction], newImageChanges[idx]] = [newImageChanges[idx], newImageChanges[idx + direction]];
+    newImageChanges[idx + direction].change = 'moved';
     newImageChanges[idx].change = 'moved';
     setImageChanges(newImageChanges);
   };
@@ -140,7 +133,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
 
   const handleSubmitChanges = async () => {
     setLoading(true);
-    await editAlbum(albumId, user?.uid, imageChanges);
+    await editAlbum(albumId, user?.uid, imageChanges, deletedImages);
     await getImages();
     toast.success('Saved changes!');
     setEditMode(false);
@@ -186,11 +179,10 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
       <div className="px-2 pb-[50px]">
         <ImageGallery
           images={editMode ?
-            imageChanges.filter((imageChange) => imageChange.change !== 'delete').map(
-              (imageChange) => imageChange.previewImageUrl
-            ) :
+            imageChanges.map((imageChange) => imageChange.previewImageUrl) :
             images.map((image) => image.previewImageUrl)
           }
+          onModalOpen={() => setIsQrOpen(false)}
           handleRemoveImage={handleRemoveImage}
           handleReorderImage={handleReorderImage}
           editMode={albumInfo.ownerId === user?.uid ? editMode : false}
@@ -213,8 +205,10 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
           "h-[225px]": isQrOpen,
           "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
         })}>
-          {qrCode && <Image className="rounded-lg" alt="QR code" width={175} height={175} src={qrCode} />}
-          <p className="!text-md font-secondary text-black">Code: {albumId}</p>
+          <div className="text-center bg-white rounded-lg overflow-hidden">
+            {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
+            <p className="pb-2 !text-md text-black">{albumId}</p>
+          </div>
         </div>
         <div className="bg-primary text-secondary h-[50px] flex flex-row items-center justify-center gap-20 pb-3">
           {editMode &&

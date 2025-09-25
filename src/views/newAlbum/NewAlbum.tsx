@@ -151,7 +151,6 @@ const NewAlbumPage: React.FC = () => {
       </div>
     )
   }
-  console.log(isStuck, sentinelRef)
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">

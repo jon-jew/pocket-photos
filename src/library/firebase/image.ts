@@ -70,7 +70,7 @@ export const uploadImageAlbum = async (
       setUploadProgress((prev) => prev + progressIncrement);
       const imageUrl = await getDownloadURL(imageRef);
       setUploadProgress((prev) => prev + progressIncrement);
-      return ({ id: imageId, creatorId: userUid, imageUrl, });
+      return ({ id: imageId, uploaderId: userUid, imageUrl, });
     });
 
     const imageList = await Promise.all(promises);
@@ -168,11 +168,20 @@ export const getUserAlbums = async (userId: string) => {
   }
 };
 
-export const editAlbum = async (albumId: string, userId: string | undefined, changes: ImageChange[]) => {
+export const editAlbum = async (
+  albumId: string,
+  userId: string | undefined,
+  changes: ImageChange[],
+  deletedImages: ImageChange[]
+) => {
   try {
-    const imageLength = changes.filter((change) => change.change !== 'delete').length;
-    const newImageList: Image[] = new Array(imageLength);
-    const promises = changes.map(async (change, index) => {
+    const deletePromises = deletedImages.map(async (change) => {
+      const imageRef = ref(storage, `/${albumId}/${change.id}`);
+      await deleteObject(imageRef);
+    });
+
+    const newImageList: Image[] = new Array(changes.length);
+    const promises =  changes.map(async (change, index) => {
       if (change.file && !change.uploaded) {
         const imageId = generateRandomId();
         const imageRef = ref(storage, `/${albumId}/${imageId}`);
@@ -183,9 +192,6 @@ export const editAlbum = async (albumId: string, userId: string | undefined, cha
           uploaderId: userId ? userId : 'anonymous',
           imageUrl,
         };
-      } else if (change.change === 'delete') {
-        const imageRef = ref(storage, `/${albumId}/${change.id}`);
-        await deleteObject(imageRef);
       } else {
         newImageList[index] = {
           id: change.id,
@@ -195,7 +201,7 @@ export const editAlbum = async (albumId: string, userId: string | undefined, cha
       }
     });
 
-    await Promise.all(promises);
+    await Promise.all([...promises, ...deletePromises]);
     const albumRef = doc(db, 'albums', albumId);
     await updateDoc(albumRef, {
       imageList: newImageList,

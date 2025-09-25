@@ -16,9 +16,9 @@ import './imageGallery.scss';
 interface ImageGalleryProps {
   images: string[];
   editMode?: boolean;
-  hideRemove?: boolean;
   showDownload?: boolean;
   variant?: 'primary' | 'secondary';
+  onModalOpen?: () => void;
   handleRemoveImage?: (idx: number) => void;
   handleReorderImage?: (idx: number, direction: -1 | 1) => void;
 };
@@ -28,6 +28,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   editMode = false,
   showDownload = false,
   variant = 'primary',
+  onModalOpen,
   handleRemoveImage,
   handleReorderImage,
 }) => {
@@ -70,7 +71,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             }
             <button
               type="button"
-              onClick={() => openModal(idx)}
+              onClick={() => {
+                if (onModalOpen) onModalOpen();
+                openModal(idx)}
+              }
               className="thumbnail w-38 h-38 relative rounded-sm overflow-hidden"
             >
               <Image
