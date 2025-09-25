@@ -98,7 +98,7 @@ const Login: React.FC = () => {
         strategy="lazyOnload"
         src="https://www.google.com/recaptcha/enterprise.js?render=6LcRkcwrAAAAAGM5FKmXxQ2fVBWX8cQmX1zrtH7y"
       />
-      <IconHeader isLoading={loading} />
+      <IconHeader />
       <TornContainer>
         {mode == 'phone' &&
           <form className="centered-col gap-2 width-full" onSubmit={handleSendOTP}>
