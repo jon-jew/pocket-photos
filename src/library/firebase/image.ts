@@ -7,6 +7,7 @@ import {
   where,
   getDocs,
   updateDoc,
+  deleteDoc,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -20,6 +21,7 @@ declare global {
     created: string;
     thumbnailImage: string;
   }
+
   interface Image {
     id: string;
     imageUrl: string;
@@ -168,7 +170,7 @@ export const getUserAlbums = async (userId: string) => {
   }
 };
 
-export const editAlbum = async (
+export const editAlbumImages = async (
   albumId: string,
   userId: string | undefined,
   changes: ImageChange[],
@@ -181,7 +183,7 @@ export const editAlbum = async (
     });
 
     const newImageList: Image[] = new Array(changes.length);
-    const promises =  changes.map(async (change, index) => {
+    const promises = changes.map(async (change, index) => {
       if (change.file && !change.uploaded) {
         const imageId = generateRandomId();
         const imageRef = ref(storage, `/${albumId}/${imageId}`);
@@ -210,6 +212,48 @@ export const editAlbum = async (
   } catch (error) {
     console.error(error);
     toast.error('Failed to save changes');
+    return false;
+  }
+};
+
+export const editAlbumFields = async (albumId: string, albumName: string, viewersCanEdit: boolean) => {
+  try {
+    const albumRef = doc(db, 'albums', albumId);
+    await updateDoc(albumRef, {
+      albumName,
+      viewersCanEdit,
+    });
+
+    return true;
+
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to save changes');
+    return false;
+  }
+};
+
+export const deleteAlbum = async (albumId: string) => {
+  try {
+    const albumRef = doc(db, 'albums', albumId);
+    const docSnap = await getDoc(albumRef);
+    if (docSnap.exists()) {
+      const { imageList } = docSnap.data();
+      const promises = imageList.map(async (image: Image) => {
+        const imageRef = ref(storage, `/${albumId}/${image.id}`);
+        await deleteObject(imageRef);
+      });
+      await Promise.all(promises);
+      await deleteDoc(doc(db, 'albums', albumId));
+      return true;
+    } else {
+      toast.error('Album not found');
+      return false;
+    }
+
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to delete album');
     return false;
   }
 };

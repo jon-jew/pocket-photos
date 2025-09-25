@@ -11,7 +11,7 @@ import Button from '@/components/ui/button';
 import './textfield.scss';
 
 interface TextfieldProps {
-  intialValue?: string;
+  initialValue?: string;
   placeholder?: string;
   label?: string;
   type?: string;
@@ -30,7 +30,7 @@ interface TextfieldProps {
 }
 
 const Textfield: React.FC<TextfieldProps> = ({
-  intialValue,
+  initialValue,
   placeholder,
   label,
   type,
@@ -47,7 +47,7 @@ const Textfield: React.FC<TextfieldProps> = ({
   onButtonClick,
   onChange,
 }) => {
-  const [value, setValue] = useState(intialValue || '');
+  const [value, setValue] = useState(initialValue || '');
 
   const inputClasses = clx({
     'textfield transition-colors duration-200 flex relative items-center rounded-lg px-1 py-1': true,

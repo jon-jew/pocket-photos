@@ -6,17 +6,20 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { toast } from "react-toastify";
 import clx from 'classnames';
+import Modal from '@mui/material/Modal';
 
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import EditIcon from '@mui/icons-material/Edit';
 import ImageIcon from '@mui/icons-material/Image';
 import SaveIcon from '@mui/icons-material/Save';
+import TuneIcon from '@mui/icons-material/Tune';
 
 import { generateQR, compressFile } from '@/library/utils';
-import { getAlbumImages, editAlbum } from "@/library/firebase/image";
+import { getAlbumImages, editAlbumImages } from "@/library/firebase/image";
 
 import useUser from '@/components/hooks/useUser';
 import ImageGallery from "@/components/imageGallery";
+import OptionsForm from "@/components/optionsForm";
 import UserDropdown from "@/components/ui/userDropdown";
 import IconButton from "@/components/ui/iconButton";
 
@@ -39,6 +42,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
 
+  const [isOptionsOpen, setIsOptionsOpen] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isChanged, setIsChanged] = useState<boolean>(false);
   const [imageChanges, setImageChanges] = useState<ImageChange[]>([]);
@@ -93,6 +97,12 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
     }
   };
 
+  const closeOptions = async (reload: boolean, loading: boolean) => {
+    if (loading) setLoading(true);
+    if (reload) await getImages();
+    setIsOptionsOpen(false);
+  };
+
   const handleRemoveImage = (idx: number) => {
     if (!isChanged) setIsChanged(true);
     if (imageChanges[idx].uploaded) {
@@ -133,7 +143,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
 
   const handleSubmitChanges = async () => {
     setLoading(true);
-    await editAlbum(albumId, user?.uid, imageChanges, deletedImages);
+    await editAlbumImages(albumId, user?.uid, imageChanges, deletedImages);
     await getImages();
     toast.success('Saved changes!');
     setEditMode(false);
@@ -156,43 +166,20 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
   }
 
   return (
-    <main className="max-w-4xl mx-auto">
-      <div className="relative bg-primary transition-[height] duration-200 ease-in-out">
-        <div className="pt-6 pl-5 pr-15">
-          <h2 className="text-3xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
-          <p className="pl-3 text-md text-black">{albumInfo.createdOn}</p>
+    <>
+      <main className="max-w-4xl mx-auto">
+        <div className="relative bg-primary transition-[height] duration-200 ease-in-out">
+          <div className="pt-6 pl-5 pr-15">
+            <h2 className="text-3xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
+            <p className="pl-3 text-md text-black">{albumInfo.createdOn}</p>
+          </div>
+          <div className="absolute top-5 right-[5px] z-10">
+            <UserDropdown variant="secondary" />
+          </div>
+
         </div>
-        <div className="absolute top-5 right-[5px] z-10">
-          <UserDropdown variant="secondary" />
-        </div>
 
-      </div>
-
-      <div className="h-[20px] w-full rotate-180 relative">
-        <Image
-          priority
-          src="/tornEdge.png"
-          alt="torn edge"
-          fill
-        />
-      </div>
-      <div className="px-2 pb-[50px]">
-        <ImageGallery
-          images={editMode ?
-            imageChanges.map((imageChange) => imageChange.previewImageUrl) :
-            images.map((image) => image.previewImageUrl)
-          }
-          onModalOpen={() => setIsQrOpen(false)}
-          handleRemoveImage={handleRemoveImage}
-          handleReorderImage={handleReorderImage}
-          editMode={albumInfo.ownerId === user?.uid ? editMode : false}
-          showDownload={!editMode}
-          variant="secondary"
-        />
-      </div>
-
-      <div className="fixed w-full max-w-4xl bottom-0 z-10">
-        <div className="h-[15px] w-full relative">
+        <div className="h-[20px] w-full rotate-180 relative">
           <Image
             priority
             src="/tornEdge.png"
@@ -200,61 +187,106 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
             fill
           />
         </div>
-        <div className={clx({
-          "h-0": !isQrOpen,
-          "h-[225px]": isQrOpen,
-          "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
-        })}>
-          <div className="text-center bg-white rounded-lg overflow-hidden">
-            {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
-            <p className="pb-2 !text-md text-black">{albumId}</p>
+        <div className="px-2 pb-[50px]">
+          <ImageGallery
+            images={editMode ?
+              imageChanges.map((imageChange) => imageChange.previewImageUrl) :
+              images.map((image) => image.previewImageUrl)
+            }
+            onModalOpen={() => setIsQrOpen(false)}
+            handleRemoveImage={handleRemoveImage}
+            handleReorderImage={handleReorderImage}
+            editMode={albumInfo.ownerId === user?.uid ? editMode : false}
+            showDownload={!editMode}
+            variant="secondary"
+          />
+        </div>
+
+        <div className="fixed w-full max-w-4xl bottom-0 z-10">
+          <div className="h-[15px] w-full relative">
+            <Image
+              priority
+              src="/tornEdge.png"
+              alt="torn edge"
+              fill
+            />
+          </div>
+          <div className={clx({
+            "h-0": !isQrOpen,
+            "h-[225px]": isQrOpen,
+            "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
+          })}>
+            <div className="text-center bg-white rounded-lg overflow-hidden">
+              {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
+              <p className="pb-2 !text-md text-black">{albumId}</p>
+            </div>
+          </div>
+          <div className="bg-primary text-secondary h-[55px] flex flex-row items-center justify-center gap-20 pb-3">
+            {editMode &&
+              <>
+                <button
+                  className="text-primary text-[14px] bg-secondary px-4 py-2 rounded-lg"
+                  onClick={handleSubmitChanges}
+                  disabled={!isChanged}
+                  type="button"
+                >
+                  Save <SaveIcon sx={{ fontSize: '18px' }} />
+                </button>
+                <button type="button">
+                  <label htmlFor="image-upload">
+                    <span>+</span><ImageIcon />
+                  </label>
+                </button>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={handleFilesChange}
+                  className="hidden"
+                />
+              </>
+            }
+            {(albumInfo.viewersCanEdit || user?.uid === albumInfo.ownerId) &&
+              <button
+                type="button"
+                onClick={handleToggleEditMode}
+              >
+                {editMode && <span className="text-xs">x</span>}<EditIcon />
+              </button>
+            }
+            {!editMode &&
+              <IconButton
+                chevronState={isQrOpen ? 'down' : 'up'}
+                onClick={handleQr}
+              >
+                <QrCodeIcon />
+              </IconButton>
+            }
+            {(user?.uid === albumInfo.ownerId && !editMode) &&
+              <button
+                type="button"
+                onClick={() => setIsOptionsOpen(true)}
+              >
+                <TuneIcon />
+              </button>
+            }
           </div>
         </div>
-        <div className="bg-primary text-secondary h-[50px] flex flex-row items-center justify-center gap-20 pb-3">
-          {editMode &&
-            <>
-              <button
-                className="text-primary text-[12px] bg-secondary px-3 py-2 rounded-lg"
-                onClick={handleSubmitChanges}
-                disabled={!isChanged}
-                type="button"
-              >
-                Save <SaveIcon sx={{ fontSize: '15px' }} />
-              </button>
-              <button type="button">
-                <label htmlFor="image-upload">
-                  <span>+</span><ImageIcon />
-                </label>
-              </button>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                multiple
-                ref={fileInputRef}
-                onChange={handleFilesChange}
-                className="hidden"
-              />
-            </>
-          }
-          {(albumInfo.viewersCanEdit || user?.uid === albumInfo.ownerId) &&
-            <button
-              type="button"
-              onClick={handleToggleEditMode}
-            >
-              {editMode && <span className="text-xs">x</span>}<EditIcon />
-            </button>
-          }
-          {!editMode &&
-            <IconButton
-              chevronState={isQrOpen ? 'down' : 'up'}
-              onClick={handleQr}
-            >
-              <QrCodeIcon />
-            </IconButton>
-          }
+      </main>
+      <Modal open={isOptionsOpen} onClose={() => closeOptions(false, false)}>
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[1000]"
+        >
+          <OptionsForm
+            albumId={albumId}
+            initialAlbumName={albumInfo.albumName}
+            initialViewersCanEdit={albumInfo.viewersCanEdit}
+            closeOptions={closeOptions}
+          />
         </div>
-      </div>
-    </main>
+      </Modal>
+    </>
   );
-}
+};

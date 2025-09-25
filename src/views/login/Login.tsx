@@ -46,7 +46,6 @@ const Login: React.FC = () => {
         toast.error('Failed to send code.');
       });
   };
-  //6505553434
 
   const handleChangeOtp = (value: string) => {
     setOtpCode(value);
@@ -88,7 +87,7 @@ const Login: React.FC = () => {
         'size': 'invisible',
       });
     }
-  }, [user, userLoading]);
+  }, [userLoading]);
 
   if (userLoading) return <Loading />;
 
