@@ -26,7 +26,8 @@ const doesAlbumExist = async (albumId: string) => {
   const docSnap = await getDoc(albumRef);
   if (docSnap.exists()) return true;
   return false;
-}
+};
+
 export const uploadImageAlbum = async (
   albumName: string,
   images: File[],
@@ -49,7 +50,6 @@ export const uploadImageAlbum = async (
       setUploadProgress((prev) => prev + progressIncrement);
       return imageUrl;
     });
-    console.log(promises)
 
     const imageList = await Promise.all(promises);
 
@@ -134,4 +134,4 @@ export const getUserAlbums = async (userId: string) => {
     console.error(error);
     return false;
   }
-}
+};

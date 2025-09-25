@@ -9,7 +9,7 @@ interface TornContainerProps {
 
 const TornContainer: React.FC<TornContainerProps> = ({ children, smallXPadding }) => {
   return (
-    <div className="flex flex-col max-w-xl grow w-full">
+    <div className="flex flex-col grow w-full">
       <div className="h-[35px] w-full relative">
         <Image priority src="/tornEdge.png" alt="torn edge" fill />
       </div>

@@ -10,7 +10,9 @@ import clx from 'classnames';
 import imageCompression from 'browser-image-compression';
 import { toast } from 'react-toastify';
 
+import Switch from '@mui/material/Switch';
 import CollectionsIcon from '@mui/icons-material/Collections';
+import TuneIcon from '@mui/icons-material/Tune';
 
 import { uploadImageAlbum } from '@/library/firebase/image';
 import { generateQR } from '@/library/utils';
@@ -22,6 +24,7 @@ import TornContainer from '@/components/tornContainer';
 import ImageGallery from '@/components/imageGallery';
 import Loading from '@/components/loading';
 import Button from '@/components/ui/button';
+import IconButton from '@/components/ui/iconButton';
 import Textfield from '@/components/ui/textfield';
 
 interface UploadedImage {
@@ -31,14 +34,17 @@ interface UploadedImage {
 
 const NewAlbumPage: React.FC = () => {
   const [albumName, setAlbumName] = useState('');
+  const [albumId, setAlbumId] = useState<string | null>(null);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadLoading, setUploadLoading] = useState<boolean>(false);
-  const [albumId, setAlbumId] = useState<string | null>(null);
-  const [qrCode, setQrCode] = useState<string | null>(null);
-  const [images, setImages] = useState<UploadedImage[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [images, setImages] = useState<UploadedImage[]>([]);
+
   const [isStuck, setIsStuck] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const stickyRef = useRef(null);
@@ -204,6 +210,21 @@ const NewAlbumPage: React.FC = () => {
                 buttonDisabled={images.length === 0 || albumName === ''}
               />
 
+            </div>
+            <IconButton
+              chevronState={optionsOpen ? 'up' : 'down'}
+              onClick={() => setOptionsOpen(!optionsOpen)}
+            >
+              <TuneIcon />
+            </IconButton>
+            <div className={clx({
+              "h-[150px]": optionsOpen,
+              "transition-[height] duration-150 h-0 overflow-hidden": true,
+            })}>
+              <div>
+                <Switch color="secondary" />
+                <span className="font-secondary">Viewers can add images</span>
+              </div>
             </div>
             {images.length > 0 && (
               <div className="mt-1 mb-4 w-full">

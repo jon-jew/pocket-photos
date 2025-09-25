@@ -19,6 +19,7 @@ interface UploadedImage {
 
 interface ImageGalleryProps {
   images: string[];
+  editMode?: boolean;
   hideRemove?: boolean;
   showDownload?: boolean;
   variant?: 'primary' | 'secondary';
@@ -29,6 +30,7 @@ interface ImageGalleryProps {
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({
   images,
+  editMode = false,
   hideRemove = false,
   showDownload = false,
   variant = 'primary',
@@ -59,7 +61,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               "shadow-indigo-500/50": variant === 'secondary',
             })}
           >
-            {!hideRemove && handleRemoveImage &&
+            {editMode &&
               <button
                 type="button"
                 onClick={(e) => {
@@ -90,7 +92,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               "justify-between": idx !== 0,
               "justify-end": idx === 0,
             })}>
-              {idx !== 0 && setImages && handleReorderImage &&
+              {idx !== 0 && editMode &&
                 <button
                   type="button"
                   className="thumbnail-control"
@@ -103,7 +105,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   {'<'}
                 </button>
               }
-              {idx !== images.length - 1 && setImages && handleReorderImage &&
+              {idx !== images.length - 1 && editMode &&
                 <button
                   type="button"
                   className="thumbnail-control"
