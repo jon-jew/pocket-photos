@@ -115,7 +115,6 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
     newImageChanges[i].change = 'moved';
     newImageChanges[idx].change = 'moved';
     setImageChanges(newImageChanges);
-
   };
 
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -195,7 +194,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
           handleRemoveImage={handleRemoveImage}
           handleReorderImage={handleReorderImage}
           editMode={albumInfo.ownerId === user?.uid ? editMode : false}
-          showDownload
+          showDownload={!editMode}
           variant="secondary"
         />
       </div>
@@ -217,11 +216,11 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
           {qrCode && <Image className="rounded-lg" alt="QR code" width={175} height={175} src={qrCode} />}
           <p className="!text-md font-secondary text-black">Code: {albumId}</p>
         </div>
-        <div className="bg-primary text-secondary  flex flex-row items-center justify-center gap-20 pb-3">
+        <div className="bg-primary text-secondary h-[50px] flex flex-row items-center justify-center gap-20 pb-3">
           {editMode &&
             <>
               <button
-                className="text-primary text-[12px] bg-secondary px-3 py-1 rounded-lg"
+                className="text-primary text-[12px] bg-secondary px-3 py-2 rounded-lg"
                 onClick={handleSubmitChanges}
                 disabled={!isChanged}
                 type="button"
@@ -244,12 +243,12 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
               />
             </>
           }
-          {albumInfo.viewersCanEdit || user?.uid === albumInfo.ownerId &&
+          {(albumInfo.viewersCanEdit || user?.uid === albumInfo.ownerId) &&
             <button
               type="button"
               onClick={handleToggleEditMode}
             >
-              {editMode && <span>x</span>}<EditIcon />
+              {editMode && <span className="text-xs">x</span>}<EditIcon />
             </button>
           }
           {!editMode &&

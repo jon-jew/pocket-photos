@@ -51,7 +51,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             key={`img-container-${idx}`}
             className={clx({
               "thumbnail-container shadow-lg": true,
-              "shadow-indigo-100/50": variant === 'secondary',
             })}
           >
             {handleRemoveImage &&
@@ -131,7 +130,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       >
         <Slide direction="up" in={isModalOpen} mountOnEnter unmountOnExit>
           <div
-            onClick={closeModal}
             className="fixed inset-0 flex items-center justify-center z-[1000]"
           >
             <Carousel initialCurrent={selectedIndex} images={images} showDownload={showDownload} />

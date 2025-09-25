@@ -1,11 +1,14 @@
 .gallery-container {
-  display: grid;
-  position: relative;
-  grid-template-columns: repeat(auto-fit, 165px);
-  align-items: flex-start;
+  // display: grid;
+  // position: relative;
+  // grid-template-columns: repeat(auto-fit, 165px);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
   row-gap: 25px;
-  column-gap: 10px;
+  column-gap: 15px;
 
   .hide {
     pointer-events: none !important;
@@ -47,14 +50,14 @@
 
 .delete-btn {
   position: absolute;
-  top: -0px;
-  left: -10px;
+  top: -4px;
+  left: -8px;
   z-index: 2;
   background-color: rgb(180, 7, 7);
   color: #ffffffc9;
   font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 2px;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
 /* By default, we tilt all our images -2 degrees */

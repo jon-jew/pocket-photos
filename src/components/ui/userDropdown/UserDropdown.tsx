@@ -28,6 +28,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
   const { user, userLoading } = useUser();
 
   const menuItems: MenuItem[] = [
+    { label: "Home", href: '/'},
     { label: "Albums", href: `/user-albums/${user ? user.uid : ''}` },
     { label: "Logout", onClick: () => logoutUser() },
   ];

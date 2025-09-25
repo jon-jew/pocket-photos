@@ -72,7 +72,7 @@ const NewAlbumPage: React.FC = () => {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [loading, userLoading]);
 
   const handleAlbumNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAlbumName(e.target.value);
@@ -151,11 +151,11 @@ const NewAlbumPage: React.FC = () => {
       </div>
     )
   }
-  console.log(isStuck)
+  console.log(isStuck, sentinelRef)
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
-      <IconHeader isLoading={userLoading || uploadLoading} showLogin />
+      <IconHeader showLogin />
       <TornContainer smallXPadding={images.length > 0}>
         <>
           <h3 className={clx({
@@ -165,7 +165,7 @@ const NewAlbumPage: React.FC = () => {
             Album Lobby
           </h3>
           <form onSubmit={handleSubmit} className="centered-col w-full">
-            <div ref={sentinelRef} style={{ height: '1px' }} /> {/* Sentinel */}
+            <div ref={sentinelRef} className="h-[1px] w-full" />
             <div
               ref={stickyRef}
               className={clx({
@@ -207,7 +207,7 @@ const NewAlbumPage: React.FC = () => {
                     onChange={() => setViewersCanEdit(!viewersCanEdit)}
                     color="secondary"
                   />
-                  <span className="font-secondary text-sm">Viewers can add images</span>
+                  <span className="text-xs">Viewers can add images</span>
                 </div>
               </div>
             </div>
