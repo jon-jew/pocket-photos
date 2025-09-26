@@ -156,7 +156,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
-      <IconHeader showLogin />
+      <IconHeader showLogin currentUser={currentUser} />
       <TornContainer smallXPadding={images.length > 0} isLoading={uploadLoading}>
         <>
           <h3 className={clx({

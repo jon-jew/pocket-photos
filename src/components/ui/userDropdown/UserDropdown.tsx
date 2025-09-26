@@ -64,7 +64,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
   }
 
   return (
-    <div ref={dropdownRef} className="fixed z-10 top-4 right-4 inline-block">
+    <div ref={dropdownRef} className="absolute z-10 top-4 right-4 inline-block">
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="bg-none border-none cursor-pointer p-0 flex items-center"
