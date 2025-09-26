@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 
-import { signInWithPhoneNumber as _signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { signInWithPhoneNumber as _signInWithPhoneNumber, RecaptchaVerifier, User } from "firebase/auth";
 import { toast } from 'react-toastify';
 
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
@@ -19,7 +19,7 @@ import Button from '@/components/ui/button';
 import NumberInput from '@/components/ui/numberInput';
 
 interface LoginProps {
-  initialUser: object | undefined;
+  initialUser: User | undefined;
 }
 
 const Login: React.FC<LoginProps> = ({ initialUser }) => {
