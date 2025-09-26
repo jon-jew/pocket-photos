@@ -11,17 +11,20 @@ import { toast } from 'react-toastify';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 
 import { auth } from '@/library/firebase/clientApp';
-import useUser from '@/components/hooks/useUser';
+import useUserSession from '@/components/hooks/useUserSesssion';
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer/TornContainer';
-import Loading from '@/components/loading';
 import Textfield from '@/components/ui/textfield';
 import Button from '@/components/ui/button';
 import NumberInput from '@/components/ui/numberInput';
 
-const Login: React.FC = () => {
+interface LoginProps {
+  initialUser: object | undefined;
+}
+
+const Login: React.FC<LoginProps> = ({ initialUser }) => {
   const router = useRouter();
-  const { user, userLoading } = useUser();
+  const user = useUserSession(initialUser);
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
@@ -56,7 +59,7 @@ const Login: React.FC = () => {
     if (window.confirmationResult) {
       window.confirmationResult.confirm(otpCode).then(() => {
         // User signed in successfully.
-        toast.success('Signed in successfully!')
+        toast.success('Signed in successfully!');
         router.push('/');
       }).catch((error: { message: string }) => {
         // User couldn't sign in (bad verification code?)
@@ -79,17 +82,15 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user && !userLoading) {
+    if (user ) {
       toast.info('User already logged in');
       router.push('/');
-    } else if (!userLoading && !user) {
+    } else if (!user) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
         'size': 'invisible',
       });
     }
-  }, [userLoading]);
-
-  if (userLoading) return <Loading />;
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
@@ -98,7 +99,7 @@ const Login: React.FC = () => {
         src="https://www.google.com/recaptcha/enterprise.js?render=6LcRkcwrAAAAAGM5FKmXxQ2fVBWX8cQmX1zrtH7y"
       />
       <IconHeader />
-      <TornContainer>
+      <TornContainer isLoading={loading}>
         {mode == 'phone' &&
           <form className="centered-col gap-2 width-full" onSubmit={handleSendOTP}>
             <h3 className="mb-2">

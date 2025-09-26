@@ -1,18 +1,20 @@
 import React from "react";
 
 import Image from "next/image";
+import { User } from "firebase/auth";
 
 import UserDropdown from '@/components/ui/userDropdown';
 
 interface IconHeaderProps {
   showLogin?: boolean;
+  currentUser?: User | undefined;
 };
 
-const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false }) => {
+const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, currentUser }) => {
   return (
     <div className="centered-col relative w-full max-w-xl !justify-end h-[300px] text-primary mb-8">
       <div className="absolute z-10 top-[20px] right-[10px]">
-        {showLogin && <UserDropdown />}
+        {showLogin && <UserDropdown initialUser={currentUser}/>}
       </div>
       <Image
         alt="Logo"

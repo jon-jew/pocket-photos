@@ -13,10 +13,10 @@ import Switch from '@mui/material/Switch';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import TuneIcon from '@mui/icons-material/Tune';
 
+import { User } from "firebase/auth";
+
 import { uploadImageAlbum } from '@/library/firebase/image';
 import { generateQR, compressFile } from '@/library/utils';
-
-import useUser from '@/components/hooks/useUser';
 
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer';
@@ -26,8 +26,11 @@ import Button from '@/components/ui/button';
 import IconButton from '@/components/ui/iconButton';
 import Textfield from '@/components/ui/textfield';
 
+interface NewAlbumProps {
+  currentUser: User | undefined;
+}
 
-const NewAlbumPage: React.FC = () => {
+const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
   const [albumName, setAlbumName] = useState('');
   const [albumId, setAlbumId] = useState<string | null>(null);
 
@@ -47,14 +50,13 @@ const NewAlbumPage: React.FC = () => {
   const sentinelRef = useRef(null);
 
   const router = useRouter();
-  const { user, userLoading } = useUser();
 
   useEffect(() => {
-    if (!user && !userLoading) {
+    if (!currentUser) {
       router.push('/');
       toast.info('Please login to create album.');
     }
-  }, [userLoading, router, user]);
+  }, [router, currentUser]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -72,7 +74,7 @@ const NewAlbumPage: React.FC = () => {
     return () => {
       observer.disconnect();
     };
-  }, [loading, userLoading]);
+  }, [loading, currentUser]);
 
   const handleAlbumNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAlbumName(e.target.value);
@@ -93,11 +95,11 @@ const NewAlbumPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    if (user) {
+    if (currentUser) {
       const uploadRes = await uploadImageAlbum(
         albumName,
         images.map((image) => image.file),
-        user.uid,
+        currentUser.uid,
         viewersCanEdit,
         setUploadProgress,
       );
@@ -129,7 +131,7 @@ const NewAlbumPage: React.FC = () => {
     }
   };
 
-  if (loading || userLoading) return <Loading progress={!userLoading ? uploadProgress : null} />;
+  if (loading) return <Loading progress={uploadProgress} />;
 
   if (qrCode) {
     return (
@@ -155,7 +157,7 @@ const NewAlbumPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
       <IconHeader showLogin />
-      <TornContainer smallXPadding={images.length > 0}>
+      <TornContainer smallXPadding={images.length > 0} isLoading={uploadLoading}>
         <>
           <h3 className={clx({
             'mb-2': images.length === 0,

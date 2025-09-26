@@ -6,6 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import { Manrope, Monomaniac_One, Gloria_Hallelujah } from 'next/font/google';
 
 import Bubbles from "@/components/bubbles";
+import { getAuthenticatedAppForUser } from "@/library/firebase/serverApp";
 import "./globals.css";
 
 const comicoRegular = localFont({
@@ -36,11 +37,13 @@ export const metadata: Metadata = {
   description: "Create a photo album together, instantly",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { currentUser } = await getAuthenticatedAppForUser();
+
   return (
     <html lang="en">
       <Head>

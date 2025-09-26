@@ -4,8 +4,11 @@ import React, { useState, useEffect, useRef } from "react";
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { User } from "firebase/auth";
+
 import { toast } from "react-toastify";
 import clx from 'classnames';
+
 import Modal from '@mui/material/Modal';
 
 import QrCodeIcon from '@mui/icons-material/QrCode';
@@ -17,7 +20,6 @@ import TuneIcon from '@mui/icons-material/Tune';
 import { generateQR, compressFile } from '@/library/utils';
 import { getAlbumImages, editAlbumImages } from "@/library/firebase/image";
 
-import useUser from '@/components/hooks/useUser';
 import ImageGallery from "@/components/imageGallery";
 import OptionsForm from "@/components/optionsForm";
 import UserDropdown from "@/components/ui/userDropdown";
@@ -30,9 +32,13 @@ interface AlbumInfo {
   viewersCanEdit: boolean;
 };
 
-export default function AlbumPage({ albumId }: { albumId: string }) {
+interface AlbumProps {
+  albumId: string;
+  currentUser: User | undefined;
+}
+
+export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
   const router = useRouter();
-  const { user, userLoading } = useUser();
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -130,7 +136,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
       const newImages = await Promise.all(files.map(compressFile));
       setImageChanges(prevImages => [...prevImages, ...newImages.map((image) => ({
         id: '',
-        uploaderId: user ? user.uid : null,
+        uploaderId: currentUser ? currentUser.uid : null,
         previewImageUrl: image.previewUrl,
         imageUrl: '',
         uploaded: false,
@@ -143,13 +149,13 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
 
   const handleSubmitChanges = async () => {
     setLoading(true);
-    await editAlbumImages(albumId, user?.uid, imageChanges, deletedImages);
+    await editAlbumImages(albumId, currentUser?.uid, imageChanges, deletedImages);
     await getImages();
     toast.success('Saved changes!');
     setEditMode(false);
   };
 
-  if (!albumInfo || loading || userLoading) {
+  if (!albumInfo || loading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center">
         <Image priority src="/loading.gif" alt="loading" width={100} height={100} />
@@ -173,10 +179,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
             <h2 className="text-3xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
             <p className="pl-3 text-md text-black">{albumInfo.createdOn}</p>
           </div>
-          <div className="absolute top-5 right-[5px] z-10">
-            <UserDropdown variant="secondary" />
-          </div>
-
+          <UserDropdown initialUser={currentUser} variant="secondary" />
         </div>
 
         <div className="h-[20px] w-full rotate-180 relative">
@@ -196,7 +199,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
             onModalOpen={() => setIsQrOpen(false)}
             handleRemoveImage={handleRemoveImage}
             handleReorderImage={handleReorderImage}
-            editMode={albumInfo.ownerId === user?.uid ? editMode : false}
+            editMode={albumInfo.ownerId === currentUser?.uid ? editMode : false}
             showDownload={!editMode}
             variant="secondary"
           />
@@ -248,7 +251,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
                 />
               </>
             }
-            {(albumInfo.viewersCanEdit || user?.uid === albumInfo.ownerId) &&
+            {(albumInfo.viewersCanEdit || currentUser?.uid === albumInfo.ownerId) &&
               <button
                 type="button"
                 onClick={handleToggleEditMode}
@@ -264,7 +267,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
                 <QrCodeIcon />
               </IconButton>
             }
-            {(user?.uid === albumInfo.ownerId && !editMode) &&
+            {(currentUser?.uid === albumInfo.ownerId && !editMode) &&
               <button
                 type="button"
                 onClick={() => setIsOptionsOpen(true)}
@@ -281,6 +284,7 @@ export default function AlbumPage({ albumId }: { albumId: string }) {
         >
           <OptionsForm
             albumId={albumId}
+            currentUser={currentUser}
             initialAlbumName={albumInfo.albumName}
             initialViewersCanEdit={albumInfo.viewersCanEdit}
             closeOptions={closeOptions}

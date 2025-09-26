@@ -1,20 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { User } from 'firebase/auth';
 import { toast } from 'react-toastify';
 
 import DialpadIcon from '@mui/icons-material/Dialpad';
-
-import useUser from '@/components/hooks/useUser';
 
 import IconHeader from "@/components/iconHeader";
 import TornContainer from "@/components/tornContainer/TornContainer";
 import Button from "@/components/ui/button";
 import Textfield from "@/components/ui/textfield";
 
-export default function Home() {
+export default function Home({ currentUser }: { currentUser: User | undefined }) {
   const router = useRouter();
-  const { user, userLoading } = useUser();
 
   const handleJoinClick = (value: string) => {
     if (value.trim() !== "") {
@@ -24,7 +22,7 @@ export default function Home() {
   };
 
   const handleLobbyClick = () => {
-    if (user && !userLoading) {
+    if (currentUser) {
       router.push('/new-album');
     } else {
       toast.info('Please login to create a lobby');
@@ -34,7 +32,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
-      <IconHeader showLogin />
+      <IconHeader showLogin currentUser={currentUser} />
       <TornContainer>
         <h3 className="mb-2">
           Got a code from a friend?<br />

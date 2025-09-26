@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { User } from 'firebase/auth';
 import { toast } from 'react-toastify';
 
 import Switch from '@mui/material/Switch';
@@ -9,12 +10,12 @@ import TuneIcon from '@mui/icons-material/Tune';
 // import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 
 import { editAlbumFields, deleteAlbum } from '@/library/firebase/image';
-import useUser from '@/components/hooks/useUser';
 import Button from '@/components/ui/button';
 import Textfield from '@/components/ui/textfield';
 
 interface OptionsFormProps {
   albumId: string;
+  currentUser: User | undefined;
   initialAlbumName: string;
   initialViewersCanEdit: boolean;
   closeOptions: (reload: boolean, loading: boolean) => void;
@@ -22,12 +23,12 @@ interface OptionsFormProps {
 
 const OptionsForm: React.FC<OptionsFormProps> = ({
   albumId,
+  currentUser,
   initialAlbumName = '',
   initialViewersCanEdit = true,
   closeOptions,
 }) => {
   const router = useRouter();
-  const { user } = useUser();
 
   const [albumName, setAlbumName] = useState<string>(initialAlbumName);
   const [viewersCanEdit, setViewersCanEdit] = useState<boolean>(initialViewersCanEdit);
@@ -41,7 +42,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
   const handleDelete = async () => {
     closeOptions(false, true);
     const delRes = await deleteAlbum(albumId);
-    if (delRes) router.push(`/user-albums/${user?.uid}`);
+    if (delRes) router.push(`/user-albums/${currentUser?.uid}`);
   };
 
   return (

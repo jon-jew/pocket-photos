@@ -5,21 +5,21 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { User } from "firebase/auth";
 import { toast } from 'react-toastify';
 
 import { getUserAlbums } from '@/library/firebase/image';
 
 import UserDropdown from '@/components/ui/userDropdown';
-import useUser from '@/components/hooks/useUser';
 import Loading from '@/components/loading';
 
 interface UserAlbumsProps {
   userId: string;
+  currentUser: User | undefined;
 };
 
-const UserAlbums: React.FC<UserAlbumsProps> = ({ userId }) => {
+const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
   const router = useRouter();
-  const { user, userLoading } = useUser();
 
   const [albums, setAlbums] = useState<UserAlbum[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,23 +33,20 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId }) => {
   };
 
   useEffect(() => {
-    if (!userLoading) {
-      if (!user || user.uid !== userId) router.push('/');
-      else if (user && user.uid === userId) {
-        fetchUserAlbums();
-      }
+    if (currentUser?.uid !== userId) router.push('/');
+    else if (currentUser?.uid === userId) {
+      fetchUserAlbums();
     }
-  }, [user, userLoading]);
 
-  if (userLoading || loading) return <Loading />;
+  }, [currentUser]);
+
+  if (loading) return <Loading />;
   return (
     <main className="max-w-4xl mx-auto">
       <div className="relative bg-primary pt-6  pl-5 pr-15 z-4">
         <h2 className="text-4xl text-secondary font-bold">Your Albums</h2>
         <h4 className="text-black mt-2 ml-2">{albums.length} albums</h4>
-        <div className="absolute top-5 right-[5px] z-10">
-          <UserDropdown variant="secondary" />
-        </div>
+        <UserDropdown variant="secondary" initialUser={currentUser} />
       </div>
       <div className="h-[20px] w-full rotate-180 relative">
         <Image
@@ -61,7 +58,7 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId }) => {
       </div>
       <div className="flex flex-row flex-wrap gap-6 px-2 py-6 justify-center items-center">
         {albums.map((album, index) => (
-          <Link key={`album-${index}`}href={`/album/${album.id}`} className="max-w-[150px] relative">
+          <Link key={`album-${index}`} href={`/album/${album.id}`} className="max-w-[150px] relative">
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] relative z-3">
               <div className="h-[140px] w-[140px] relative">
                 <Image

@@ -23,6 +23,8 @@
     "react-dom": "19.1.0",
     "react-toastify": "^11.0.5",
     "sass": "^1.92.1",
+    "sharp": "^0.34.4",
+    "universal-cookie": "^8.0.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

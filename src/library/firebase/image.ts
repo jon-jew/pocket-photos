@@ -64,8 +64,18 @@ export const uploadImageAlbum = async (
     } while (!doesAlbumExist(albumId))
 
     const progressIncrement: number = 1 / (images.length * 2) * 100;
+    // const apiPromises = images.map(async (image, index) => {
+    //   const formData = new FormData();
+    //   formData.append(`image`, image, `album-img-${index}`);
+    //   const res = await fetch('/api/upload', {
+    //     method: 'POST',
+    //     body: formData,
+    //   });
+    //   setUploadProgress((prev) => prev + progressIncrement);
+    // });
+    // await Promise.all(apiPromises)
 
-    const promises = images.map(async (image) => {
+    const promises = images.map(async (image, index) => {
       const imageId = generateRandomId();
       const imageRef = ref(storage, `/${albumId}/${imageId}`);
       const uploadRes = await uploadBytes(imageRef, image);
