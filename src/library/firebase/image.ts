@@ -10,9 +10,12 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { User } from 'firebase/auth';
+
+import { toast } from 'react-toastify';
 
 import { storage, db } from './clientApp';
-import { toast } from 'react-toastify';
+import { streamToObject } from '../utils';
 
 declare global {
   interface UserAlbum {
@@ -53,43 +56,65 @@ const generateRandomId = (length = 6) => {
 export const uploadImageAlbum = async (
   albumName: string,
   images: File[],
-  userUid: string,
+  currentUser: UserInfo,
   viewersCanEdit: boolean,
   setUploadProgress: React.Dispatch<React.SetStateAction<number>>
 ) => {
   try {
+    if (!currentUser) {
+      toast.error('Please login to create album.');
+      return false;
+    }
+    if (images.length === 0) {
+      toast.error('Please select images to upload.');
+      return false;
+    }
+
+    const idToken = await currentUser.stsTokenManager.accessToken;
+    if (!idToken) {
+      toast.error('Failed to get user token. Please login again.');
+      return false;
+    }
+
     let albumId = '';
     do {
       albumId = generateRandomId();
-    } while (!doesAlbumExist(albumId))
+    } while (!doesAlbumExist(albumId));
 
-    const progressIncrement: number = 1 / (images.length * 2) * 100;
-    // const apiPromises = images.map(async (image, index) => {
-    //   const formData = new FormData();
-    //   formData.append(`image`, image, `album-img-${index}`);
-    //   const res = await fetch('/api/upload', {
-    //     method: 'POST',
-    //     body: formData,
-    //   });
-    //   setUploadProgress((prev) => prev + progressIncrement);
-    // });
-    // await Promise.all(apiPromises)
-
-    const promises = images.map(async (image, index) => {
-      const imageId = generateRandomId();
-      const imageRef = ref(storage, `/${albumId}/${imageId}`);
-      const uploadRes = await uploadBytes(imageRef, image);
-      setUploadProgress((prev) => prev + progressIncrement);
-      const imageUrl = await getDownloadURL(imageRef);
-      setUploadProgress((prev) => prev + progressIncrement);
-      return ({ id: imageId, uploaderId: userUid, imageUrl, });
+    const progressIncrement: number = 1 / (images.length * 1) * 100;
+    const apiPromises = images.map(async (image, index) => {
+      const formData = new FormData();
+      formData.append(`image`, image, `album-img-${index}`);
+      formData.append('albumId', albumId);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: formData,
+      });
+      if (res.body && res.ok) {
+        const body = await streamToObject(res.body);
+        setUploadProgress((prev) => prev + progressIncrement);
+        return body;
+      }
     });
+    const imageList = await Promise.all(apiPromises);
+    // const promises = images.map(async (image, index) => {
+    //   const imageId = generateRandomId();
+    //   const imageRef = ref(storage, `/${albumId}/${imageId}`);
+    //   const uploadRes = await uploadBytes(imageRef, image);
+    //   setUploadProgress((prev) => prev + progressIncrement);
+    //   const imageUrl = await getDownloadURL(imageRef);
+    //   setUploadProgress((prev) => prev + progressIncrement);
+    //   return ({ id: imageId, uploaderId: userUid, imageUrl, });
+    // });
 
-    const imageList = await Promise.all(promises);
+    // const imageList = await Promise.all(promises);
 
     const albumData = {
       albumName: albumName,
-      ownerId: userUid,
+      ownerId: currentUser?.uid,
       viewersCanEdit: viewersCanEdit,
       created: Date.now(),
       imageList: imageList,

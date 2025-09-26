@@ -16,6 +16,7 @@
     "browser-image-compression": "^2.0.2",
     "classnames": "^2.5.1",
     "firebase": "^12.1.0",
+    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "next": "15.5.1",
     "qrcode": "^1.5.4",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19",

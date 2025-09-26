@@ -18,6 +18,14 @@ declare global {
     recaptchaVerifier: RecaptchaVerifier;
     confirmationResult?: ConfirmationResult;
   }
+
+  interface UserInfo extends User {
+    stsTokenManager: {
+      accessToken: string;
+      expirationTime: number;
+      refreshToken: string;
+    };
+  }
 };
 
 export function onIdTokenChanged(cb: NextOrObserver<User | undefined>) {

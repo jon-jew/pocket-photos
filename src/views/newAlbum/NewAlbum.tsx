@@ -27,7 +27,7 @@ import IconButton from '@/components/ui/iconButton';
 import Textfield from '@/components/ui/textfield';
 
 interface NewAlbumProps {
-  currentUser: User | undefined;
+  currentUser: UserInfo | undefined;
 }
 
 const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
@@ -99,7 +99,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
       const uploadRes = await uploadImageAlbum(
         albumName,
         images.map((image) => image.file),
-        currentUser.uid,
+        currentUser,
         viewersCanEdit,
         setUploadProgress,
       );

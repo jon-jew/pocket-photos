@@ -15,6 +15,7 @@ const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, currentUser 
     <div className="centered-col relative w-full max-w-xl !justify-end h-[300px] text-primary mb-8">
       {showLogin && <UserDropdown initialUser={currentUser} />}
       <Image
+        priority
         alt="Logo"
         className="mb-3"
         width={125}

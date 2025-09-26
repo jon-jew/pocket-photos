@@ -1,24 +1,48 @@
+'use server';
+
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import path from 'path';
-import { mkdir } from 'fs/promises';
+import { v4 as generateRandomId } from 'uuid';
+import { ref, uploadBytes, getDownloadURL, } from 'firebase/storage';
 import sharp from 'sharp';
+
+import { storage } from '@/library/firebase/serverApp';
+import { validateJwt } from '@/library/validateJwt';
 
 export async function POST(req: NextRequest) {
   try {
-    // Ensure upload directory exists
+    let userId = null;
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader) {
+      const jwtRes = await validateJwt(authHeader.replace("Bearer ", ""));
+      if (!jwtRes || !jwtRes.uid) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      userId = jwtRes.user_id;
+    } else {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const formData = await req.formData();
-    const file = formData.get('image') as File;
-    console.log(file);
+    const imageFile = formData.get('image') as File;
+    const albumId = formData.get('albumId') as string;
+    if (!imageFile || !albumId) {
+      return NextResponse.json({ error: 'Missing file or albumId' }, { status: 400 });
+    }
+    const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+    const webpFile = await sharp(imageBuffer).webp({
+      nearLossless: true,
+      quality: 75,
+    }).toBuffer({ resolveWithObject: true });
 
-    
+    const imageId = generateRandomId();
+    const imageRef = ref(storage, `/${albumId}/${imageId}`);
+    await uploadBytes(imageRef, webpFile.data, {
+      contentType: 'image/webp',
+    });
+    const imageUrl = await getDownloadURL(imageRef);
 
-
-
-
-
-    return NextResponse.json({ message: 'File uploaded', path: `/uploads/${file.name}` });
+    return NextResponse.json({ id: imageId, imageUrl, uploadedId: userId }, { status: 200 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: 'Upload failed', details: String(error) }, { status: 500 });
   }
 }
