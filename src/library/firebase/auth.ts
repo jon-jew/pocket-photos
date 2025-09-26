@@ -7,6 +7,7 @@ import {
   signOut,
   ConfirmationResult,
   NextOrObserver,
+  User,
 } from "firebase/auth";
 import { toast } from "react-toastify";
 
@@ -19,7 +20,7 @@ declare global {
   }
 };
 
-export function onIdTokenChanged(cb: NextOrObserver<any>) {
+export function onIdTokenChanged(cb: NextOrObserver<User | undefined>) {
   return _onIdTokenChanged(auth, cb);
 }
 
