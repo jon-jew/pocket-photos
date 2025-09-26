@@ -125,6 +125,7 @@ export const uploadImageAlbum = async (
     return albumId;
   } catch (error) {
     console.error(error);
+    toast.error('Failed to create album');
     return false;
   }
 };

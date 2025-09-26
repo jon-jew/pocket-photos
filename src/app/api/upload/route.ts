@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const authHeader = req.headers.get('Authorization');
     if (authHeader) {
       const jwtRes = await validateJwt(authHeader.replace("Bearer ", ""));
-      if (!jwtRes || !jwtRes.uid) {
+      if (!jwtRes || !jwtRes.user_id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
       userId = jwtRes.user_id;
