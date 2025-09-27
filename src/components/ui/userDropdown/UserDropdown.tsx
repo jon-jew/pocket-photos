@@ -57,7 +57,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
   if (!user) {
     return (
       <Link
-        className={`fixed z-10 top-4 right-4 text-${variant}`}
+        className={`absolute z-10 top-4 right-4 text-${variant}`}
         href="/login">Login
       </Link>
     );

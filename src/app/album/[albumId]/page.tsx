@@ -1,5 +1,4 @@
 'use server';
-import { User } from "firebase/auth";
 
 import { getAuthenticatedAppForUser } from "@/library/firebase/serverApp";
 
@@ -14,6 +13,9 @@ export default async function AlbumPage({
   const { currentUser } = await getAuthenticatedAppForUser();
 
   return (
-    <Album albumId={albumId} currentUser={currentUser?.toJSON() as User} />
+    <Album
+      albumId={albumId}
+      currentUser={currentUser?.toJSON() as UserInfo}
+    />
   );
 }

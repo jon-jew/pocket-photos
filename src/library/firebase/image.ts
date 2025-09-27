@@ -8,9 +8,9 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
+  arrayUnion,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { User } from 'firebase/auth';
 
 import { toast } from 'react-toastify';
 
@@ -51,6 +51,82 @@ const doesAlbumExist = async (albumId: string) => {
 
 const generateRandomId = (length = 6) => {
   return Math.random().toString(36).substring(2, length + 2);
+};
+
+const uploadPromises = (
+  images: File[],
+  albumId: string,
+  idToken: string | undefined,
+  newAlbum: boolean,
+  cb?: () => void
+) => {
+  return images.map(async (image: File, index: number) => {
+    const endpoint = newAlbum ? '/api/upload' : `/api/upload-to-album`;
+    const headers = new Headers();
+    if (idToken) headers.append('Authorization', `Bearer ${idToken}`);
+    const formData = new FormData();
+    formData.append(`image`, image, `album-img-${index}`);
+    formData.append('albumId', albumId);
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    if (res.body && res.ok) {
+      const body = await streamToObject(res.body);
+      if (cb) cb();
+      return body;
+    }
+  })
+};
+
+export const uploadImagesToAlbum = async (
+  albumId: string,
+  images: File[],
+  currentUser: UserInfo | undefined,
+) => {
+  if (images.length === 0) {
+    toast.error('Please select images to upload.');
+    return false;
+  }
+
+  try {
+    const albumRef = doc(db, 'albums', albumId);
+    const docSnap = await getDoc(albumRef);
+    if (docSnap.exists()) {
+      const { viewersCanEdit, ownerId, imageList } = docSnap.data();
+      let userToken;
+
+      if (
+        (ownerId === currentUser?.uid) ||
+        (viewersCanEdit && ownerId !== currentUser?.uid)
+      ) {
+        userToken = currentUser?.stsTokenManager.accessToken;
+      } else if (!viewersCanEdit) {
+        toast.error('Unauthorized to upload photos');
+        return false;
+      }
+
+      const imagePromises = uploadPromises(
+        images,
+        albumId,
+        userToken,
+        false
+      );
+      const addedImageList = await Promise.all(imagePromises);
+      await updateDoc(albumRef, {
+        imageList: [...imageList, ...addedImageList],
+      });
+      return true;
+    } else {
+      toast.error('Album does not exist');
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error('Failed to upload images');
+    return false;
+  }
 };
 
 export const uploadImageAlbum = async (
@@ -146,7 +222,7 @@ const XHRRequest = (imageUrl: string): Promise<Blob> => {
   });
 };
 
-export const getAlbumImages = async (albumId: string) => {
+export const getAlbumImages = async (albumId: string, prevImages?: ImageEntry[]) => {
   try {
     const albumRef = doc(db, 'albums', albumId);
     const docSnap = await getDoc(albumRef);
@@ -155,6 +231,22 @@ export const getAlbumImages = async (albumId: string) => {
       const blobs = await Promise.all(data.imageList.map(
         (image: Image) => XHRRequest(image.imageUrl)
       ));
+      // let blobs: Blob[] = [];
+      // if (!prevImages || prevImages.length === 0) {
+      //   blobs = await Promise.all(data.imageList.map(
+      //     (image: Image) => XHRRequest(image.imageUrl)
+      //   ));
+      // } else {
+      //   data.imageList.forEach(async (image: Image) => {
+      //     const existingImage = prevImages.find((img) => img.id === image.id);
+      //     if (existingImage) {
+      //       blobs.push(new Blob([existingImage.previewImageUrl]));
+      //     } else {
+      //       const blob = await XHRRequest(image.imageUrl)
+      //       blobs.push(blob);
+      //     }
+      //   });
+      // }
       return ({
         created: data.created,
         albumName: data.albumName,

@@ -18,7 +18,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import TuneIcon from '@mui/icons-material/Tune';
 
 import { generateQR, compressFile } from '@/library/utils';
-import { getAlbumImages, editAlbumImages } from "@/library/firebase/image";
+import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/image";
 
 import ImageGallery from "@/components/imageGallery";
 import OptionsForm from "@/components/optionsForm";
@@ -27,23 +27,26 @@ import IconButton from "@/components/ui/iconButton";
 
 interface AlbumInfo {
   albumName: string;
-  createdOn: string;
+  created: string;
   ownerId: string;
   viewersCanEdit: boolean;
 };
 
 interface AlbumProps {
   albumId: string;
-  currentUser: User | undefined;
+  currentUser: UserInfo | undefined;
 }
 
-export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
+export default function AlbumPage({
+  albumId,
+  currentUser,
+}: AlbumProps) {
   const router = useRouter();
 
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [images, setImages] = useState<ImageEntry[]>([]);
-  const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>();
+  const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(undefined);
 
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -59,18 +62,15 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
   const handleQr = () => {
     setIsQrOpen(!isQrOpen);
   };
-
   const getImages = async () => {
-    const imageRes = await getAlbumImages(albumId);
+    const imageRes = await getAlbumImages(albumId, images);
     if (imageRes) {
-      const qrRes = await generateQR(window.location.href);
-      if (qrRes) setQrCode(qrRes);
       setImages(imageRes.imageList);
       const dateString = new Date(imageRes.created).toDateString();
       setAlbumInfo({
         albumName: imageRes.albumName,
         ownerId: imageRes.ownerId,
-        createdOn: dateString,
+        created: dateString,
         viewersCanEdit: imageRes.viewersCanEdit,
       })
       setLoading(false);
@@ -79,10 +79,6 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
       router.push('/');
     }
   };
-
-  useEffect(() => {
-    getImages();
-  }, []);
 
   const handleToggleEditMode = () => {
     if (editMode) {
@@ -128,23 +124,26 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
 
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isChanged) setIsChanged(true);
-
+    setLoading(true);
     const files = Array.from(e.target.files || []);
-    if (files.length + imageChanges.length > 75) {
+    if (files.length + images.length > 75) {
       toast.error('Image count limit is 75.');
     } else {
       const newImages = await Promise.all(files.map(compressFile));
-      setImageChanges(prevImages => [...prevImages, ...newImages.map((image) => ({
-        id: '',
-        uploaderId: currentUser ? currentUser.uid : null,
-        previewImageUrl: image.previewUrl,
-        imageUrl: '',
-        uploaded: false,
-        change: 'new',
-        file: image.file,
-      }))]);
+      // setImageChanges(prevImages => [...prevImages, ...newImages.map((image) => ({
+      //   id: '',
+      //   uploaderId: currentUser ? currentUser.uid : null,
+      //   previewImageUrl: image.previewUrl,
+      //   imageUrl: '',
+      //   uploaded: false,
+      //   change: 'new',
+      //   file: image.file,
+      // }))]);
+      const res = await uploadImagesToAlbum(albumId, newImages.map((image) => image.file), currentUser);
+      await getImages();
       window.scrollTo(0, document.body.scrollHeight);
     }
+    setLoading(false);
   };
 
   const handleSubmitChanges = async () => {
@@ -154,6 +153,16 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
     toast.success('Saved changes!');
     setEditMode(false);
   };
+
+  const getQrCode = async () => {
+    const qrRes = await generateQR(window.location.href);
+    if (qrRes) setQrCode(qrRes);
+  };
+
+  useEffect(() => {
+    getQrCode();
+    getImages();
+  }, []);
 
   if (!albumInfo || loading) {
     return (
@@ -169,7 +178,7 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
         <p>No images in album</p>
       </main>
     );
-  }
+  };
 
   return (
     <>
@@ -177,7 +186,27 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
         <div className="relative bg-primary transition-[height] duration-200 ease-in-out">
           <div className="pt-6 pl-5 pr-15">
             <h2 className="text-3xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
-            <p className="pl-3 text-md text-black">{albumInfo.createdOn}</p>
+            <div className="flex flex-row">
+              <p className="pl-3 text-md text-black">{albumInfo.created}</p>
+              <div className="flex grow justify-end">
+                <IconButton
+                  chevronState={isQrOpen ? 'up' : 'down'}
+                  onClick={handleQr}
+                >
+                  <QrCodeIcon />
+                </IconButton>
+              </div>
+            </div>
+          </div>
+          <div className={clx({
+            "h-0": !isQrOpen,
+            "h-[225px]": isQrOpen,
+            "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
+          })}>
+            <div className="text-center bg-white rounded-lg overflow-hidden">
+              {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
+              <p className="pb-2 !text-md text-black">{albumId}</p>
+            </div>
           </div>
           <UserDropdown initialUser={currentUser} variant="secondary" />
         </div>
@@ -200,21 +229,21 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
             handleRemoveImage={handleRemoveImage}
             handleReorderImage={handleReorderImage}
             editMode={albumInfo.ownerId === currentUser?.uid ? editMode : false}
-            showDownload={!editMode}
+            showDownload={true}
             variant="secondary"
           />
         </div>
 
         <div className="fixed w-full max-w-4xl bottom-0 z-10">
-          <div className="h-[15px] w-full relative">
+          {/* <div className="h-[15px] w-full relative">
             <Image
               priority
               src="/tornEdge.png"
               alt="torn edge"
               fill
             />
-          </div>
-          <div className={clx({
+          </div> */}
+          {/* <div className={clx({
             "h-0": !isQrOpen,
             "h-[225px]": isQrOpen,
             "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
@@ -223,19 +252,22 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
               {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
               <p className="pb-2 !text-md text-black">{albumId}</p>
             </div>
-          </div>
-          <div className="bg-primary text-secondary h-[55px] flex flex-row items-center justify-center gap-20 pb-3">
+          </div> */}
+          <div className="text-secondary h-[50px] flex flex-row items-center justify-center gap-20 pb-4">
             {editMode &&
+
+              <button
+                className="text-secondary ring-blue-500/50 shadow-xl bg-primary text-[14px] px-4 py-2 rounded-lg"
+                onClick={handleSubmitChanges}
+                disabled={!isChanged}
+                type="button"
+              >
+                Save <SaveIcon sx={{ fontSize: '18px' }} />
+              </button>
+            }
+            {!editMode &&
               <>
-                <button
-                  className="text-primary text-[14px] bg-secondary px-4 py-2 rounded-lg"
-                  onClick={handleSubmitChanges}
-                  disabled={!isChanged}
-                  type="button"
-                >
-                  Save <SaveIcon sx={{ fontSize: '18px' }} />
-                </button>
-                <button type="button">
+                <button type="button" className="bg-primary ring-blue-500/50 shadow-xl px-2 py-3 rounded-[50%]">
                   <label htmlFor="image-upload">
                     <span>+</span><ImageIcon />
                   </label>
@@ -253,22 +285,24 @@ export default function AlbumPage({ albumId, currentUser }: AlbumProps) {
             }
             {(albumInfo.viewersCanEdit || currentUser?.uid === albumInfo.ownerId) &&
               <button
+                className={`bg-primary ring-blue-500/50 shadow-xl px-${editMode ? '2' : '3'} py-3 rounded-[50%]`}
                 type="button"
                 onClick={handleToggleEditMode}
               >
                 {editMode && <span className="text-xs">x</span>}<EditIcon />
               </button>
             }
-            {!editMode &&
+            {/* {!editMode &&
               <IconButton
                 chevronState={isQrOpen ? 'down' : 'up'}
-                onClick={handleQr}
+                onClick={handleQr}s
               >
                 <QrCodeIcon />
               </IconButton>
-            }
+            } */}
             {(currentUser?.uid === albumInfo.ownerId && !editMode) &&
               <button
+                className="bg-primary  ring-blue-500/50 shadow-xl px-3 py-3 rounded-[50%]"
                 type="button"
                 onClick={() => setIsOptionsOpen(true)}
               >
