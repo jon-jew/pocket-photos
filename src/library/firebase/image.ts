@@ -209,7 +209,6 @@ export const uploadImageAlbum = async (
 export const XHRRequest = (imageUrl: string): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    console.log('test')
     xhr.responseType = 'blob';
     xhr.onload = () => {
       const blob = xhr.response;
@@ -276,11 +275,11 @@ export const getUserAlbums = async (userId: string) => {
     const promises = querySnapshot.docs.map(async (doc) => {
       const data = doc.data();
       if (data.imageList.length !== 0) {
-        const thumbnailImage = await XHRRequest(data.imageList[0].imageUrl);
+        // const thumbnailImage = await XHRRequest(data.imageList[0].imageUrl);
         return ({
           id: doc.id,
           albumName: data.albumName as string,
-          thumbnailImage: URL.createObjectURL(thumbnailImage),
+          thumbnailImage: data.imageList[0].imageUrl,
           created: new Date(data.created).toDateString(),
         });
       }

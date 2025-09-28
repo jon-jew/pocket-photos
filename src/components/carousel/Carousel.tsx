@@ -88,7 +88,7 @@ const Carousel: React.FC<CarouselProps> = ({
         </ul>
       </div>
       <div className="absolute bottom-0 w-full z-10">
-        <div className="w-full flex flex-row gap-26 pb-5 justify-center items-center">
+        <div className="w-full flex flex-row gap-24 pt-2 pb-6 bg-[#00000082] justify-center items-center">
           {!confirmDownload &&
             <button
               onClick={prevSlide}
@@ -105,7 +105,7 @@ const Carousel: React.FC<CarouselProps> = ({
             </button>
           }
           {(showDownload && confirmDownload) &&
-            <div className="mb-10 flex flex-col gap-4 items-center text-center">
+            <div className="mb-10 flex flex-col bg-[#00000082] p-4 rounded-lg gap-4 items-center text-center">
               <h3>Confirm download?</h3>
               <div className="flex flex-row gap-10 items-center">
 
@@ -114,7 +114,7 @@ const Carousel: React.FC<CarouselProps> = ({
                 </Button>
 
                 <a href={downloadBlob ? URL.createObjectURL(downloadBlob) : ''} download={`pluur-${current}`}>
-                  <Button variant="secondary" type="button">
+                  <Button onClick={() => setConfirmDownload(false)}variant="secondary" type="button">
                     Confirm
                   </Button>
                 </a>

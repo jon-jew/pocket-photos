@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();
-    const imageRef = ref(storage, `/${albumId}/${imageId}.webp`);
+    const imageRef = ref(storage, `/${albumId}/${imageId}`);
     await uploadBytes(imageRef, webpFile.data, {
       contentType: 'image/webp',
     });

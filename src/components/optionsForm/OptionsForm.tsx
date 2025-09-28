@@ -42,7 +42,13 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
   const handleDelete = async () => {
     closeOptions(false, true);
     const delRes = await deleteAlbum(albumId);
-    if (delRes) router.push(`/user-albums/${currentUser?.uid}`);
+    if (delRes) {
+      router.push(`/user-albums/${currentUser?.uid}`);
+      toast.success('Album deleted');
+    } else {
+      toast.error('Failed to delete album');
+      closeOptions(false, false);
+    }
   };
 
   return (

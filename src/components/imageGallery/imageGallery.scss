@@ -21,6 +21,9 @@
     transition-duration: 150ms;
   }
 
+  .thumbnail {
+    background-color: #292929;
+  }
   .thumbnail-container {
     background: var(--polaroid);
     position: relative;
