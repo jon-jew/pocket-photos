@@ -8,7 +8,6 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-  arrayUnion,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -53,37 +52,11 @@ const generateRandomId = (length = 6) => {
   return Math.random().toString(36).substring(2, length + 2);
 };
 
-const uploadPromises = (
-  images: File[],
-  albumId: string,
-  idToken: string | undefined,
-  newAlbum: boolean,
-  cb?: () => void
-) => {
-  return images.map(async (image: File, index: number) => {
-    const endpoint = newAlbum ? '/api/upload' : `/api/upload-to-album`;
-    const headers = new Headers();
-    if (idToken) headers.append('Authorization', `Bearer ${idToken}`);
-    const formData = new FormData();
-    formData.append(`image`, image, `album-img-${index}`);
-    formData.append('albumId', albumId);
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: formData,
-    });
-    if (res.body && res.ok) {
-      const body = await streamToObject(res.body);
-      if (cb) cb();
-      return body;
-    }
-  })
-};
-
 export const uploadImagesToAlbum = async (
   albumId: string,
   images: File[],
   currentUser: UserInfo | undefined,
+  setUploadProgress: React.Dispatch<React.SetStateAction<number>>
 ) => {
   if (images.length === 0) {
     toast.error('Please select images to upload.');
@@ -95,7 +68,7 @@ export const uploadImagesToAlbum = async (
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const { viewersCanEdit, ownerId, imageList } = docSnap.data();
-      let userToken;
+      let userToken: string | undefined = undefined;
 
       if (
         (ownerId === currentUser?.uid) ||
@@ -106,13 +79,24 @@ export const uploadImagesToAlbum = async (
         toast.error('Unauthorized to upload photos');
         return false;
       }
-
-      const imagePromises = uploadPromises(
-        images,
-        albumId,
-        userToken,
-        false
-      );
+      const imagePromises = images.map(async (image: File, index: number) => {
+        const endpoint = `/api/upload-to-album`;
+        const headers = new Headers();
+        if (userToken) headers.append('Authorization', `Bearer ${userToken}`);
+        const formData = new FormData();
+        formData.append(`image`, image, `album-img-${index}`);
+        formData.append('albumId', albumId);
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: formData,
+        });
+        if (res.body && res.ok) {
+          const body = await streamToObject(res.body);
+          // setUploadProgress((prev) => prev + (1 / images.length) * 100);
+          return body;
+        }
+      })
       const addedImageList = await Promise.all(imagePromises);
       await updateDoc(albumRef, {
         imageList: [...imageList, ...addedImageList],
@@ -228,25 +212,6 @@ export const getAlbumImages = async (albumId: string, prevImages?: ImageEntry[])
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      // const blobs = await Promise.all(data.imageList.map(
-      //   (image: Image) => XHRRequest(image.imageUrl)
-      // ));
-      // let blobs: Blob[] = [];
-      // if (!prevImages || prevImages.length === 0) {
-      //   blobs = await Promise.all(data.imageList.map(
-      //     (image: Image) => XHRRequest(image.imageUrl)
-      //   ));
-      // } else {
-      //   data.imageList.forEach(async (image: Image) => {
-      //     const existingImage = prevImages.find((img) => img.id === image.id);
-      //     if (existingImage) {
-      //       blobs.push(new Blob([existingImage.previewImageUrl]));
-      //     } else {
-      //       const blob = await XHRRequest(image.imageUrl)
-      //       blobs.push(blob);
-      //     }
-      //   });
-      // }
       return ({
         created: data.created,
         albumName: data.albumName,
@@ -275,7 +240,6 @@ export const getUserAlbums = async (userId: string) => {
     const promises = querySnapshot.docs.map(async (doc) => {
       const data = doc.data();
       if (data.imageList.length !== 0) {
-        // const thumbnailImage = await XHRRequest(data.imageList[0].imageUrl);
         return ({
           id: doc.id,
           albumName: data.albumName as string,

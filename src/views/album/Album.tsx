@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { User } from "firebase/auth";
 
 import { toast } from "react-toastify";
 import clx from 'classnames';
@@ -20,6 +19,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import { generateQR, compressFile } from '@/library/utils';
 import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/image";
 
+import Loading from "@/components/loading";
 import ImageGallery from "@/components/imageGallery";
 import OptionsForm from "@/components/optionsForm";
 import UserDropdown from "@/components/ui/userDropdown";
@@ -54,6 +54,7 @@ export default function AlbumPage({
   const [isOptionsOpen, setIsOptionsOpen] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isChanged, setIsChanged] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(-1);
   const [imageChanges, setImageChanges] = useState<ImageChange[]>([]);
   const [deletedImages, setDeletedImages] = useState<ImageChange[]>([]);
 
@@ -130,18 +131,15 @@ export default function AlbumPage({
       toast.error('Image count limit is 75.');
     } else {
       const newImages = await Promise.all(files.map(compressFile));
-      // setImageChanges(prevImages => [...prevImages, ...newImages.map((image) => ({
-      //   id: '',
-      //   uploaderId: currentUser ? currentUser.uid : null,
-      //   previewImageUrl: image.previewUrl,
-      //   imageUrl: '',
-      //   uploaded: false,
-      //   change: 'new',
-      //   file: image.file,
-      // }))]);
-      const res = await uploadImagesToAlbum(albumId, newImages.map((image) => image.file), currentUser);
+
+      const res = await uploadImagesToAlbum(
+        albumId,
+        newImages.map((image) => image.file),
+        currentUser,
+        setUploadProgress,
+      );
       await getImages();
-      window.scrollTo(0, document.body.scrollHeight);
+      toast.success(`Added ${files.length} images`);
     }
     setLoading(false);
   };
@@ -166,9 +164,7 @@ export default function AlbumPage({
 
   if (!albumInfo || loading) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center">
-        <Image priority src="/loading.gif" alt="loading" width={100} height={100} />
-      </div>
+      <Loading progress={uploadProgress} />
     );
   }
   if (images.length === 0) {
@@ -235,24 +231,6 @@ export default function AlbumPage({
         </div>
 
         <div className="fixed w-full max-w-4xl pb-5 bottom-0 z-10">
-          {/* <div className="h-[15px] w-full relative">
-            <Image
-              priority
-              src="/tornEdge.png"
-              alt="torn edge"
-              fill
-            />
-          </div> */}
-          {/* <div className={clx({
-            "h-0": !isQrOpen,
-            "h-[225px]": isQrOpen,
-            "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
-          })}>
-            <div className="text-center bg-white rounded-lg overflow-hidden">
-              {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
-              <p className="pb-2 !text-md text-black">{albumId}</p>
-            </div>
-          </div> */}
           <div className="text-secondary h-[50px] flex flex-row items-center justify-center gap-20 pb-4">
             {editMode &&
 
@@ -292,14 +270,6 @@ export default function AlbumPage({
                 {editMode && <span className="text-xs">x</span>}<EditIcon />
               </button>
             }
-            {/* {!editMode &&
-              <IconButton
-                chevronState={isQrOpen ? 'down' : 'up'}
-                onClick={handleQr}s
-              >
-                <QrCodeIcon />
-              </IconButton>
-            } */}
             {(currentUser?.uid === albumInfo.ownerId && !editMode) &&
               <button
                 className="bg-primary  ring-blue-500/50 shadow-xl px-3 py-3 rounded-[50%]"
