@@ -206,9 +206,10 @@ export const uploadImageAlbum = async (
   }
 };
 
-const XHRRequest = (imageUrl: string): Promise<Blob> => {
+export const XHRRequest = (imageUrl: string): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
+    console.log('test')
     xhr.responseType = 'blob';
     xhr.onload = () => {
       const blob = xhr.response;
@@ -228,9 +229,9 @@ export const getAlbumImages = async (albumId: string, prevImages?: ImageEntry[])
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const blobs = await Promise.all(data.imageList.map(
-        (image: Image) => XHRRequest(image.imageUrl)
-      ));
+      // const blobs = await Promise.all(data.imageList.map(
+      //   (image: Image) => XHRRequest(image.imageUrl)
+      // ));
       // let blobs: Blob[] = [];
       // if (!prevImages || prevImages.length === 0) {
       //   blobs = await Promise.all(data.imageList.map(
@@ -252,12 +253,7 @@ export const getAlbumImages = async (albumId: string, prevImages?: ImageEntry[])
         albumName: data.albumName,
         ownerId: data.ownerId,
         viewersCanEdit: data.viewersCanEdit,
-        imageList: blobs.map((blob, index) => ({
-          id: data.imageList[index].id,
-          uploaderId: data.imageList[index].uploaderId,
-          imageUrl: data.imageList[index].imageUrl,
-          previewImageUrl: URL.createObjectURL(blob),
-        })),
+        imageList: data.imageList,
       });
     } else {
       // docSnap.data() will be undefined in this case

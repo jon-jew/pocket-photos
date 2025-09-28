@@ -222,8 +222,8 @@ export default function AlbumPage({
         <div className="px-2 pb-[50px]">
           <ImageGallery
             images={editMode ?
-              imageChanges.map((imageChange) => imageChange.previewImageUrl) :
-              images.map((image) => image.previewImageUrl)
+              imageChanges.map((imageChange) => imageChange.imageUrl) :
+              images.map((image) => image.imageUrl)
             }
             onModalOpen={() => setIsQrOpen(false)}
             handleRemoveImage={handleRemoveImage}
@@ -234,7 +234,7 @@ export default function AlbumPage({
           />
         </div>
 
-        <div className="fixed w-full max-w-4xl bottom-0 z-10">
+        <div className="fixed w-full max-w-4xl pb-5 bottom-0 z-10">
           {/* <div className="h-[15px] w-full relative">
             <Image
               priority

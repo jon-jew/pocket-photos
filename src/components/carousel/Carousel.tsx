@@ -5,6 +5,9 @@ import { useSwipeable } from 'react-swipeable';
 
 import DownloadIcon from '@mui/icons-material/Download';
 
+import { XHRRequest } from '@/library/firebase/image';
+import Button from '@/components/ui/button';
+
 import './carousel.scss';
 
 interface CarouselProps {
@@ -21,14 +24,17 @@ const Carousel: React.FC<CarouselProps> = ({
   showDownload = false,
 }) => {
   const [current, setCurrent] = useState(initialCurrent);
+  const [confirmDownload, setConfirmDownload] = useState(false);
+  const [downloadBlob, setDownloadBlob] = useState<Blob | null>(null);
 
   const prevSlide = () => {
-    console.log('prev')
-    setCurrent((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    if (!confirmDownload)
+      setCurrent((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const nextSlide = () => {
-    setCurrent((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    if (!confirmDownload)
+      setCurrent((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const handlers = useSwipeable({
@@ -38,6 +44,12 @@ const Carousel: React.FC<CarouselProps> = ({
     preventScrollOnSwipe: true,
     trackMouse: true
   });
+
+  const handleDownload = async () => {
+    setConfirmDownload(true);
+    const blob = await XHRRequest(images[current]);
+    setDownloadBlob(blob);
+  };
 
   return (
     <>
@@ -76,30 +88,49 @@ const Carousel: React.FC<CarouselProps> = ({
         </ul>
       </div>
       <div className="absolute bottom-0 w-full z-10">
-        <div className="w-full flex flex-row gap-26 pb-2 justify-center items-center">
-          <button
-            onClick={prevSlide}
-            className="gallery-btn text-4xl cursor-pointer"
-            aria-label="Previous"
-            type="button"
-          >
-            {'<'}
-          </button>
-          {showDownload &&
-            <a href={images[current]} download={`pluur-${current}`}>
-              <button className="bg-primary ring-blue-500/50 shadow-xl py-3 px-3 rounded-[50%] text-black" type="button">
-                <DownloadIcon />
-              </button>
-            </a>
+        <div className="w-full flex flex-row gap-26 pb-5 justify-center items-center">
+          {!confirmDownload &&
+            <button
+              onClick={prevSlide}
+              className="gallery-btn text-4xl cursor-pointer"
+              aria-label="Previous"
+              type="button"
+            >
+              {'<'}
+            </button>
           }
-          <button
-            onClick={nextSlide}
-            className="gallery-btn text-4xl cursor-pointer"
-            aria-label="Next"
-            type="button"
-          >
-            {'>'}
-          </button>
+          {(showDownload && !confirmDownload) &&
+            <button onClick={handleDownload} className="bg-primary ring-blue-500/50 shadow-xl py-3 px-3 rounded-[50%] text-black" type="button">
+              <DownloadIcon />
+            </button>
+          }
+          {(showDownload && confirmDownload) &&
+            <div className="mb-10 flex flex-col gap-4 items-center text-center">
+              <h3>Confirm download?</h3>
+              <div className="flex flex-row gap-10 items-center">
+
+                <Button type="button" onClick={() => setConfirmDownload(false)}>
+                  Cancel
+                </Button>
+
+                <a href={downloadBlob ? URL.createObjectURL(downloadBlob) : ''} download={`pluur-${current}`}>
+                  <Button variant="secondary" type="button">
+                    Confirm
+                  </Button>
+                </a>
+              </div>
+            </div>
+          }
+          {!confirmDownload &&
+            <button
+              onClick={nextSlide}
+              className="gallery-btn text-4xl cursor-pointer"
+              aria-label="Next"
+              type="button"
+            >
+              {'>'}
+            </button>
+          }
         </div>
       </div>
     </>
