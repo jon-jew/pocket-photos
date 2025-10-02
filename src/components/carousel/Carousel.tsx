@@ -15,12 +15,14 @@ interface CarouselProps {
   initialCurrent?: number;
   width?: string;
   height?: string;
+  closeModal?: () => void;
   showDownload?: boolean;
 }
 
 const Carousel: React.FC<CarouselProps> = ({
   initialCurrent = 0,
   images,
+  closeModal,
   showDownload = false,
 }) => {
   const [current, setCurrent] = useState(initialCurrent);
@@ -40,6 +42,7 @@ const Carousel: React.FC<CarouselProps> = ({
   const handlers = useSwipeable({
     onSwipedLeft: nextSlide,
     onSwipedRight: prevSlide,
+    onSwipedDown: closeModal,
     swipeDuration: 500,
     preventScrollOnSwipe: true,
     trackMouse: true
@@ -62,12 +65,15 @@ const Carousel: React.FC<CarouselProps> = ({
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {images.map((src, idx) => (
-            <li key={`gallery-img-${idx}`} className="w-full">
+            <li
+              key={`gallery-img-${idx}`}
+              className="w-full"
+            >
               <div className="w-[100vw] flex justify-center items-center">
                 <div className="gallery-slide rounded-sm">
                   <div className="img-container">
                     <Image
-                      priority
+                      priority={idx === current}
                       src={src}
                       alt={`Gallery image ${idx}`}
                       width={0}

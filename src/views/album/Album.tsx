@@ -34,19 +34,23 @@ interface AlbumInfo {
 
 interface AlbumProps {
   albumId: string;
+  initialAlbumInfo: AlbumInfo;
+  initialImages: ImageEntry[];
   currentUser: UserInfo | undefined;
 }
 
 export default function AlbumPage({
   albumId,
+  initialAlbumInfo,
+  initialImages,
   currentUser,
 }: AlbumProps) {
   const router = useRouter();
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [images, setImages] = useState<ImageEntry[]>([]);
-  const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(undefined);
+  const [images, setImages] = useState<ImageEntry[]>(initialImages || []);
+  const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(initialAlbumInfo);
 
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -64,14 +68,13 @@ export default function AlbumPage({
     setIsQrOpen(!isQrOpen);
   };
   const getImages = async () => {
-    const imageRes = await getAlbumImages(albumId, images);
+    const imageRes = await getAlbumImages(albumId);
     if (imageRes) {
       setImages(imageRes.imageList);
-      const dateString = new Date(imageRes.created).toDateString();
       setAlbumInfo({
         albumName: imageRes.albumName,
         ownerId: imageRes.ownerId,
-        created: dateString,
+        created: imageRes.created,
         viewersCanEdit: imageRes.viewersCanEdit,
       })
       setLoading(false);
@@ -159,7 +162,7 @@ export default function AlbumPage({
 
   useEffect(() => {
     getQrCode();
-    getImages();
+    // getImages();
   }, []);
 
   if (!albumInfo || loading) {
@@ -170,7 +173,7 @@ export default function AlbumPage({
   if (images.length === 0) {
     return (
       <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">{albumInfo.albumName || 'Loading...'}</h1>
+        <h1 className="text-3xl font-bold mb-6">{albumInfo.albumName || 'Missing Album Name'}</h1>
         <p>No images in album</p>
       </main>
     );
@@ -261,7 +264,7 @@ export default function AlbumPage({
                 />
               </>
             }
-            {(albumInfo.viewersCanEdit || currentUser?.uid === albumInfo.ownerId) &&
+            {(currentUser?.uid === albumInfo.ownerId) &&
               <button
                 className={`bg-primary ring-blue-500/50 shadow-xl px-${editMode ? '2' : '3'} py-3 rounded-[50%]`}
                 type="button"

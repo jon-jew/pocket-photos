@@ -9,40 +9,6 @@
   justify-content: center;
   row-gap: 25px;
   column-gap: 15px;
-
-  .hide {
-    pointer-events: none !important;
-    opacity: 0 !important;
-  }
-
-  .fade-component {
-    opacity: 100;
-    transition-property: opacity;
-    transition-duration: 150ms;
-  }
-
-  .thumbnail {
-    background-color: #292929;
-  }
-  .thumbnail-container {
-    background: var(--polaroid);
-    position: relative;
-    padding: 5px;
-
-    .thumbnail-control {
-      background-color: #070217;
-      color: var(--primary);
-      font-weight: bold;
-      font-size: 16px;
-      font-family: var(--font-gloria);
-      padding: 2px 15px;
-      border-radius: 5px;
-
-      &:hover {
-        background-color: var(--secondary-hover);
-      }
-    }
-  }
 }
 
 .modal {

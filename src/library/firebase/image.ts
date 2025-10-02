@@ -206,14 +206,16 @@ export const XHRRequest = (imageUrl: string): Promise<Blob> => {
   });
 };
 
-export const getAlbumImages = async (albumId: string, prevImages?: ImageEntry[]) => {
+export const getAlbumImages = async (albumId: string) => {
   try {
     const albumRef = doc(db, 'albums', albumId);
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
+      const dateString = new Date(data.created).toDateString();
+
       return ({
-        created: data.created,
+        created: dateString,
         albumName: data.albumName,
         ownerId: data.ownerId,
         viewersCanEdit: data.viewersCanEdit,
