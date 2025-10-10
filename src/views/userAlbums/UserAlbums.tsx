@@ -42,21 +42,23 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
 
   if (loading) return <Loading />;
   return (
-    <main className="max-w-4xl mx-auto">
-      <div className="relative bg-primary pt-6  pl-5 pr-15 z-4">
-        <h2 className="text-4xl text-secondary font-bold">Your Albums</h2>
-        <h4 className="text-black mt-2 ml-2">{albums.length} albums</h4>
-        <UserDropdown variant="secondary" initialUser={currentUser} />
-      </div>
-      <div className="h-[20px] w-full rotate-180 relative">
-        <Image
-          priority
-          src="/tornEdge.png"
-          alt="torn edge"
-          fill
-        />
-      </div>
-      <div className="flex flex-row flex-wrap gap-6 px-2 py-6 justify-center items-center">
+    <main className="max-w-4xl pt-22 mx-auto">
+      <nav className="fixed top-0 w-full z-[30]">
+        <div className="relative bg-primary pt-6 pl-5 pr-15 z-4">
+          <h2 className="text-3xl text-secondary font-bold">Your Albums</h2>
+          <UserDropdown variant="secondary" initialUser={currentUser} />
+        </div>
+        <div className="h-[20px] w-full rotate-180 relative">
+          <Image
+            priority
+            src="/tornEdge.png"
+            alt="torn edge"
+            fill
+          />
+        </div>
+      </nav>
+      <h4 className="text-primary mt-2 ml-10 mb-3">{albums.length} albums</h4>
+      <div className="flex flex-row flex-wrap gap-x-10 gap-y-15 px-2 py-6 justify-center items-center">
         {albums.map((album, index) => (
           <Link key={`album-${index}`} href={`/album/${album.id}`} className="max-w-[150px] relative">
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] relative z-3">
@@ -75,10 +77,19 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] absolute top-0 z-2 -rotate-6 -translate-x-2 -translate-y-1">
               <div className="h-[140px] w-[140px] bg-black" />
             </div>
-            <h5 className="pt-2">{album.albumName}</h5>
-            <p>{album.created}</p>
+            <h5 className="absolute bottom-[-15px] left-[-20px] z-[20] px-3 py-2 bg-primary text-sm text-secondary rounded-full">
+              {album.albumName}
+            </h5>
+            {/* <p>{album.created}</p> */}
           </Link>
         ))}
+        <div className="fixed bottom-10 right-15 z-[25]">
+          <Link href='/new-album'>
+            <button className="bg-secondary text-primary border-4 border-primary text-3xl px-6 py-4 rounded-full">
+              +
+            </button>
+          </Link>
+        </div>
       </div>
     </main>
   )

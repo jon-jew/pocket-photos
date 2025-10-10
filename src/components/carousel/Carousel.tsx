@@ -60,8 +60,19 @@ const Carousel: React.FC<CarouselProps> = ({
         className="flex flex-col h-[100vh] relative overflow-hidden mx-auto"
         {...handlers}
       >
+        <button
+          onClick={closeModal}
+          type="button"
+          className="absolute top-8 right-8 text-2xl"
+        >
+          X
+        </button>
+        <div
+          className="fixed w-full h-full z-[999]"
+          onClick={closeModal}
+        />
         <ul
-          className="flex items-center transition-transform duration-500 ease-in-out h-[100vh]"
+          className="flex items-center transition-transform duration-500 ease-in-out h-[100vh] z-[1000]"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {images.map((src, idx) => (
@@ -93,8 +104,8 @@ const Carousel: React.FC<CarouselProps> = ({
           ))}
         </ul>
       </div>
-      <div className="absolute bottom-0 w-full z-10">
-        <div className="w-full flex flex-row gap-24 pt-2 pb-6 bg-[#00000082] justify-center items-center">
+      <div className="absolute bottom-0 w-full z-[1000]">
+        <div className="w-full flex flex-row gap-24 pt-2 pb-8 bg-[#00000082] justify-center items-center">
           {!confirmDownload &&
             <button
               onClick={prevSlide}
@@ -120,7 +131,7 @@ const Carousel: React.FC<CarouselProps> = ({
                 </Button>
 
                 <a href={downloadBlob ? URL.createObjectURL(downloadBlob) : ''} download={`pluur-${current}`}>
-                  <Button onClick={() => setConfirmDownload(false)}variant="secondary" type="button">
+                  <Button onClick={() => setConfirmDownload(false)} variant="secondary" type="button">
                     Confirm
                   </Button>
                 </a>

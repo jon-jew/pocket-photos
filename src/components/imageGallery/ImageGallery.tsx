@@ -46,15 +46,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   return (
     <>
-      <ul className="py-8 polaroids w-full gallery-container">
+      <ul className="py-4 polaroids w-full gallery-container">
         {images.map((image, idx) => (
           <Thumbnail
-            key={`thumbnail-${idx}`} 
+            key={`thumbnail-${idx}`}
             idx={idx}
             imagesLength={images.length}
             src={image}
             quality={10}
-            alt={`Image ${idx + 1}`} 
+            alt={`Image ${idx + 1}`}
             editMode={editMode}
             openModal={() => openModal(idx)}
             handleRemoveImage={handleRemoveImage}
@@ -76,14 +76,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               images={images}
               showDownload={showDownload}
             />
-            <button
-              onClick={closeModal}
-              className="absolute !top-[30px] !left-[20px] !text-3xl delete-btn cursor-pointer"
-              aria-label="Close"
-              type="button"
-            >
-              &times;
-            </button>
           </div>
         </Slide>
       </Modal>

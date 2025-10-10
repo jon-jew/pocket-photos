@@ -60,7 +60,7 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
       window.confirmationResult.confirm(otpCode).then(() => {
         // User signed in successfully.
         toast.success('Signed in successfully!');
-        router.push('/');
+        router.back();
       }).catch((error: { message: string }) => {
         // User couldn't sign in (bad verification code?)
         console.error(error.message);

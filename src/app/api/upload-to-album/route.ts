@@ -38,15 +38,14 @@ export async function POST(req: NextRequest) {
     }
 
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
-    const webpFile = await sharp(imageBuffer).webp({
-      nearLossless: true,
-      quality: 75,
+    const webpFile = await sharp(imageBuffer).jpeg({
+      quality: 50,
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();
-    const imageRef = ref(storage, `/${albumId}/${imageId}`);
+    const imageRef = ref(storage, `albums/${albumId}/${imageId}.jpg`);
     await uploadBytes(imageRef, webpFile.data, {
-      contentType: 'image/webp',
+      contentType: 'image/jpeg',
     });
     const imageUrl = await getDownloadURL(imageRef);
 

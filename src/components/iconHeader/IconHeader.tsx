@@ -16,13 +16,13 @@ const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, currentUser 
       {showLogin && <UserDropdown initialUser={currentUser} />}
       <Image
         priority
-        alt="Logo"
+        alt="Plurr Logo"
         className="mb-3"
         width={125}
         height={120}
         src="/logo.svg"
       />
-      <h1 className="leading-[48px]">PLUUR</h1>
+      <h1 className="leading-[48px]">PLURR</h1>
       <p className="leading-[20px]">
         Create a photo album<br />together, instantly
       </p>

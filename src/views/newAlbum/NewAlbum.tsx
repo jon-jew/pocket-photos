@@ -13,8 +13,6 @@ import Switch from '@mui/material/Switch';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import TuneIcon from '@mui/icons-material/Tune';
 
-import { User } from "firebase/auth";
-
 import { uploadImageAlbum } from '@/library/firebase/image';
 import { generateQR, compressFile } from '@/library/utils';
 

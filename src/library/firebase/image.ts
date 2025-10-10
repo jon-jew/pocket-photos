@@ -8,6 +8,7 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
+  orderBy,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -236,7 +237,7 @@ export const getAlbumImages = async (albumId: string) => {
 export const getUserAlbums = async (userId: string) => {
   try {
     const albumsRef = collection(db, 'albums');
-    const q = query(albumsRef, where("ownerId", "==", userId));
+    const q = query(albumsRef, where("ownerId", "==", userId), orderBy('createdOn', 'desc'));
 
     const querySnapshot = await getDocs(q);
     const promises = querySnapshot.docs.map(async (doc) => {
@@ -329,7 +330,7 @@ export const deleteAlbum = async (albumId: string) => {
     if (docSnap.exists()) {
       const { imageList } = docSnap.data();
       const promises = imageList.map(async (image: Image) => {
-        const imageRef = ref(storage, `/${albumId}/${image.id}`);
+        const imageRef = ref(storage, `albums/${albumId}/${image.id}.jpg`);
         await deleteObject(imageRef);
       });
       await Promise.all(promises);

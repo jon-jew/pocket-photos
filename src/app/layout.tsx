@@ -33,7 +33,7 @@ const gloria = Gloria_Hallelujah({
 });
 
 export const metadata: Metadata = {
-  title: "pluur - create a photo album together, instantly",
+  title: "plurr - create a photo album together, instantly",
   description: "Create a photo album together, instantly",
 };
 

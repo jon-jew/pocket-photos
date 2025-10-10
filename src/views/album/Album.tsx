@@ -15,6 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ImageIcon from '@mui/icons-material/Image';
 import SaveIcon from '@mui/icons-material/Save';
 import TuneIcon from '@mui/icons-material/Tune';
+import ShareIcon from '@mui/icons-material/Share';
 
 import { generateQR, compressFile } from '@/library/utils';
 import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/image";
@@ -67,6 +68,23 @@ export default function AlbumPage({
   const handleQr = () => {
     setIsQrOpen(!isQrOpen);
   };
+
+  async function shareContent() {
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `Plurr: ${albumInfo?.albumName}`,
+        text: 'Check out this image lobby!',
+        url: window.location.href,
+      });
+    } catch (error) {
+      console.error('Error sharing content:', error);
+    }
+  } else {
+    console.log('Web Share API not supported in this browser.');
+  }
+}
+
   const getImages = async () => {
     const imageRes = await getAlbumImages(albumId);
     if (imageRes) {
@@ -135,7 +153,7 @@ export default function AlbumPage({
     } else {
       const newImages = await Promise.all(files.map(compressFile));
 
-      const res = await uploadImagesToAlbum(
+      await uploadImagesToAlbum(
         albumId,
         newImages.map((image) => image.file),
         currentUser,
@@ -182,43 +200,49 @@ export default function AlbumPage({
   return (
     <>
       <main className="max-w-4xl mx-auto">
-        <div className="relative bg-primary transition-[height] duration-200 ease-in-out">
-          <div className="pt-6 pl-5 pr-15">
-            <h2 className="text-3xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
-            <div className="flex flex-row">
-              <p className="pl-3 text-md text-black">{albumInfo.created}</p>
-              <div className="flex grow justify-end">
-                <IconButton
-                  chevronState={isQrOpen ? 'up' : 'down'}
-                  onClick={handleQr}
-                >
-                  <QrCodeIcon />
-                </IconButton>
+        <nav className="fixed w-full z-[30] transition-[height] duration-200 ease-in-out">
+          <div className="w-full bg-primary">
+            <div className="pt-6 pl-5 pr-17">
+              <h2 className="text-2xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
+              <div className="flex flex-row">
+                <p className="pl-3 text-md text-black">{albumInfo.created}</p>
+                <div className="flex gap-4 grow justify-end">
+                  <IconButton onClick={shareContent}>
+                    <ShareIcon />
+                  </IconButton>
+                  <IconButton
+                    chevronState={isQrOpen ? 'up' : 'down'}
+                    onClick={handleQr}
+                  >
+                    <QrCodeIcon />
+                  </IconButton>
+                  
+                </div>
               </div>
             </div>
-          </div>
-          <div className={clx({
-            "h-0": !isQrOpen,
-            "h-[225px]": isQrOpen,
-            "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
-          })}>
-            <div className="text-center bg-white rounded-lg overflow-hidden">
-              {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
-              <p className="pb-2 !text-md text-black">{albumId}</p>
+            <div className={clx({
+              "h-0": !isQrOpen,
+              "h-[225px]": isQrOpen,
+              "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
+            })}>
+              <div className="text-center bg-white rounded-lg overflow-hidden">
+                {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
+                <p className="pb-2 !text-md text-black">{albumId}</p>
+              </div>
             </div>
+            <UserDropdown initialUser={currentUser} variant="secondary" />
           </div>
-          <UserDropdown initialUser={currentUser} variant="secondary" />
-        </div>
-
-        <div className="h-[20px] w-full rotate-180 relative">
-          <Image
-            priority
-            src="/tornEdge.png"
-            alt="torn edge"
-            fill
-          />
-        </div>
-        <div className="px-2 pb-[50px]">
+          <div className="h-[20px] w-full rotate-180 relative">
+            <Image
+              priority
+              src="/tornEdge.png"
+              alt="torn edge"
+              fill
+            />
+          </div>
+        </nav>
+        <div className="pt-30 px-2 pb-[50px]">
+          <h4 className="text-primary ml-10">{images.length} images</h4>
           <ImageGallery
             images={editMode ?
               imageChanges.map((imageChange) => imageChange.imageUrl) :
@@ -289,6 +313,17 @@ export default function AlbumPage({
         <div
           className="fixed inset-0 flex items-center justify-center z-[1000]"
         >
+          <button
+            onClick={() => closeOptions(false, false)}
+            type="button"
+            className="absolute top-8 right-8 text-2xl"
+          >
+            X
+          </button>
+          <div
+            className="fixed w-full h-full z-[999]"
+            onClick={() => closeOptions(false, false)}
+          />
           <OptionsForm
             albumId={albumId}
             currentUser={currentUser}

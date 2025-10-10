@@ -30,6 +30,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 }) => {
   const router = useRouter();
 
+  const [showDelete, setShowDelete] = useState<boolean>(false);
   const [albumName, setAlbumName] = useState<string>(initialAlbumName);
   const [viewersCanEdit, setViewersCanEdit] = useState<boolean>(initialViewersCanEdit);
 
@@ -52,42 +53,55 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
   };
 
   return (
-    <div className="bg-primary text-secondary rounded-lg relative px-2 py-4 w-[85%] max-w-[500px]">
-      <h2 className="text-3xl mb-6"><TuneIcon /> Options</h2>
-      <button
-        onClick={() => closeOptions(false, false)}
-        type="button"
-        className="absolute top-3 right-3 text-2xl"
-      >
-        X
-      </button>
-      <form onSubmit={handleOptionsSubmit} className="flex flex-col gap-5 justify-center items-center">
-        <Textfield
-          fullWidth
-          initialValue={initialAlbumName}
-          onChange={(e) => setAlbumName(e.target.value)}
-          label="Album Name"
-          required
-        />
-        <div>
-          <Switch
-            checked={viewersCanEdit}
-            onChange={() => setViewersCanEdit(!viewersCanEdit)}
-            color="secondary"
-          />
-          <span className="text-xs">Viewers can add images</span>
-        </div>
-        <Button onClick={handleDelete} variant="warning">
-          {/* <span className="text-xs">X</span><PhotoLibraryIcon /> */}
+    <div className="bg-primary text-secondary rounded-lg relative px-2 py-4 w-[85%] max-w-[500px] z-[1000]">
+      <h2 className="text-3xl mb-10"><TuneIcon /> Options</h2>
+      {!showDelete ?
+        <>
+          <div className="absolute top-3 right-3">
+            <Button onClick={() => setShowDelete(true)} variant="warning">
+              <span className="text-xs mr-2">X</span> Delete
+            </Button>
+          </div>
+
+          <form onSubmit={handleOptionsSubmit} className="flex flex-col gap-5 justify-center items-center">
+            <Textfield
+              fullWidth
+              initialValue={initialAlbumName}
+              onChange={(e) => setAlbumName(e.target.value)}
+              label="Album Name"
+              required
+            />
+            <div>
+              <Switch
+                checked={viewersCanEdit}
+                onChange={() => setViewersCanEdit(!viewersCanEdit)}
+                color="secondary"
+              />
+              <span className="text-xs">Viewers can add images</span>
+            </div>
+            {/* <Button onClick={handleDelete} variant="warning">
           <span className="text-xs mr-2">X</span> Delete
-        </Button>
-        <Button
-          type="submit"
-          fullWidth
-        >
-          Save
-        </Button>
-      </form>
+        </Button> */}
+            <Button
+              type="submit"
+              fullWidth
+            >
+              Save
+            </Button>
+          </form>
+        </> :
+        <div className="flex flex-col items-center justify-center gap-9">
+          <h4>Are you sure you want to delete?</h4>
+          <div className="flex flex-row gap-8">
+            <button onClick={() => setShowDelete(false)}>
+              Cancel
+            </button>
+            <Button onClick={handleDelete} variant="warning">
+              <span className="text-xs mr-2">X</span> Delete
+            </Button>
+          </div>
+        </div>
+      }
     </div>
   );
 };
