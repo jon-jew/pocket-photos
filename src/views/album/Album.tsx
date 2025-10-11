@@ -92,7 +92,7 @@ export default function AlbumPage({
       setAlbumInfo({
         albumName: imageRes.albumName,
         ownerId: imageRes.ownerId,
-        created: imageRes.created,
+        created: imageRes.createdOn,
         viewersCanEdit: imageRes.viewersCanEdit,
       })
       setLoading(false);
@@ -200,7 +200,7 @@ export default function AlbumPage({
   return (
     <>
       <main className="max-w-4xl mx-auto">
-        <nav className="fixed w-full z-[30] transition-[height] duration-200 ease-in-out">
+        <nav className="fixed w-full max-w-4xl z-[30] transition-[height] duration-200 ease-in-out">
           <div className="w-full bg-primary">
             <div className="pt-6 pl-5 pr-17">
               <h2 className="text-2xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>

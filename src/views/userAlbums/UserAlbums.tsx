@@ -43,7 +43,7 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
   if (loading) return <Loading />;
   return (
     <main className="max-w-4xl pt-22 mx-auto">
-      <nav className="fixed top-0 w-full z-[30]">
+      <nav className="fixed top-0 w-full max-w-4xl z-[30]">
         <div className="relative bg-primary pt-6 pl-5 pr-15 z-4">
           <h2 className="text-3xl text-secondary font-bold">Your Albums</h2>
           <UserDropdown variant="secondary" initialUser={currentUser} />
