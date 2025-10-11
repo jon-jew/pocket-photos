@@ -9,6 +9,7 @@ import {
   updateDoc,
   deleteDoc,
   orderBy,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
@@ -177,7 +178,7 @@ export const uploadImageAlbum = async (
       albumName: albumName,
       ownerId: currentUser?.uid,
       viewersCanEdit: viewersCanEdit,
-      created: Date.now(),
+      createdOn: serverTimestamp(),
       imageList: imageList,
     };
 
@@ -213,7 +214,7 @@ export const getAlbumImages = async (albumId: string) => {
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const dateString = new Date(data.created).toDateString();
+      const dateString = new Date(data.createdOn.toDate()).toDateString();
 
       return ({
         createdOn: dateString,

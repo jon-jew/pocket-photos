@@ -1,6 +1,6 @@
 'use server';
 
-import { getDoc, doc } from 'firebase/firestore';
+import { getDoc, doc, } from 'firebase/firestore';
 
 import { db } from './serverApp';
 
@@ -10,7 +10,7 @@ export const getAlbumImages = async (albumId: string) => {
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const dateString = new Date(data.created).toDateString();
+      const dateString = new Date(data.createdOn.toDate()).toDateString();
       return ({
         albumInfo: {
           created: dateString,
