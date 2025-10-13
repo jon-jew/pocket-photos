@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
 
         <div className="mt-8 prose prose-lg text-gray-300">
           <p>
-            This privacy policy ("Policy") describes how the application operator ("we", "us", or "our") collects, protects, and uses the personally identifiable information ("Personal Information") you ("User", "you", or "your") may provide through our application and any of its products or services (collectively, "Application" or "Services").
+            This privacy policy describes how we collects, protects, and uses the personally identifiable information Personal Information you may provide through our application and any of its products or services.
           </p>
           <p className="mt-5">
             It also describes the choices available to you regarding our use of your Personal Information and how you can access and update this information. This Policy is a legally binding agreement between you and us. By accessing and using the Application and Services, you acknowledge that you have read, understood, and agree to be bound by the terms of this Policy.
@@ -26,7 +26,7 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="mt-8">Collection of information</h2>
           <p className="mt-2">
-            We receive and store any information you knowingly provide to us when you create an account, publish content, or fill any online forms in the Application. When required, this information may include your email address, name, or other Personal Information. You can choose not to provide us with certain information, but then you may not be able to take advantage of some of the Application's features.
+            We receive and store any information you knowingly provide to us when you create an account, publish content, or fill any online forms in the Application. When required, this information may include your email address, name, or other Personal Information. You can choose not to provide us with certain information, but then you may not be able to take advantage of some of the application features.
           </p>
 
           <h2 className="mt-8">Use and processing of collected information</h2>
