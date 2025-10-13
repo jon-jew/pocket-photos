@@ -17,6 +17,7 @@ import TornContainer from '@/components/tornContainer/TornContainer';
 import Textfield from '@/components/ui/textfield';
 import Button from '@/components/ui/button';
 import NumberInput from '@/components/ui/numberInput';
+import Link from 'next/link';
 
 interface LoginProps {
   initialUser: User | undefined;
@@ -82,7 +83,7 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
   };
 
   useEffect(() => {
-    if (user ) {
+    if (user) {
       toast.info('User already logged in');
       router.push('/');
     } else if (!user) {
@@ -120,8 +121,10 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
             />
             {/* <div id="recaptcha-container" className="mt-4"></div> */}
 
-            <p className="text-xs mt-8">
-              By entering your phone number, you agree to our Terms of Service and Privacy Policy. Standard message and data rates may apply.
+            <p className="text-xs mt-8 max-w-lg">
+              By entering your phone number, you agree to our Terms of Service
+              and <Link className="underline" href="/privacy-policy">Privacy Policy</Link>.
+              Standard message and data rates may apply.
             </p>
           </form>
         }

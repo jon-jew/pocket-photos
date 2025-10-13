@@ -63,7 +63,7 @@ const Carousel: React.FC<CarouselProps> = ({
         <button
           onClick={closeModal}
           type="button"
-          className="absolute top-8 right-8 text-2xl"
+          className="absolute top-8 right-8 text-2xl z-[3000] rounded-full bg-gray-500 opacity-85 px-4 py-2"
         >
           X
         </button>
@@ -72,7 +72,7 @@ const Carousel: React.FC<CarouselProps> = ({
           onClick={closeModal}
         />
         <ul
-          className="flex items-center transition-transform duration-500 ease-in-out h-[100vh] z-[1000]"
+          className="flex items-center transition-transform duration-500 ease-in-out h-[calc(100vh-50px)] z-[1000]"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {images.map((src, idx) => (
@@ -89,7 +89,7 @@ const Carousel: React.FC<CarouselProps> = ({
                       alt={`Gallery image ${idx}`}
                       width={0}
                       height={0}
-                      style={{ width: '100%', height: 'auto', objectFit: 'contain' }}
+                      style={{ width: '100%', maxHeight: 'calc(100vh - 200px)', objectFit: 'contain' }}
                       sizes="80vw"
                     />
                   </div>
@@ -109,7 +109,7 @@ const Carousel: React.FC<CarouselProps> = ({
           {!confirmDownload &&
             <button
               onClick={prevSlide}
-              className="gallery-btn text-4xl cursor-pointer"
+              className="gallery-btn bg-gray-200! text-4xl cursor-pointer"
               aria-label="Previous"
               type="button"
             >
@@ -130,7 +130,7 @@ const Carousel: React.FC<CarouselProps> = ({
                   Cancel
                 </Button>
 
-                <a href={downloadBlob ? URL.createObjectURL(downloadBlob) : ''} download={`pluur-${current}`}>
+                <a href={downloadBlob ? URL.createObjectURL(downloadBlob) : ''} download={`plurr-${current}`}>
                   <Button onClick={() => setConfirmDownload(false)} variant="secondary" type="button">
                     Confirm
                   </Button>
@@ -141,7 +141,7 @@ const Carousel: React.FC<CarouselProps> = ({
           {!confirmDownload &&
             <button
               onClick={nextSlide}
-              className="gallery-btn text-4xl cursor-pointer"
+              className="gallery-btn bg-gray-200! text-4xl cursor-pointer"
               aria-label="Next"
               type="button"
             >
