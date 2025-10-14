@@ -12,6 +12,9 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
     secret: firebaseSecretKey
 
+  - variable: NEXT_PUBLIC_GOOGLE_KEY_URL
+    value: https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com
+
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
     value: pocket-photos.firebaseapp.com
 

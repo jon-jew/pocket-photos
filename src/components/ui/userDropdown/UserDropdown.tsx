@@ -3,8 +3,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import useUser from '@/components/hooks/useUser';
+import { User } from "firebase/auth";
+
 import { logoutUser } from "@/library/firebase/auth";
+import useUserSession from "@/components/hooks/useUserSesssion";
 
 interface MenuItem {
   label: string;
@@ -14,20 +16,23 @@ interface MenuItem {
 
 interface UserDropdownProps {
   variant?: 'primary' | 'secondary';
+  initialUser?: User | undefined;
 };
 
 export const UserDropdown: React.FC<UserDropdownProps> = ({
   variant = 'primary',
+  initialUser,
 }) => {
   const router = useRouter();
+  const user = useUserSession(initialUser);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const backgroundColor = variant === 'primary' ? '#BD9CEA' : '#070217';
   const iconColor = variant === 'primary' ? '#070217' : '#BD9CEA'
-  const { user, userLoading } = useUser();
 
   const menuItems: MenuItem[] = [
+    { label: "Home", href: '/' },
     { label: "Albums", href: `/user-albums/${user ? user.uid : ''}` },
     { label: "Logout", onClick: () => logoutUser() },
   ];
@@ -49,11 +54,17 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     };
   }, [open]);
 
-  if (userLoading) return null;
-  if (!userLoading && !user) return <Link className={`text-${variant}`} href="/login">Login</Link>;
+  if (!user) {
+    return (
+      <Link
+        className={`absolute z-10 top-4 right-4 text-${variant}`}
+        href="/login">Login
+      </Link>
+    );
+  }
 
   return (
-    <div ref={dropdownRef} className="relative inline-block">
+    <div ref={dropdownRef} className="absolute z-10 top-4 right-4 inline-block">
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="bg-none border-none cursor-pointer p-0 flex items-center"

@@ -1,37 +1,28 @@
 import React from "react";
 
 import Image from "next/image";
+import { User } from "firebase/auth";
 
 import UserDropdown from '@/components/ui/userDropdown';
 
 interface IconHeaderProps {
-  isLoading?: boolean;
   showLogin?: boolean;
+  currentUser?: User | undefined;
 };
 
-const IconHeader: React.FC<IconHeaderProps> = ({ isLoading, showLogin = false }) => {
+const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, currentUser }) => {
   return (
     <div className="centered-col relative w-full max-w-xl !justify-end h-[300px] text-primary mb-8">
-      <div className="absolute top-[20px] right-[10px]">
-        {showLogin && <UserDropdown />}
-      </div>
-      {isLoading ?
-        <Image
-          alt="Logo"
-          className="mb-3"
-          width={125}
-          height={120}
-          src="/loading.gif"
-        /> :
-        <Image
-          alt="Logo"
-          className="mb-3"
-          width={125}
-          height={120}
-          src="/logo.svg"
-        />
-      }
-      <h1 className="leading-[48px]">PLUUR</h1>
+      {showLogin && <UserDropdown initialUser={currentUser} />}
+      <Image
+        priority
+        alt="Plurr Logo"
+        className="mb-3"
+        width={125}
+        height={120}
+        src="/logo.svg"
+      />
+      <h1 className="leading-[48px]">PLURR</h1>
       <p className="leading-[20px]">
         Create a photo album<br />together, instantly
       </p>

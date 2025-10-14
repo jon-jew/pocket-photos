@@ -7,6 +7,8 @@
   --primary-hover: #A475F9;
   --secondary: #070217;
   --secondary-hover: #1C0E3E;
+  --warning: #b40707;
+  --warning-hover: #9c0909;
   --polaroid: #f4f5f2;
   --toastify-color-success: var(--primary);
   --toastify-font-family: var(--font-manrope);
@@ -19,6 +21,8 @@
   --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
+  --color-warning: var(--warning);
+  --color-warning-hover: var(--warning-hover);
   --color-polaroid: var(--polaroid);
   --font-primary: var(--font-comico);
   --font-secondary: var(--font-manrope);
@@ -39,6 +43,10 @@ body {
   align-items: center;
 }
 
+.close-btn {
+  background-color: #0000006b;
+}
+
 h1 {
   font-size: 48px;
 }
@@ -53,6 +61,12 @@ p {
 
 button {
   cursor: pointer;
+
+  &:disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.5;
+  }
 }
 
 header {

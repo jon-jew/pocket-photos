@@ -5,6 +5,8 @@ import { ToastContainer } from 'react-toastify';
 
 import { Manrope, Monomaniac_One, Gloria_Hallelujah } from 'next/font/google';
 
+import Bubbles from "@/components/bubbles";
+import { getAuthenticatedAppForUser } from "@/library/firebase/serverApp";
 import "./globals.css";
 
 const comicoRegular = localFont({
@@ -31,15 +33,17 @@ const gloria = Gloria_Hallelujah({
 });
 
 export const metadata: Metadata = {
-  title: "pluur - create a photo album together, instantly",
+  title: "plurr - create a photo album together, instantly",
   description: "Create a photo album together, instantly",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { currentUser } = await getAuthenticatedAppForUser();
+
   return (
     <html lang="en">
       <Head>
@@ -51,6 +55,7 @@ export default function RootLayout({
         className={`${comicoRegular.variable} ${manrope.variable} ${monomaniac.variable} ${gloria.variable} antialiased`}
       >
         <ToastContainer theme="dark" />
+        <Bubbles />
         {children}
       </body>
     </html>

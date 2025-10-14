@@ -2,16 +2,29 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as generateRandomId } from 'uuid';
+import { getDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, } from 'firebase/storage';
 import sharp from 'sharp';
 
-import { storage } from '@/library/firebase/serverApp';
+import { storage, db } from '@/library/firebase/serverApp';
 import { validateJwt } from '@/library/validateJwt';
 
 export async function POST(req: NextRequest) {
   try {
+    const formData = await req.formData();
+    const imageFile = formData.get('image') as File;
+    const albumId = formData.get('albumId') as string;
+    if (!imageFile || !albumId) {
+      return NextResponse.json({ error: 'Missing file or albumId' }, { status: 400 });
+    }
+    const albumRef = doc(db, 'albums', albumId);
+    const docsnap = await getDoc(albumRef);
+    if (!docsnap.exists()) {
+      return NextResponse.json({ error: 'Album does not exist' }, { status: 404 });
+    }
+    const { viewersCanEdit, ownerId } = docsnap.data();
+
     let userId = null;
-    
     const authHeader = req.headers.get('Authorization');
     if (authHeader) {
       const jwtRes = await validateJwt(authHeader.replace("Bearer ", ""));
@@ -19,18 +32,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
       userId = jwtRes.user_id;
-    } else {
+    }
+    if (!viewersCanEdit && userId !== ownerId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const formData = await req.formData();
-    const imageFile = formData.get('image') as File;
-    const albumId = formData.get('albumId') as string;
-    if (!imageFile || !albumId) {
-      return NextResponse.json({ error: 'Missing file or albumId' }, { status: 400 });
-    }
+
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
     const webpFile = await sharp(imageBuffer).jpeg({
-      quality: 75,
+      quality: 50,
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();

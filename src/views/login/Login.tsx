@@ -5,23 +5,27 @@ import React, { useState, useEffect } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 
-import { signInWithPhoneNumber as _signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { signInWithPhoneNumber as _signInWithPhoneNumber, RecaptchaVerifier, User } from "firebase/auth";
 import { toast } from 'react-toastify';
 
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 
 import { auth } from '@/library/firebase/clientApp';
-import useUser from '@/components/hooks/useUser';
+import useUserSession from '@/components/hooks/useUserSesssion';
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer/TornContainer';
-import Loading from '@/components/loading';
 import Textfield from '@/components/ui/textfield';
 import Button from '@/components/ui/button';
 import NumberInput from '@/components/ui/numberInput';
+import Link from 'next/link';
 
-const Login: React.FC = () => {
+interface LoginProps {
+  initialUser: User | undefined;
+}
+
+const Login: React.FC<LoginProps> = ({ initialUser }) => {
   const router = useRouter();
-  const { user, userLoading } = useUser();
+  const user = useUserSession(initialUser);
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
@@ -46,7 +50,6 @@ const Login: React.FC = () => {
         toast.error('Failed to send code.');
       });
   };
-  //6505553434
 
   const handleChangeOtp = (value: string) => {
     setOtpCode(value);
@@ -57,8 +60,8 @@ const Login: React.FC = () => {
     if (window.confirmationResult) {
       window.confirmationResult.confirm(otpCode).then(() => {
         // User signed in successfully.
-        toast.success('Signed in successfully!')
-        router.push('/');
+        toast.success('Signed in successfully!');
+        router.back();
       }).catch((error: { message: string }) => {
         // User couldn't sign in (bad verification code?)
         console.error(error.message);
@@ -80,17 +83,15 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user && !userLoading) {
+    if (user) {
       toast.info('User already logged in');
       router.push('/');
-    } else if (!userLoading && !user) {
+    } else if (!user) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
         'size': 'invisible',
       });
     }
-  }, [user, userLoading]);
-
-  if (userLoading) return <Loading />;
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
@@ -98,8 +99,8 @@ const Login: React.FC = () => {
         strategy="lazyOnload"
         src="https://www.google.com/recaptcha/enterprise.js?render=6LcRkcwrAAAAAGM5FKmXxQ2fVBWX8cQmX1zrtH7y"
       />
-      <IconHeader isLoading={loading} />
-      <TornContainer>
+      <IconHeader />
+      <TornContainer isLoading={loading}>
         {mode == 'phone' &&
           <form className="centered-col gap-2 width-full" onSubmit={handleSendOTP}>
             <h3 className="mb-2">
@@ -120,8 +121,10 @@ const Login: React.FC = () => {
             />
             {/* <div id="recaptcha-container" className="mt-4"></div> */}
 
-            <p className="text-xs mt-8">
-              By entering your phone number, you agree to our Terms of Service and Privacy Policy. Standard message and data rates may apply.
+            <p className="text-xs mt-8 max-w-lg">
+              By entering your phone number, you agree to our Terms of Service
+              and <Link className="underline" href="/privacy-policy">Privacy Policy</Link>.
+              Standard message and data rates may apply.
             </p>
           </form>
         }

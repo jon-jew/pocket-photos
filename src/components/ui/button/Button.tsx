@@ -13,7 +13,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   onClick?: () => void;
   href?: string;
   fullWidth?: boolean;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'warning';
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -31,6 +31,7 @@ const Button: React.FC<ButtonProps> = ({
     'w-full': fullWidth,
     'bg-secondary text-primary hover:not-disabled:bg-secondary-hover': variant === 'primary',
     'bg-primary text-secondary hover:not-disabled:bg-primary-hover': variant === 'secondary',
+    'bg-warning text-white hover:not-disabled:bg-warning-hover': variant === 'warning',
   });
 
   if (href) {
@@ -53,7 +54,7 @@ const Button: React.FC<ButtonProps> = ({
       type={type}
       disabled={disabled}
       onClick={onClick ? onClick : undefined}
-      className={classes}
+      className={`${classes}`}
       {...props}
     >
       {children}

@@ -1,7 +1,11 @@
+'use server';
+
+import { getAuthenticatedAppForUser } from "@/library/firebase/serverApp";
+
 import NewAlbum from "@/views/newAlbum";
 
-const NewAlbumPage: React.FC = () => {
-  return <NewAlbum />
-};
+export default async function NewAlbumPage() {
+  const { currentUser } = await getAuthenticatedAppForUser();
 
-export default NewAlbumPage;
+  return <NewAlbum currentUser={currentUser?.toJSON() as UserInfo} />;
+};

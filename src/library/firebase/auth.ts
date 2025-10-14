@@ -1,6 +1,14 @@
 "use client";
 import { redirect } from "next/navigation";
-import { RecaptchaVerifier, onAuthStateChanged, signOut, ConfirmationResult } from "firebase/auth";
+import {
+  RecaptchaVerifier,
+  onAuthStateChanged,
+  onIdTokenChanged as _onIdTokenChanged,
+  signOut,
+  ConfirmationResult,
+  NextOrObserver,
+  User,
+} from "firebase/auth";
 import { toast } from "react-toastify";
 
 import { auth } from "./clientApp";
@@ -10,18 +18,29 @@ declare global {
     recaptchaVerifier: RecaptchaVerifier;
     confirmationResult?: ConfirmationResult;
   }
+
+  interface UserInfo extends User {
+    stsTokenManager: {
+      accessToken: string;
+      expirationTime: number;
+      refreshToken: string;
+    };
+  }
 };
 
+export function onIdTokenChanged(cb: NextOrObserver<User | undefined>) {
+  return _onIdTokenChanged(auth, cb);
+}
+
 export const logoutUser = () => {
-  console.log('logout')
   signOut(auth).then(() => {
+    window.location.reload();
     toast.info('Logged out');
     redirect('/');
   }).catch((error) => {
     console.error(error);
   });
 };
-
 
 export const getUser = (cb: (user: string | null) => void) => {
   onAuthStateChanged(auth, (user) => {
