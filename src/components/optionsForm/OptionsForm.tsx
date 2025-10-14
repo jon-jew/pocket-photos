@@ -54,7 +54,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 
   return (
     <div className="bg-primary text-secondary rounded-lg relative px-2 py-4 w-[85%] max-w-[500px] z-[1000]">
-      <h2 className="text-3xl mb-10"><TuneIcon /> Options</h2>
+      <h2 className="text-2xl mb-10"><TuneIcon /> Options</h2>
       {!showDelete ?
         <>
           <div className="absolute top-3 right-3">
@@ -79,9 +79,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
               />
               <span className="text-xs">Viewers can add images</span>
             </div>
-            {/* <Button onClick={handleDelete} variant="warning">
-          <span className="text-xs mr-2">X</span> Delete
-        </Button> */}
             <Button
               type="submit"
               fullWidth

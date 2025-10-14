@@ -1,5 +1,8 @@
 @use 'sass:math';
 
+.close-btn {
+  background-color: #0000006b;
+}
 .gallery-slide {
   background-color: #e7e9e5;
   padding: 15px 10px 0px 10px;
@@ -16,10 +19,14 @@
   }
 }
 
-.gallery-btn {
-  background-color: #ffffff;
-  border-radius: 50%;
-  font-family: var(--font-gloria);
-  color: var(--secondary);
-  padding: 5px 18px;
+.control-container {
+  background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(51, 51, 51, 0.82) 50%, rgba(0, 0, 0, 0.12) 100%);
+
+  .gallery-btn {
+    background-color: #ffffffb2;
+    border-radius: 50%;
+    font-family: var(--font-gloria);
+    color: var(--secondary);
+    padding: 5px 18px;
+  }
 }

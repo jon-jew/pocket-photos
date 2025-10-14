@@ -63,10 +63,10 @@ const Carousel: React.FC<CarouselProps> = ({
         <button
           onClick={closeModal}
           type="button"
-          className="absolute top-8 right-8 text-2xl z-[3000] rounded-full bg-gray-500 opacity-85 px-4 py-2"
+          className="absolute close-btn top-8 left-8 text-2xl z-[3000] rounded-full px-4 py-2"
         >
           X
-        </button>
+        </button> 
         <div
           className="fixed w-full h-full z-[999]"
           onClick={closeModal}
@@ -89,7 +89,7 @@ const Carousel: React.FC<CarouselProps> = ({
                       alt={`Gallery image ${idx}`}
                       width={0}
                       height={0}
-                      style={{ width: '100%', maxHeight: 'calc(100vh - 200px)', objectFit: 'contain' }}
+                      style={{ width: '100%', maxHeight: 'calc(100vh - 225px)', objectFit: 'contain' }}
                       sizes="80vw"
                     />
                   </div>
@@ -104,12 +104,12 @@ const Carousel: React.FC<CarouselProps> = ({
           ))}
         </ul>
       </div>
-      <div className="absolute bottom-0 w-full z-[1000]">
+      <div className="control-container absolute bottom-0 w-full z-[1000]">
         <div className="w-full flex flex-row gap-24 pt-2 pb-8 bg-[#00000082] justify-center items-center">
           {!confirmDownload &&
             <button
               onClick={prevSlide}
-              className="gallery-btn bg-gray-200! text-4xl cursor-pointer"
+              className="gallery-btn text-4xl cursor-pointer"
               aria-label="Previous"
               type="button"
             >
@@ -141,7 +141,7 @@ const Carousel: React.FC<CarouselProps> = ({
           {!confirmDownload &&
             <button
               onClick={nextSlide}
-              className="gallery-btn bg-gray-200! text-4xl cursor-pointer"
+              className="gallery-btn text-4xl cursor-pointer"
               aria-label="Next"
               type="button"
             >

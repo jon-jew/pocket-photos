@@ -24,6 +24,7 @@ import Loading from "@/components/loading";
 import ImageGallery from "@/components/imageGallery";
 import OptionsForm from "@/components/optionsForm";
 import UserDropdown from "@/components/ui/userDropdown";
+import ReportDropdown from "@/components/ui/reportDropdown";
 import IconButton from "@/components/ui/iconButton";
 
 interface AlbumInfo {
@@ -70,20 +71,20 @@ export default function AlbumPage({
   };
 
   async function shareContent() {
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: `Plurr: ${albumInfo?.albumName}`,
-        text: 'Check out this image lobby!',
-        url: window.location.href,
-      });
-    } catch (error) {
-      console.error('Error sharing content:', error);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Plurr: ${albumInfo?.albumName}`,
+          text: 'Check out this image lobby!',
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing content:', error);
+      }
+    } else {
+      console.log('Web Share API not supported in this browser.');
     }
-  } else {
-    console.log('Web Share API not supported in this browser.');
   }
-}
 
   const getImages = async () => {
     const imageRes = await getAlbumImages(albumId);
@@ -216,7 +217,7 @@ export default function AlbumPage({
                   >
                     <QrCodeIcon />
                   </IconButton>
-                  
+
                 </div>
               </div>
             </div>
@@ -242,7 +243,12 @@ export default function AlbumPage({
           </div>
         </nav>
         <div className="pt-30 px-2 pb-[50px]">
-          <h4 className="text-primary ml-10">{images.length} images</h4>
+          <div className="flex flex-row gap-3 pl-3">
+            <ReportDropdown albumId={albumId} />
+            <h4 className="text-primary">
+              {images.length} images
+            </h4>
+          </div>
           <ImageGallery
             images={editMode ?
               imageChanges.map((imageChange) => imageChange.imageUrl) :
@@ -316,7 +322,7 @@ export default function AlbumPage({
           <button
             onClick={() => closeOptions(false, false)}
             type="button"
-            className="absolute top-8 right-8 text-2xl"
+            className="close-btn absolute top-8 left-8 text-2xl"
           >
             X
           </button>

@@ -5,8 +5,10 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { User } from "firebase/auth";
 import { toast } from 'react-toastify';
+import { User } from "firebase/auth";
+
+import CollectionsIcon from '@mui/icons-material/Collections';
 
 import { getUserAlbums } from '@/library/firebase/image';
 
@@ -83,14 +85,14 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
             {/* <p>{album.created}</p> */}
           </Link>
         ))}
-        <div className="fixed bottom-10 right-15 z-[25]">
+      </div>
+      <div className="w-full sticky bottom-0 text-right pr-5 pb-5 z-[25]">
           <Link href='/new-album'>
-            <button className="bg-secondary text-primary border-4 border-primary text-3xl px-6 py-4 rounded-full">
-              +
+            <button className="bg-secondary text-primary border-3 border-primary px-4 py-5 rounded-full">
+              <span className="text-md">+</span><CollectionsIcon />
             </button>
           </Link>
         </div>
-      </div>
     </main>
   )
 };

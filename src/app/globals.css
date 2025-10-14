@@ -43,6 +43,10 @@ body {
   align-items: center;
 }
 
+.close-btn {
+  background-color: #0000006b;
+}
+
 h1 {
   font-size: 48px;
 }
