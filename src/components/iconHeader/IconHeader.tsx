@@ -13,7 +13,7 @@ interface IconHeaderProps {
 const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, currentUser }) => {
   return (
     <div className="centered-col relative w-full max-w-xl !justify-end h-[300px] text-primary mb-8">
-      {showLogin && <UserDropdown initialUser={currentUser} />}
+      {showLogin && <UserDropdown user={currentUser} />}
       <Image
         priority
         alt="Plurr Logo"

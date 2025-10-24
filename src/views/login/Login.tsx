@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 
 import Script from 'next/script';
-import { useRouter } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
+import Cookies from 'universal-cookie';
+import { onIdTokenChanged } from '@/library/firebase/auth';
 import { signInWithPhoneNumber as _signInWithPhoneNumber, RecaptchaVerifier, User } from "firebase/auth";
 import { toast } from 'react-toastify';
 
@@ -24,8 +26,9 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ initialUser }) => {
+  const cookies = new Cookies(null, { path: '/' });
   const router = useRouter();
-  const user = useUserSession(initialUser);
+  // const user = useUserSession(initialUser);
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
@@ -58,10 +61,12 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
   const handleOtpSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (window.confirmationResult) {
-      window.confirmationResult.confirm(otpCode).then(() => {
+      window.confirmationResult.confirm(otpCode).then((res) => {
         // User signed in successfully.
-        toast.success('Signed in successfully!');
-        router.back();
+
+        // window.location.reload();
+
+        // router.back();
       }).catch((error: { message: string }) => {
         // User couldn't sign in (bad verification code?)
         console.error(error.message);
@@ -83,15 +88,31 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (initialUser) {
       toast.info('User already logged in');
       router.push('/');
-    } else if (!user) {
+    } else if (!initialUser) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
         'size': 'invisible',
       });
     }
   }, []);
+
+  useEffect(() => {
+    return onIdTokenChanged(async (user) => {
+      if (user) {
+        const idToken = await user.getIdToken();
+        await cookies.set("__session", idToken);
+        router.push('/');
+        toast.success('Signed in successfully!');
+      } else {
+        await cookies.remove("__session");
+      }
+      if (initialUser?.uid === user?.uid) {
+        return;
+      }
+    });
+  }, [initialUser]);
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">

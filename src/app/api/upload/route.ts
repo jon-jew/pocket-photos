@@ -24,13 +24,15 @@ export async function POST(req: NextRequest) {
     }
     const formData = await req.formData();
     const imageFile = formData.get('image') as File;
-    const albumId = formData.get('albumId') as string;
+    const info = formData.get('info') as string;
+    const { albumId, isFullQuality } = JSON.parse(info);
+    // const albumId = formData.get('albumId') as string;
     if (!imageFile || !albumId) {
       return NextResponse.json({ error: 'Missing file or albumId' }, { status: 400 });
     }
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
     const webpFile = await sharp(imageBuffer).jpeg({
-      quality: 75,
+      quality: isFullQuality ?  100 : 75,
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();

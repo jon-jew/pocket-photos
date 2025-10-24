@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       pathname: '**',
     }
     ],
-    qualities: [10, 20, 50, 75, 80],
+    qualities: [10, 20, 50, 75, 80, 100],
   },
   experimental: {
     serverActions: {

@@ -41,6 +41,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
 
   const [isStuck, setIsStuck] = useState(false);
   const [viewersCanEdit, setViewersCanEdit] = useState(true);
+  const [fullQuality, setFullQuality] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -84,7 +85,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
       toast.error('Image count limit is 75.');
     } else {
       setUploadLoading(true);
-      const newImages = await Promise.all(files.map(compressFile));
+      const newImages = await Promise.all(files.map((file) => compressFile(file, fullQuality)));
       setImages(prevImages => [...prevImages, ...newImages]);
       setUploadLoading(false);
     }
@@ -99,6 +100,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
         images.map((image) => image.file),
         currentUser,
         viewersCanEdit,
+        fullQuality,
         setUploadProgress,
       );
       if (uploadRes) {
@@ -197,7 +199,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
                 <span className="text-xs mr-1">options</span><TuneIcon />
               </IconButton>
               <div className={clx({
-                "h-[40px]": optionsOpen,
+                "h-[80px]": optionsOpen,
                 "transition-[height] duration-150 h-0 overflow-hidden": true,
               })}>
                 <div>
@@ -207,6 +209,14 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
                     color="secondary"
                   />
                   <span className="text-xs">Viewers can add images</span>
+                </div>
+                <div>
+                  <Switch
+                    checked={fullQuality}
+                    onChange={() => setFullQuality(!fullQuality)}
+                    color="secondary"
+                  />
+                  <span className="text-xs">Full Quality</span>
                 </div>
               </div>
             </div>

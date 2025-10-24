@@ -89,6 +89,7 @@ const Carousel: React.FC<CarouselProps> = ({
                       alt={`Gallery image ${idx}`}
                       width={0}
                       height={0}
+                      quality={100}
                       style={{ width: '100%', maxHeight: 'calc(100vh - 225px)', objectFit: 'contain' }}
                       sizes="80vw"
                     />

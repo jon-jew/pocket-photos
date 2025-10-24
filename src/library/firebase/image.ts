@@ -122,6 +122,7 @@ export const uploadImageAlbum = async (
   images: File[],
   currentUser: UserInfo,
   viewersCanEdit: boolean,
+  isFullQuality: boolean,
   setUploadProgress: React.Dispatch<React.SetStateAction<number>>
 ) => {
   try {
@@ -149,7 +150,11 @@ export const uploadImageAlbum = async (
     const apiPromises = images.map(async (image, index) => {
       const formData = new FormData();
       formData.append(`image`, image, `album-img-${index}`);
-      formData.append('albumId', albumId);
+      // formData.append('albumId', albumId);
+      // formData.append('isFullQuality', isFullQuality);
+      formData.append('info', JSON.stringify({
+        isFullQuality, albumId,
+      }));
       const res = await fetch('/api/upload', {
         method: 'POST',
         headers: {
@@ -182,6 +187,7 @@ export const uploadImageAlbum = async (
       viewersCanEdit: viewersCanEdit,
       createdOn: serverTimestamp(),
       imageList: imageList,
+      isFullQuality
     };
 
     await setDoc(doc(db, 'albums', albumId), albumData);
