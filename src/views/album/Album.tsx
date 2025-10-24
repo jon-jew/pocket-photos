@@ -152,7 +152,7 @@ export default function AlbumPage({
     if (files.length + images.length > 75) {
       toast.error('Image count limit is 75.');
     } else {
-      const newImages = await Promise.all(files.map(compressFile));
+      const newImages = await Promise.all(files.map((file) => compressFile(file, false)));
 
       await uploadImagesToAlbum(
         albumId,
