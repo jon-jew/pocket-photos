@@ -48,7 +48,7 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
       <nav className="fixed top-0 w-full max-w-4xl z-[30]">
         <div className="relative bg-primary pt-6 pl-5 pr-15 z-4">
           <h2 className="text-3xl text-secondary font-bold">Your Albums</h2>
-          <UserDropdown variant="secondary" initialUser={currentUser} />
+          <UserDropdown variant="secondary" user={currentUser} />
         </div>
         <div className="h-[20px] w-full rotate-180 relative">
           <Image

@@ -231,7 +231,7 @@ export default function AlbumPage({
                 <p className="pb-2 !text-md text-black">{albumId}</p>
               </div>
             </div>
-            <UserDropdown initialUser={currentUser} variant="secondary" />
+            <UserDropdown user={currentUser} variant="secondary" />
           </div>
           <div className="h-[20px] w-full rotate-180 relative">
             <Image

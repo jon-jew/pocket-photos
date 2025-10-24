@@ -7,7 +7,7 @@ import { onIdTokenChanged } from '@/library/firebase/auth';
 
 export default function useUserSession(initialUser: User | undefined) {
   const cookies = new Cookies(null, { path: '/' });
-  
+
   useEffect(() => {
     return onIdTokenChanged(async (user) => {
       if (user) {

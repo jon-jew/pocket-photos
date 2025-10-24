@@ -1,5 +1,5 @@
 "use client";
-import { redirect } from "next/navigation";
+import Cookies from 'universal-cookie';
 import {
   RecaptchaVerifier,
   onAuthStateChanged,
@@ -12,6 +12,7 @@ import {
 import { toast } from "react-toastify";
 
 import { auth } from "./clientApp";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 declare global {
   interface Window {
@@ -32,11 +33,17 @@ export function onIdTokenChanged(cb: NextOrObserver<User | undefined>) {
   return _onIdTokenChanged(auth, cb);
 }
 
-export const logoutUser = () => {
-  signOut(auth).then(() => {
-    window.location.reload();
+export const logoutUser = (router: AppRouterInstance) => {
+  const cookies = new Cookies(null, { path: '/' });
+
+  signOut(auth).then(async () => {
+    await cookies.remove("__session");
+
+    // window.location.reload();
     toast.info('Logged out');
-    redirect('/');
+    console.log('logged out')
+
+    router.push('/logged-out');
   }).catch((error) => {
     console.error(error);
   });

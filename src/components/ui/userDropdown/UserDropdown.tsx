@@ -16,15 +16,14 @@ interface MenuItem {
 
 interface UserDropdownProps {
   variant?: 'primary' | 'secondary';
-  initialUser?: User | undefined;
+  user?: User | undefined;
 };
 
 export const UserDropdown: React.FC<UserDropdownProps> = ({
   variant = 'primary',
-  initialUser,
+  user,
 }) => {
   const router = useRouter();
-  const user = useUserSession(initialUser);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +33,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
   const menuItems: MenuItem[] = [
     { label: "Home", href: '/' },
     { label: "Albums", href: `/user-albums/${user ? user.uid : ''}` },
-    { label: "Logout", onClick: () => logoutUser() },
+    { label: "Logout", onClick: () => logoutUser(router) },
   ];
 
   useEffect(() => {
