@@ -184,7 +184,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
                 LeadingIcon={<CollectionsIcon sx={{ fontSize: '18px' }} />}
                 buttonLabel="Create"
                 buttonType="submit"
-                buttonDisabled={images.length === 0 || albumName === ''}
+                buttonDisabled={albumName === ''}
               />
 
             </div>

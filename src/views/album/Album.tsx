@@ -189,14 +189,14 @@ export default function AlbumPage({
       <Loading progress={uploadProgress} />
     );
   }
-  if (images.length === 0) {
-    return (
-      <main className="max-w-4xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">{albumInfo.albumName || 'Missing Album Name'}</h1>
-        <p>No images in album</p>
-      </main>
-    );
-  };
+  // if (images.length === 0) {
+  //   return (
+  //     <main className="max-w-4xl mx-auto p-6">
+  //       <h1 className="text-3xl font-bold mb-6">{albumInfo.albumName || 'Missing Album Name'}</h1>
+  //       <p>No images in album</p>
+  //     </main>
+  //   );
+  // };
 
   return (
     <>

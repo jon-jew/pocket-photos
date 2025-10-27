@@ -130,10 +130,10 @@ export const uploadImageAlbum = async (
       toast.error('Please login to create album.');
       return false;
     }
-    if (images.length === 0) {
-      toast.error('Please select images to upload.');
-      return false;
-    }
+    // if (images.length === 0) {
+    //   toast.error('Please select images to upload.');
+    //   return false;
+    // }
 
     const idToken = await currentUser.stsTokenManager.accessToken;
     if (!idToken) {
