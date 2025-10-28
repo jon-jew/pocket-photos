@@ -337,7 +337,7 @@ export const handleImageReaction = async (userId: string, reaction: string, albu
         });
       }
 
-      let displayReactions: string[] = [];
+      const displayReactions: string[] = [];
       for (let i = 0; i < reactions.length && displayReactions.length < 4; i++) {
         if (
           !displayReactions.includes(reactions[i].reaction) &&
