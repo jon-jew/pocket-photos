@@ -35,7 +35,7 @@ ul.polaroids li {
   -moz-transform: rotate(-2deg);
   transform: rotate(-2deg);
 
-  .thumbnail-reaction.reaction-menu {
+  .thumbnail-reaction .reaction-menu {
     -webkit-transform: rotate(2deg);
     -moz-transform: rotate(2deg);
     transform: rotate(2deg);
@@ -48,7 +48,7 @@ ul.polaroids li:nth-child(even) {
   -moz-transform: rotate(2deg);
   transform: rotate(2deg);
 
-  .thumbnail-reaction.reaction-menu {
+  .thumbnail-reaction .reaction-menu {
     -webkit-transform: rotate(-2deg);
     -moz-transform: rotate(-2deg);
     transform: rotate(-2deg);
@@ -63,7 +63,7 @@ ul.polaroids li:nth-child(3n) {
   position: relative;
   top: -5px;
 
-  .thumbnail-reaction.reaction-menu {
+  .thumbnail-reaction .reaction-menu {
     -webkit-transform: none;
     -moz-transform: none;
     transform: none;
@@ -78,7 +78,7 @@ ul.polaroids li:nth-child(5n) {
   position: relative;
   right: 5px;
 
-  .thumbnail-reaction.reaction-menu {
+  .thumbnail-reaction .reaction-menu {
     -webkit-transform: rotate(-5deg);
     -moz-transform: rotate(-5deg);
     transform: rotate(-5deg);
