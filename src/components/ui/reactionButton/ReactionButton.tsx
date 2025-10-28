@@ -75,6 +75,8 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         onClick={handleClick}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onPointerDown={handleMouseDown}
+        onPointerUp={handleMouseUp}
         onTouchStart={handleMouseDown}
         onTouchEnd={handleMouseUp}
       >
