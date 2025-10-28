@@ -20,8 +20,6 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   selectedReaction,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  // const [reactionString, setReactionString] = useState<string>(displayString);
-  // const [selectedReact, setSelectedReact] = useState<string | null>(selectedReaction);
   const buttonRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>(null);
 
@@ -44,19 +42,13 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   };
 
   const handleReactionSelect = async (reaction: string) => {
-    const newString = await onReactionSelect(reaction);
-    // if (newString) setReactionString(newString);
-    // if (reaction === selectedReact) setSelectedReact(null);
-    // else setSelectedReact(reaction);
+    await onReactionSelect(reaction);
     setIsOpen(false);
   };
 
   const handleClick = async () => {
     if (!isOpen) {
-      const newString = await onReactionSelect('like');
-      // if (newString) setReactionString(newString);
-      // if (selectedReact !== null) setSelectedReact(null);
-      // else setSelectedReact('like');
+      await onReactionSelect('like');
     }
   };
 

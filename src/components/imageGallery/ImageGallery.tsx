@@ -95,7 +95,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             src={image.imageUrl}
             albumId={albumId}
             currentUserId={currentUserId}
-            reactions={("reactions" in image) ? image.reactions : undefined}
             reactionEntry={reactionList ? reactionList[idx] : undefined}
             imagesLength={imageList.length}
             editMode={editMode}

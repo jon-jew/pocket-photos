@@ -245,8 +245,8 @@ export default function AlbumPage({
               imageList={editMode ? editedImageList : imageList}
               initialReactions={imageList.map((image) => ({
                 selectedReaction: currentUser?.uid ?
-                  image.reactions.find((reaction) => reaction.userId === currentUser.uid)?.reaction : null,
-                reactionString: `${image.reactionString} ${image.reactions.length}`,
+                  image.reactions?.find((reaction) => reaction.userId === currentUser.uid)?.reaction : null,
+                reactionString: image.reactions ? `${image.reactionString} ${image.reactions?.length}` : '',
               }))}
               albumId={albumId}
               editMode={albumInfo.ownerId === currentUser?.uid ? editMode : false}

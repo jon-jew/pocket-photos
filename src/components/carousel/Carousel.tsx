@@ -85,51 +85,47 @@ const Carousel: React.FC<CarouselProps> = ({
           className="flex items-center transition-transform duration-500 ease-in-out h-[calc(100vh-50px)] z-[1000]"
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
-          {imageList.map((image, idx) => {
-            const selectedReaction = currentUserId && ("reactions" in image) ?
-              image.reactions.find((reaction) => reaction.userId)?.reaction : null;
-            return (
-              <li
-                key={`gallery-img-${idx}`}
-                className="w-full"
-              >
-                <div className="w-[100vw] flex justify-center items-center">
-                  <div className="gallery-slide rounded-sm">
-                    <div className="img-container">
-                      <Image
-                        priority={idx === current}
-                        src={image.imageUrl}
-                        alt={`Gallery image ${idx}`}
-                        width={0}
-                        height={0}
-                        quality={100}
-                        style={{ width: '100%', maxHeight: 'calc(100vh - 225px)', objectFit: 'contain' }}
-                        sizes="80vw"
-                      />
-                    </div>
-                    <div
-                      className="relative h-[40px] text-secondary rounded-sm w-full flex justify-center items-center"
-                    >
-                      {("reactions" in image) && reactionList && albumId &&
-                        <div className={clx({
-                          "hide": hideReactionBtn,
-                          "absolute bottom-0 left-0 fade-component": true,
-                        })}>
-                          <ReactionButton
-                            displayString={reactionList[idx].reactionString}
-                            selectedReaction={reactionList[idx].selectedReaction}
-                            disableClick={currentUserId === undefined}
-                            onReactionSelect={(reaction: string) => onReactionSelect(reaction, idx)}
-                          />
-                        </div>
-                      }
-                      <span>{idx + 1} / {imageList.length}</span>
-                    </div>
+          {imageList.map((image, idx) =>
+            <li
+              key={`gallery-img-${idx}`}
+              className="w-full"
+            >
+              <div className="w-[100vw] flex justify-center items-center">
+                <div className="gallery-slide rounded-sm">
+                  <div className="img-container">
+                    <Image
+                      priority={idx === current}
+                      src={image.imageUrl}
+                      alt={`Gallery image ${idx}`}
+                      width={0}
+                      height={0}
+                      quality={100}
+                      style={{ width: '100%', maxHeight: 'calc(100vh - 225px)', objectFit: 'contain' }}
+                      sizes="80vw"
+                    />
+                  </div>
+                  <div
+                    className="relative h-[40px] px-2 text-secondary rounded-sm w-full flex justify-end items-center"
+                  >
+                    {("reactions" in image) && reactionList && albumId &&
+                      <div className={clx({
+                        "hide": hideReactionBtn,
+                        "absolute bottom-0 left-0 fade-component": true,
+                      })}>
+                        <ReactionButton
+                          displayString={reactionList[idx].reactionString}
+                          selectedReaction={reactionList[idx].selectedReaction}
+                          disableClick={currentUserId === undefined}
+                          onReactionSelect={(reaction: string) => onReactionSelect(reaction, idx)}
+                        />
+                      </div>
+                    }
+                    <span className="text-xs">{idx + 1} / {imageList.length}</span>
                   </div>
                 </div>
-              </li>
-            );
-          })}
+              </div>
+            </li>
+          )}
         </ul>
       </div>
       <div className="control-container absolute bottom-0 w-full z-[1000]">

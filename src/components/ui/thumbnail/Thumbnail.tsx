@@ -15,7 +15,6 @@ interface ThumbnailProps {
   src: string;
   albumId?: string;
   currentUserId: string | undefined;
-  reactions?: ImageReaction[];
   reactionEntry?: ImageReactionEntry;
   imagesLength: number;
   editMode?: boolean;
@@ -31,11 +30,10 @@ export default function Thumbnail({
   src,
   albumId,
   currentUserId,
-  reactions,
   reactionEntry,
   imagesLength,
   editMode = false,
-  quality = 20,
+  quality = 80,
   openModal,
   handleRemoveImage,
   handleReorderImage,
@@ -45,10 +43,6 @@ export default function Thumbnail({
     triggerOnce: true,
     threshold: 0.5
   });
-
-  // const selectedReaction = currentUserId ?
-  //   reactions?.find((reaction) => reaction.userId)?.reaction
-  //   : null;
 
   return (
     <li
