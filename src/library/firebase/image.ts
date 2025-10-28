@@ -13,7 +13,7 @@ import {
   orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, deleteObject } from 'firebase/storage';
 
 import { toast } from 'react-toastify';
 
@@ -29,13 +29,32 @@ declare global {
   }
 
   interface Image {
-    id: string;
     imageUrl: string;
-    uploaderId: string | null;
   }
 
   interface ImageEntry extends Image {
     previewImageUrl: string;
+  }
+
+  interface NewImageEntry extends Image {
+    file: File;
+  }
+
+  interface GalleryImageEntry extends Image {
+    id: string;
+    uploaderId: string | null;
+    reactions: ImageReaction[];
+    reactionString: string;
+  }
+
+  interface ImageReaction {
+    userId: string;
+    reaction: string;
+  }
+
+  interface ImageReactionEntry {
+    selectedReaction: string | null | undefined;
+    reactionString: string;
   }
 
   interface ImageChange extends ImageEntry {
@@ -102,6 +121,7 @@ export const uploadImagesToAlbum = async (
         }
       })
       const addedImageList = await Promise.all(imagePromises);
+
       await updateDoc(albumRef, {
         imageList: [...imageList, ...addedImageList],
       });
@@ -130,10 +150,6 @@ export const uploadImageAlbum = async (
       toast.error('Please login to create album.');
       return false;
     }
-    // if (images.length === 0) {
-    //   toast.error('Please select images to upload.');
-    //   return false;
-    // }
 
     const idToken = await currentUser.stsTokenManager.accessToken;
     if (!idToken) {
@@ -150,8 +166,6 @@ export const uploadImageAlbum = async (
     const apiPromises = images.map(async (image, index) => {
       const formData = new FormData();
       formData.append(`image`, image, `album-img-${index}`);
-      // formData.append('albumId', albumId);
-      // formData.append('isFullQuality', isFullQuality);
       formData.append('info', JSON.stringify({
         isFullQuality, albumId,
       }));
@@ -165,7 +179,11 @@ export const uploadImageAlbum = async (
       if (res.body && res.ok) {
         const body = await streamToObject(res.body);
         setUploadProgress((prev) => prev + progressIncrement);
-        return body;
+        return ({
+          ...body,
+          reactions: [],
+          reactionString: '',
+        });
       }
     });
     const imageList = await Promise.all(apiPromises);
@@ -251,14 +269,14 @@ export const getUserAlbums = async (userId: string) => {
     const querySnapshot = await getDocs(q);
     const promises = querySnapshot.docs.map(async (doc) => {
       const data = doc.data();
-      if (data.imageList.length !== 0) {
-        return ({
-          id: doc.id,
-          albumName: data.albumName as string,
-          thumbnailImage: data.imageList[0].imageUrl,
-          created: new Date(data.created).toDateString(),
-        });
-      }
+      return ({
+        id: doc.id,
+        albumName: data.albumName as string,
+        thumbnailImage: data.imageList.length !== 0 ?
+          data.imageList[0].imageUrl :
+          null,
+        created: new Date(data.created).toDateString(),
+      });
     });
     const res = await Promise.all(promises);
     return res as UserAlbum[];
@@ -272,45 +290,75 @@ export const getUserAlbums = async (userId: string) => {
 export const editAlbumImages = async (
   albumId: string,
   userId: string | undefined,
-  changes: ImageChange[],
-  deletedImages: ImageChange[]
+  editedImageList: GalleryImageEntry[],
+  deletedImageIds: string[]
 ) => {
   try {
-    const deletePromises = deletedImages.map(async (change) => {
-      const imageRef = ref(storage, `/${albumId}/${change.id}`);
+    const deletePromises = deletedImageIds.map(async (id) => {
+      const imageRef = ref(storage, `/albums/${albumId}/${id}.jpg`);
       await deleteObject(imageRef);
     });
+    await Promise.all(deletePromises);
 
-    const newImageList: Image[] = new Array(changes.length);
-    const promises = changes.map(async (change, index) => {
-      if (change.file && !change.uploaded) {
-        const imageId = generateRandomId();
-        const imageRef = ref(storage, `/${albumId}/${imageId}`);
-        await uploadBytes(imageRef, change.file);
-        const imageUrl = await getDownloadURL(imageRef);
-        newImageList[index] = {
-          id: imageId,
-          uploaderId: userId ? userId : 'anonymous',
-          imageUrl,
-        };
-      } else {
-        newImageList[index] = {
-          id: change.id,
-          uploaderId: change.uploaderId ? change.uploaderId : null,
-          imageUrl: change.imageUrl,
-        };
-      }
-    });
-
-    await Promise.all([...promises, ...deletePromises]);
     const albumRef = doc(db, 'albums', albumId);
     await updateDoc(albumRef, {
-      imageList: newImageList,
+      imageList: editedImageList,
     });
-
   } catch (error) {
     console.error(error);
     toast.error('Failed to save changes');
+    return false;
+  }
+};
+
+export const handleImageReaction = async (userId: string, reaction: string, albumId: string, imageIndex: number) => {
+  try {
+    const albumRef = doc(db, 'albums', albumId);
+    const docSnap = await getDoc(albumRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const imageList: GalleryImageEntry[] = data.imageList;
+      const imageEntry = imageList[imageIndex];
+      const reactions = imageEntry.reactions ? [...imageEntry.reactions] : [];
+      const foundIndex = reactions.findIndex(
+        (reaction: ImageReaction) => reaction.userId === userId
+      );
+
+      if (foundIndex !== -1) {
+        if (reactions[foundIndex].reaction === reaction || reaction === 'like') {
+          reactions.splice(foundIndex, 1);
+        } else {
+          reactions[foundIndex].reaction = reaction;
+        }
+      } else {
+        reactions.push({
+          userId,
+          reaction
+        });
+      }
+
+      let displayReactions: string[] = [];
+      for (let i = 0; i < reactions.length && displayReactions.length < 4; i++) {
+        if (
+          !displayReactions.includes(reactions[i].reaction) &&
+          reactions[i].reaction !== 'like'
+        ) {
+          displayReactions.push(reactions[i].reaction);
+        }
+      }
+      const reactionString = displayReactions.join('');
+
+      imageList[imageIndex].reactions = reactions;
+      imageList[imageIndex].reactionString = reactionString;
+      await updateDoc(albumRef, { imageList });
+
+      return `${reactionString} ${reactions.length}`;
+    }
+    console.error('Album id not found');
+    return false;
+
+  } catch (error) {
+    console.error(error);
     return false;
   }
 };
@@ -338,7 +386,7 @@ export const deleteAlbum = async (albumId: string) => {
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const { imageList } = docSnap.data();
-      const promises = imageList.map(async (image: Image) => {
+      const promises = imageList.map(async (image: GalleryImageEntry) => {
         const imageRef = ref(storage, `albums/${albumId}/${image.id}.jpg`);
         await deleteObject(imageRef);
       });

@@ -26,6 +26,7 @@ import OptionsForm from "@/components/optionsForm";
 import UserDropdown from "@/components/ui/userDropdown";
 import ReportDropdown from "@/components/ui/reportDropdown";
 import IconButton from "@/components/ui/iconButton";
+import Button from "@/components/ui/button";
 
 interface AlbumInfo {
   albumName: string;
@@ -37,7 +38,7 @@ interface AlbumInfo {
 interface AlbumProps {
   albumId: string;
   initialAlbumInfo: AlbumInfo;
-  initialImages: ImageEntry[];
+  initialImages: GalleryImageEntry[];
   currentUser: UserInfo | undefined;
 }
 
@@ -51,18 +52,18 @@ export default function AlbumPage({
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [images, setImages] = useState<ImageEntry[]>(initialImages || []);
+  const [imageList, setImageList] = useState<GalleryImageEntry[]>(initialImages || []);
   const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(initialAlbumInfo);
 
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
-
   const [isOptionsOpen, setIsOptionsOpen] = useState<boolean>(false);
+
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isChanged, setIsChanged] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(-1);
-  const [imageChanges, setImageChanges] = useState<ImageChange[]>([]);
-  const [deletedImages, setDeletedImages] = useState<ImageChange[]>([]);
+  const [editedImageList, setEditedImageList] = useState<GalleryImageEntry[]>([]);
+  const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -89,7 +90,7 @@ export default function AlbumPage({
   const getImages = async () => {
     const imageRes = await getAlbumImages(albumId);
     if (imageRes) {
-      setImages(imageRes.imageList);
+      setImageList(imageRes.imageList);
       setAlbumInfo({
         albumName: imageRes.albumName,
         ownerId: imageRes.ownerId,
@@ -106,50 +107,42 @@ export default function AlbumPage({
   const handleToggleEditMode = () => {
     if (editMode) {
       setEditMode(false);
-      setImageChanges([]);
+      setEditedImageList([]);
       setIsChanged(false);
     } else {
-      setDeletedImages([]);
+      setDeletedImageIds([]);
       setEditMode(true);
       setIsChanged(false);
       setIsQrOpen(false);
-      const initialImageChanges = images.map((image) => ({
-        ...image,
-        uploaded: true,
-        change: null,
-      }));
-      setImageChanges(initialImageChanges);
+      setEditedImageList(imageList);
     }
   };
 
   const closeOptions = async (reload: boolean, loading: boolean) => {
-    if (loading) setLoading(true);
+    setLoading(loading);
     if (reload) await getImages();
     setIsOptionsOpen(false);
   };
 
   const handleRemoveImage = (idx: number) => {
     if (!isChanged) setIsChanged(true);
-    if (imageChanges[idx].uploaded) {
-      setDeletedImages((prev) => [...prev, imageChanges[idx]]);
-    }
-    setImageChanges((prev) => prev.filter((item, index) => index !== idx));
+    setDeletedImageIds((prev) => [...prev, editedImageList[idx].id]);
+    setEditedImageList((prev) => prev.filter((item, index) => index !== idx));
   };
 
   const handleReorderImage = (idx: number, direction: -1 | 1) => {
     if (!isChanged) setIsChanged(true);
-    const newImageChanges = [...imageChanges];
-    [newImageChanges[idx + direction], newImageChanges[idx]] = [newImageChanges[idx], newImageChanges[idx + direction]];
-    newImageChanges[idx + direction].change = 'moved';
-    newImageChanges[idx].change = 'moved';
-    setImageChanges(newImageChanges);
+    const newImageList = [...editedImageList];
+    [newImageList[idx + direction], newImageList[idx]] = [newImageList[idx], newImageList[idx + direction]];
+
+    setEditedImageList(newImageList);
   };
 
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isChanged) setIsChanged(true);
     setLoading(true);
     const files = Array.from(e.target.files || []);
-    if (files.length + images.length > 75) {
+    if (files.length + imageList.length > 75) {
       toast.error('Image count limit is 75.');
     } else {
       const newImages = await Promise.all(files.map((file) => compressFile(file, false)));
@@ -168,7 +161,7 @@ export default function AlbumPage({
 
   const handleSubmitChanges = async () => {
     setLoading(true);
-    await editAlbumImages(albumId, currentUser?.uid, imageChanges, deletedImages);
+    await editAlbumImages(albumId, currentUser?.uid, editedImageList, deletedImageIds);
     await getImages();
     toast.success('Saved changes!');
     setEditMode(false);
@@ -181,7 +174,6 @@ export default function AlbumPage({
 
   useEffect(() => {
     getQrCode();
-    // getImages();
   }, []);
 
   if (!albumInfo || loading) {
@@ -189,14 +181,6 @@ export default function AlbumPage({
       <Loading progress={uploadProgress} />
     );
   }
-  // if (images.length === 0) {
-  //   return (
-  //     <main className="max-w-4xl mx-auto p-6">
-  //       <h1 className="text-3xl font-bold mb-6">{albumInfo.albumName || 'Missing Album Name'}</h1>
-  //       <p>No images in album</p>
-  //     </main>
-  //   );
-  // };
 
   return (
     <>
@@ -246,27 +230,37 @@ export default function AlbumPage({
           <div className="flex flex-row gap-3 pl-3">
             <ReportDropdown albumId={albumId} />
             <h4 className="text-primary">
-              {images.length} images
+              {imageList.length} image{imageList.length !== 1 && 's'}
             </h4>
           </div>
-          <ImageGallery
-            images={editMode ?
-              imageChanges.map((imageChange) => imageChange.imageUrl) :
-              images.map((image) => image.imageUrl)
-            }
-            onModalOpen={() => setIsQrOpen(false)}
-            handleRemoveImage={handleRemoveImage}
-            handleReorderImage={handleReorderImage}
-            editMode={albumInfo.ownerId === currentUser?.uid ? editMode : false}
-            showDownload={true}
-            variant="secondary"
-          />
+          {imageList.length === 0 ?
+            <div className="flex flex-col justify-center items-center p-4 gap-4 h-[calc(100vh-200px)]">
+              <h3>Add images to start the fun!</h3>
+              <Button variant="secondary" fullWidth>
+                Add images
+              </Button>
+            </div> :
+            <ImageGallery
+              currentUserId={currentUser?.uid}
+              imageList={editMode ? editedImageList : imageList}
+              initialReactions={imageList.map((image) => ({
+                selectedReaction: currentUser?.uid ?
+                  image.reactions.find((reaction) => reaction.userId === currentUser.uid)?.reaction : null,
+                reactionString: `${image.reactionString} ${image.reactions.length}`,
+              }))}
+              albumId={albumId}
+              editMode={albumInfo.ownerId === currentUser?.uid ? editMode : false}
+              showDownload
+              onModalOpen={() => setIsQrOpen(false)}
+              handleRemoveImage={handleRemoveImage}
+              handleReorderImage={handleReorderImage}
+            />
+          }
         </div>
 
         <div className="fixed w-full max-w-4xl pb-5 bottom-0 z-10">
           <div className="text-secondary h-[50px] flex flex-row items-center justify-center gap-20 pb-4">
             {editMode &&
-
               <button
                 className="text-secondary ring-blue-500/50 shadow-xl bg-primary text-[14px] px-4 py-2 rounded-lg"
                 onClick={handleSubmitChanges}

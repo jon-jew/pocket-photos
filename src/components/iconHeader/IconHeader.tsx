@@ -24,7 +24,7 @@ const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, currentUser 
       />
       <h1 className="leading-[48px]">PLURR</h1>
       <p className="leading-[20px]">
-        Create a photo album<br />together, instantly
+        Do now.<br />Connect later
       </p>
     </div>
   );

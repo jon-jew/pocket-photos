@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { User } from "firebase/auth";
 
 import { logoutUser } from "@/library/firebase/auth";
-import useUserSession from "@/components/hooks/useUserSesssion";
 
 interface MenuItem {
   label: string;
@@ -32,7 +31,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
 
   const menuItems: MenuItem[] = [
     { label: "Home", href: '/' },
-    { label: "Albums", href: `/user-albums/${user ? user.uid : ''}` },
+    { label: "My Lobbies", href: `/user-albums/${user ? user.uid : ''}` },
     { label: "Logout", onClick: () => logoutUser(router) },
   ];
 

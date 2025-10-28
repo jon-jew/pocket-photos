@@ -28,6 +28,10 @@ interface NewAlbumProps {
   currentUser: UserInfo | undefined;
 }
 
+interface NewImageEntry extends Image {
+  file: File;
+};
+
 const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
   const [albumName, setAlbumName] = useState('');
   const [albumId, setAlbumId] = useState<string | null>(null);
@@ -37,7 +41,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [images, setImages] = useState<NewImageEntry[]>([]);
 
   const [isStuck, setIsStuck] = useState(false);
   const [viewersCanEdit, setViewersCanEdit] = useState(true);
@@ -223,8 +227,8 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
             {images.length > 0 && (
               <div className="mb-4 w-full">
                 <ImageGallery
-                  images={images.map((image) => image.previewUrl)}
-                  editMode
+                  imageList={images}
+                  currentUserId={currentUser?.uid}
                   handleRemoveImage={handleRemoveImage}
                   handleReorderImage={handleReorderImage}
                 />

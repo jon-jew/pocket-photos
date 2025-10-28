@@ -34,6 +34,12 @@ ul.polaroids li {
   -webkit-transform: rotate(-2deg);
   -moz-transform: rotate(-2deg);
   transform: rotate(-2deg);
+
+  .thumbnail-reaction.reaction-menu {
+    -webkit-transform: rotate(2deg);
+    -moz-transform: rotate(2deg);
+    transform: rotate(2deg);
+  }
 }
 
 /* Rotate all even images 2 degrees */
@@ -41,6 +47,12 @@ ul.polaroids li:nth-child(even) {
   -webkit-transform: rotate(2deg);
   -moz-transform: rotate(2deg);
   transform: rotate(2deg);
+
+  .thumbnail-reaction.reaction-menu {
+    -webkit-transform: rotate(-2deg);
+    -moz-transform: rotate(-2deg);
+    transform: rotate(-2deg);
+  }
 }
 
 /* Don't rotate every third image, but offset its position */
@@ -50,6 +62,12 @@ ul.polaroids li:nth-child(3n) {
   transform: none;
   position: relative;
   top: -5px;
+
+  .thumbnail-reaction.reaction-menu {
+    -webkit-transform: none;
+    -moz-transform: none;
+    transform: none;
+  }
 }
 
 /* Rotate every fifth image by 5 degrees and offset it */
@@ -59,6 +77,12 @@ ul.polaroids li:nth-child(5n) {
   transform: rotate(5deg);
   position: relative;
   right: 5px;
+
+  .thumbnail-reaction.reaction-menu {
+    -webkit-transform: rotate(-5deg);
+    -moz-transform: rotate(-5deg);
+    transform: rotate(-5deg);
+  }
 }
 
 /* Keep default rotate for every eighth, but offset it */

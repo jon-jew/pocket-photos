@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { User } from "firebase/auth";
 
 import CollectionsIcon from '@mui/icons-material/Collections';
+import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 
 import { getUserAlbums } from '@/library/firebase/image';
 
@@ -47,7 +48,7 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
     <main className="max-w-4xl pt-22 mx-auto">
       <nav className="fixed top-0 w-full max-w-4xl z-[30]">
         <div className="relative bg-primary pt-6 pl-5 pr-15 z-4">
-          <h2 className="text-3xl text-secondary font-bold">Your Albums</h2>
+          <h2 className="text-3xl text-secondary font-bold">My Lobbies</h2>
           <UserDropdown variant="secondary" user={currentUser} />
         </div>
         <div className="h-[20px] w-full rotate-180 relative">
@@ -59,18 +60,24 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
           />
         </div>
       </nav>
-      <h4 className="text-primary mt-2 ml-10 mb-3">{albums.length} albums</h4>
+      <h4 className="text-primary mt-2 ml-10 mb-3">{albums.length} lobbies</h4>
       <div className="flex flex-row flex-wrap gap-x-10 gap-y-15 px-2 py-6 justify-center items-center">
         {albums.map((album, index) => (
           <Link key={`album-${index}`} href={`/album/${album.id}`} className="max-w-[150px] relative">
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] relative z-3">
-              <div className="h-[140px] w-[140px] relative bg-[#292929]">
-                <Image
-                  src={album.thumbnailImage}
-                  fill
-                  alt={`Album Thumbnail ${index}`}
-                  style={{ objectFit: 'cover' }}
-                />
+              <div className="h-[140px] w-[140px] flex gap-2 justify-center items-center relative bg-[#292929]">
+                {album.thumbnailImage ?
+                  <Image
+                    src={album.thumbnailImage}
+                    fill
+                    alt={`Album Thumbnail ${index}`}
+                    style={{ objectFit: 'cover' }}
+                  /> :
+                  <>
+                  <ImageNotSupportedIcon />
+                  <p>Empty</p>
+                  </>
+                }
               </div>
             </div>
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] absolute top-0 z-2 rotate-5 -translate-y-2">
@@ -79,20 +86,19 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] absolute top-0 z-2 -rotate-6 -translate-x-2 -translate-y-1">
               <div className="h-[140px] w-[140px] bg-black" />
             </div>
-            <h5 className="absolute bottom-[-15px] left-[-20px] z-[20] px-3 py-2 bg-primary text-sm text-secondary rounded-full">
+            <h5 className="absolute bottom-[-5px] left-[-20px] z-[20] px-3 py-2 bg-primary text-sm text-secondary rounded-full">
               {album.albumName}
             </h5>
-            {/* <p>{album.created}</p> */}
           </Link>
         ))}
       </div>
       <div className="w-full sticky bottom-0 text-right pr-5 pb-5 z-[25]">
-          <Link href='/new-album'>
-            <button className="bg-secondary text-primary border-3 border-primary px-4 py-5 rounded-full">
-              <span className="text-md">+</span><CollectionsIcon />
-            </button>
-          </Link>
-        </div>
+        <Link href='/new-album'>
+          <button className="bg-secondary text-primary border-3 border-primary px-4 py-5 rounded-full">
+            <span className="text-md">+</span><CollectionsIcon /> New Lobby
+          </button>
+        </Link>
+      </div>
     </main>
   )
 };

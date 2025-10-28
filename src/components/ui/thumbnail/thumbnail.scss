@@ -2,17 +2,7 @@
   background: var(--polaroid);
   position: relative;
   padding: 5px;
-
-  .hide {
-    pointer-events: none !important;
-    opacity: 0 !important;
-  }
-
-  .fade-component {
-    opacity: 100;
-    transition-property: opacity;
-    transition-duration: 150ms;
-  }
+  overflow: show;
 
   .thumbnail {
     background-color: #424242;

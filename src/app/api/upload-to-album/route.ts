@@ -49,7 +49,13 @@ export async function POST(req: NextRequest) {
     });
     const imageUrl = await getDownloadURL(imageRef);
 
-    return NextResponse.json({ id: imageId, imageUrl, uploaderId: userId }, { status: 200 });
+    return NextResponse.json({
+      id: imageId, imageUrl,
+      uploaderId: userId,
+      uploadedOn: Date.now(),
+      reactionString: '',
+      reactions: [],
+    }, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: 'Upload failed', details: String(error) }, { status: 500 });

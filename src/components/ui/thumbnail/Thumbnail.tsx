@@ -6,41 +6,55 @@ import { useInView } from 'react-intersection-observer';
 
 import ImageIcon from '@mui/icons-material/Image';
 
+import ReactionButton from '@/components/ui/reactionButton';
+
 import './thumbnail.scss';
 
 interface ThumbnailProps {
-  src: string;
-  alt: string;
   idx: number;
+  src: string;
+  albumId?: string;
+  currentUserId: string | undefined;
+  reactions?: ImageReaction[];
+  reactionEntry?: ImageReactionEntry;
   imagesLength: number;
   editMode?: boolean;
   openModal?: () => void;
   handleRemoveImage?: (idx: number) => void;
   handleReorderImage?: (idx: number, direction: -1 | 1) => void;
+  onReactionSelect: (reaction: string, idx: number) => Promise<string | false | undefined>;
   quality?: number;
 }
 
 export default function Thumbnail({
-  src,
-  alt,
   idx,
+  src,
+  albumId,
+  currentUserId,
+  reactions,
+  reactionEntry,
   imagesLength,
   editMode = false,
+  quality = 20,
   openModal,
   handleRemoveImage,
   handleReorderImage,
-  quality = 80,
+  onReactionSelect,
 }: ThumbnailProps) {
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.5
-  })
+  });
+
+  // const selectedReaction = currentUserId ?
+  //   reactions?.find((reaction) => reaction.userId)?.reaction
+  //   : null;
 
   return (
     <li
       key={`img-container-${idx}`}
       className={clx({
-        "thumbnail-container shadow-lg": true,
+        "thumbnail-container shadow-lg relative": true,
       })}
     >
       {handleRemoveImage &&
@@ -69,7 +83,7 @@ export default function Thumbnail({
           quality={quality}
           fill
           priority={idx < 6}
-          alt={alt}
+          alt={`Image ${idx + 1}`}
           sizes='157.2px'
           style={{
             opacity: inView ? 1 : 0,
@@ -78,9 +92,22 @@ export default function Thumbnail({
           }}
         />
       </button>
+      {albumId && reactionEntry &&
+        <div className={clx({
+          "hide": editMode,
+          "absolute bottom-0 left-0 fade-component thumbnail-reaction": true,
+        })}>
+          <ReactionButton
+            displayString={reactionEntry.reactionString}
+            selectedReaction={reactionEntry.selectedReaction ? reactionEntry.selectedReaction : null}
+            disableClick={currentUserId === undefined}
+            onReactionSelect={(reaction: string) => onReactionSelect(reaction, idx)}
+          />
+        </div>
+      }
 
       <div className={clx({
-        "flex items-center h-[20px]": true,
+        "flex items-center h-[30px]": true,
         "justify-between": idx !== 0,
         "justify-end": idx === 0,
       })}>

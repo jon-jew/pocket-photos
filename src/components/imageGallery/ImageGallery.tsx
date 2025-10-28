@@ -8,29 +8,37 @@ import { Slide } from '@mui/material';
 import Carousel from '@/components/carousel';
 import Thumbnail from '@/components/ui/thumbnail';
 
+import { handleImageReaction } from '@/library/firebase/image';
+
 import './imageGallery.scss';
 
 interface ImageGalleryProps {
-  images: string[];
+  imageList: GalleryImageEntry[] | NewImageEntry[];
+  initialReactions?: ImageReactionEntry[];
+  albumId?: string;
+  currentUserId: string | undefined;
   editMode?: boolean;
   showDownload?: boolean;
-  variant?: 'primary' | 'secondary';
   onModalOpen?: () => void;
   handleRemoveImage?: (idx: number) => void;
   handleReorderImage?: (idx: number, direction: -1 | 1) => void;
 };
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({
-  images,
+  imageList,
+  initialReactions,
+  albumId,
+  currentUserId,
   editMode = false,
   showDownload = false,
-  variant = 'primary',
   onModalOpen,
   handleRemoveImage,
   handleReorderImage,
 }) => {
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [reactionList, setReactionList] = useState<ImageReactionEntry[] | undefined>(initialReactions);
 
   const openModal = (idx: number) => {
     setIsModalOpen(true);
@@ -44,21 +52,57 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     setIsModalOpen(false);
   };
 
+  const onReactionSelect = async (reaction: string, idx: number) => {
+    if (currentUserId && albumId && reactionList) {
+      const newReactionString = await handleImageReaction(
+        currentUserId,
+        reaction,
+        albumId,
+        idx,
+      );
+
+      if (typeof newReactionString === 'string') {
+        const newReactionList = reactionList?.map((reactionEntry, i) => {
+          if (i === idx) {
+            if (reaction === 'like') {
+              return {
+                selectedReaction: reactionEntry.selectedReaction === null ? 'like' : null,
+                reactionString: newReactionString,
+              }
+            }
+            return {
+              selectedReaction: reactionEntry.selectedReaction !== reaction ? reaction : null,
+              reactionString: newReactionString,
+            }
+          } else {
+            return reactionEntry;
+          }
+        });
+        setReactionList(newReactionList);
+      }
+
+      return newReactionString;
+    }
+  };
+
   return (
     <>
       <ul className="py-4 polaroids w-full gallery-container">
-        {images.map((image, idx) => (
+        {imageList.map((image, idx) => (
           <Thumbnail
             key={`thumbnail-${idx}`}
             idx={idx}
-            imagesLength={images.length}
-            src={image}
-            quality={10}
-            alt={`Image ${idx + 1}`}
+            src={image.imageUrl}
+            albumId={albumId}
+            currentUserId={currentUserId}
+            reactions={("reactions" in image) ? image.reactions : undefined}
+            reactionEntry={reactionList ? reactionList[idx] : undefined}
+            imagesLength={imageList.length}
             editMode={editMode}
             openModal={() => openModal(idx)}
             handleRemoveImage={handleRemoveImage}
             handleReorderImage={handleReorderImage}
+            onReactionSelect={onReactionSelect}
           />
         ))}
       </ul>
@@ -71,10 +115,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             className="fixed inset-0 flex items-center justify-center z-[1000]"
           >
             <Carousel
-              closeModal={closeModal}
               initialCurrent={selectedIndex}
-              images={images}
+              imageList={imageList}
+              reactionList={reactionList}
+              albumId={albumId}
+              currentUserId={currentUserId}
               showDownload={showDownload}
+              hideReactionBtn={editMode}
+              closeModal={closeModal}
+              onReactionSelect={onReactionSelect}
             />
           </div>
         </Slide>

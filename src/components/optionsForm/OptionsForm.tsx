@@ -47,7 +47,6 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
       router.push(`/user-albums/${currentUser?.uid}`);
       toast.success('Album deleted');
     } else {
-      toast.error('Failed to delete album');
       closeOptions(false, false);
     }
   };

@@ -41,7 +41,7 @@ export const generateQR = async (text: string) => {
   }
 }
 
-export const compressFile = async (file: File, fullQuality: boolean): Promise<UploadedImage> => {
+export const compressFile = async (file: File, fullQuality: boolean): Promise<NewImageEntry> => {
   const options = {
     maxSizeMB: fullQuality ? 8 : 0.75,
     maxWidthOrHeight: fullQuality ? 3200 : 1200,
@@ -52,13 +52,13 @@ export const compressFile = async (file: File, fullQuality: boolean): Promise<Up
     const compressedFile = await imageCompression(file, options);
     return ({
       file: compressedFile,
-      previewUrl: URL.createObjectURL(compressedFile),
+      imageUrl: URL.createObjectURL(compressedFile),
     });
   } catch (error) {
     console.error(error);
     return ({
       file: file,
-      previewUrl: URL.createObjectURL(file),
+      imageUrl: URL.createObjectURL(file),
     })
   }
 };
