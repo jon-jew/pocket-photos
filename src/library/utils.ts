@@ -8,6 +8,9 @@ declare global {
   }
 };
 
+export const getAlbumHoursRemaining =
+  (timestamp: number): number => 42 - Math.floor((Date.now() - timestamp) / (1000 * 60 * 60));
+
 export async function streamToObject(readableStream: ReadableStream<Uint8Array>): Promise<object> {
   const reader = readableStream.getReader();
   let result = '';

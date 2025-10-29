@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     ],
     qualities: [10, 20, 50, 75, 80, 100],
   },
+  transpilePackages: ["@mui/material-nextjs"],
   experimental: {
     serverActions: {
       bodySizeLimit: '100mb',

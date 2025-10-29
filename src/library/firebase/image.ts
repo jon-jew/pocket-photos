@@ -4,13 +4,8 @@ import {
   doc,
   getDoc,
   setDoc,
-  collection,
-  query,
-  where,
-  getDocs,
   updateDoc,
   deleteDoc,
-  orderBy,
   serverTimestamp,
 } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
@@ -25,7 +20,7 @@ declare global {
     id: string;
     albumName: string;
     hoursRemaining: number;
-    createdOn: string;
+    createdOn: number;
     thumbnailImage: string;
   }
 
@@ -253,43 +248,12 @@ export const getAlbumImages = async (albumId: string) => {
       });
     } else {
       // docSnap.data() will be undefined in this case
-      console.log('No such document!');
+      console.error('No such document!');
       return null;
     }
 
   } catch (error) {
     console.error(error)
-    return false;
-  }
-};
-
-export const getUserAlbums = async (userId: string) => {
-  try {
-    const albumsRef = collection(db, 'albums');
-    const q = query(albumsRef, where("ownerId", "==", userId), orderBy('createdOn', 'desc'));
-
-    const querySnapshot = await getDocs(q);
-    const promises = querySnapshot.docs.map(async (doc) => {
-      const data = doc.data();
-
-      const hoursRemaining = 42 - Math.floor((Date.now() - data.createdOn.toDate().getTime()) / 600000);
-      if (hoursRemaining > 0) {
-        return ({
-          id: doc.id,
-          albumName: data.albumName as string,
-          hoursRemaining,
-          thumbnailImage: data.imageList.length !== 0 ?
-            data.imageList[0].imageUrl :
-            null,
-          createdOn: new Date(data.createdOn).toDateString(),
-        });
-      }
-    });
-    const res = await Promise.all(promises);
-    return res.filter((album) => album);
-
-  } catch (error) {
-    console.error(error);
     return false;
   }
 };

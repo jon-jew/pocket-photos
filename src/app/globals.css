@@ -26,6 +26,7 @@
   --color-polaroid: var(--polaroid);
   --font-primary: var(--font-comico);
   --font-secondary: var(--font-manrope);
+  --font-sub: var(--font-monomaniac);
 }
 
 body {

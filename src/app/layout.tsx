@@ -54,7 +54,7 @@ export default async function RootLayout({
       <body
         className={`${comicoRegular.variable} ${manrope.variable} ${monomaniac.variable} ${gloria.variable} antialiased`}
       >
-        <ToastContainer theme="dark" />
+        <ToastContainer position="bottom-right" autoClose={4000} theme="dark" newestOnTop  />
         <Bubbles />
         {children}
       </body>

@@ -1,0 +1,26 @@
+$width: 140px;
+
+.polaroid-container {
+  width: $width;
+  background-color: var(--polaroid);
+  padding: 5px 5px 20px 5px;
+
+  .polaroid-image {
+    height: calc($width - 10px);
+    width: calc($width - 10px);
+    background-color: #292929;
+  }
+}
+
+.polaroid-container.top {
+  position: relative;
+  z-index: 3;
+
+  .polaroid-image {
+    position: relative;
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+  }
+}

@@ -14,7 +14,7 @@ import { toast } from 'react-toastify';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 
 import { auth } from '@/library/firebase/clientApp';
-import { createUserEntry } from '@/library/firebase/user';
+import { createUserEntry } from '@/library/firebase/userClient';
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer/TornContainer';
 import Textfield from '@/components/ui/textfield';
@@ -30,11 +30,11 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
   const cookies = new Cookies(null, { path: '/' });
   const router = useRouter();
   const searchParams = useSearchParams();
-  const prevAlbum = searchParams.get('prevAlbum');
+  const prevAlbum = searchParams.get('prevLobby');
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [codeAttempts, setCodeAttempts] = useState<number>(0);
   const [mode, setMode] = useState<'phone' | 'code'>('phone');
 
@@ -67,7 +67,7 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
         // User signed in successfully.
         await createUserEntry(res.user.uid);
         if (prevAlbum) {
-          router.push(`/album/${prevAlbum}`);
+          router.push(`/lobby/${prevAlbum}`);
           router.refresh();
         } else {
           router.push('/');
@@ -97,11 +97,12 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
     if (initialUser) {
       toast.info('User already logged in');
       if (prevAlbum) {
-        router.push(`/album/${prevAlbum}`);
+        router.push(`/lobby/${prevAlbum}`);
       } else {
         router.push('/');
       }
     } else if (!initialUser) {
+      setLoading(false);
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
         'size': 'invisible',
       });

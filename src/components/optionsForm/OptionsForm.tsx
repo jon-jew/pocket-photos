@@ -52,8 +52,10 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
   };
 
   return (
-    <div className="bg-primary text-secondary rounded-lg relative px-2 py-4 w-[85%] max-w-[500px] z-[1000]">
-      <h2 className="text-2xl mb-10"><TuneIcon /> Options</h2>
+    <div className="bg-secondary text-white rounded-lg relative px-2 py-4 w-[85%] max-w-[500px] z-[1000]">
+      <h2 className="text-2xl text-primary mb-10">
+        <TuneIcon /> Options
+      </h2>
       {!showDelete ?
         <>
           <div className="absolute top-3 right-3">
@@ -64,6 +66,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
 
           <form onSubmit={handleOptionsSubmit} className="flex flex-col gap-5 justify-center items-center">
             <Textfield
+              variant="secondary"
               fullWidth
               initialValue={initialAlbumName}
               onChange={(e) => setAlbumName(e.target.value)}
@@ -74,22 +77,31 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
               <Switch
                 checked={viewersCanEdit}
                 onChange={() => setViewersCanEdit(!viewersCanEdit)}
-                color="secondary"
+                sx={{
+                  // Styles for the unchecked track
+                  '.MuiSwitch-track': {
+                    backgroundColor: '#ffffff64', // Example unchecked track color
+                    opacity: 1, // Ensure full opacity if needed
+                  },
+                  // Styles for the checked track
+                }}
+                color="primary"
               />
               <span className="text-xs">Viewers can add images</span>
             </div>
             <Button
               type="submit"
               fullWidth
+              variant="secondary"
             >
               Save
             </Button>
           </form>
         </> :
-        <div className="flex flex-col items-center justify-center gap-9">
+        <div className="flex flex-col items-center justify-center gap-9 min-h-[170px]">
           <h4>Are you sure you want to delete?</h4>
           <div className="flex flex-row gap-8">
-            <button onClick={() => setShowDelete(false)}>
+            <button className="text-gray-400" onClick={() => setShowDelete(false)}>
               Cancel
             </button>
             <Button onClick={handleDelete} variant="warning">

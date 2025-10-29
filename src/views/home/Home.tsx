@@ -1,6 +1,7 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { User } from 'firebase/auth';
 import { toast } from 'react-toastify';
 
@@ -12,26 +13,35 @@ import Button from "@/components/ui/button";
 import Textfield from "@/components/ui/textfield";
 
 export default function Home({ currentUser }: { currentUser: User | undefined }) {
-  const [lobbyCode, setLobbyCode] = useState<string>('');
   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  const fromWaitlist = searchParams.get('waitlist') === 'true';
+
+  const [lobbyCode, setLobbyCode] = useState<string>('');
 
   const handleJoinClick = (e: React.FormEvent) => {
     e.preventDefault();
     if (lobbyCode.trim() !== "") {
       // Navigate to the album page with the room code
-      router.push(`/album/${lobbyCode}`);
+      router.push(`/lobby/${lobbyCode}`);
     }
   };
 
   const handleLobbyClick = () => {
     if (currentUser) {
-      router.push('/new-album');
+      router.push('/new-lobby');
     } else {
       toast.info('Please login to create a lobby');
       router.push('/login');
     }
   }
+
+  useEffect(() => {
+    if (fromWaitlist) {
+      toast.success('Thank you for signing up!');
+    }
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">

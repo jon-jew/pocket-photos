@@ -108,7 +108,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
         setUploadProgress,
       );
       if (uploadRes) {
-        const qrRes = await generateQR(`${window.location.hostname}/album/${uploadRes}`);
+        const qrRes = await generateQR(`${window.location.hostname}/lobby/${uploadRes}`);
         if (qrRes) setQrCode(qrRes);
         setAlbumId(uploadRes);
       }
@@ -148,7 +148,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
           </h1>
         </div>
         <TornContainer>
-          <Link href={`/album/${albumId}`} className="underline mb-3">
+          <Link href={`/lobby/${albumId}`} className="underline mb-3">
             <h3>View Album Lobby</h3>
           </Link>
           {qrCode && <Image className="rounded-lg" alt="QR code" width={200} height={200} src={qrCode} />}

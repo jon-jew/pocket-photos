@@ -1,108 +1,97 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { User } from "firebase/auth";
+import clx from "classnames";
+
+import Drawer from '@mui/material/Drawer';
+import Divider from '@mui/material/Divider';
+
+import MenuIcon from '@mui/icons-material/Menu';
 
 import { logoutUser } from "@/library/firebase/auth";
+import Button from '@/components/ui/button';
 
 interface MenuItem {
   label: string;
   onClick?: () => void;
   href?: string;
+  needsAuth: boolean;
 };
 
 interface UserDropdownProps {
   variant?: 'primary' | 'secondary';
-  user?: User | undefined;
+  user?: User;
+  currentPath?: string;
   prevAlbumId?: string;
 };
 
 export const UserDropdown: React.FC<UserDropdownProps> = ({
   variant = 'primary',
   user,
+  currentPath,
   prevAlbumId,
 }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const backgroundColor = variant === 'primary' ? '#BD9CEA' : '#070217';
-  const iconColor = variant === 'primary' ? '#070217' : '#BD9CEA'
-
   const menuItems: MenuItem[] = [
-    { label: "Home", href: '/' },
-    { label: "My Lobbies", href: `/user-albums/${user ? user.uid : ''}` },
-    { label: "Logout", onClick: () => logoutUser(router) },
+    { label: "Home", href: '/', needsAuth: false },
+    { label: "My Lobbies", href: '/my-lobbies', needsAuth: true, },
+    { label: 'Joined Lobbies', href: '/joined-lobbies', needsAuth: true, },
   ];
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
-      }
-    };
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [open]);
+  const toggleDrawer =
+    (open: boolean) =>
+      (event: React.KeyboardEvent | React.MouseEvent) => {
+        if (
+          event.type === 'keydown' &&
+          ((event as React.KeyboardEvent).key === 'Tab' ||
+            (event as React.KeyboardEvent).key === 'Shift')
+        ) {
+          return;
+        }
 
-  if (!user) {
-    return (
-      <Link
-        className={`absolute z-10 top-4 right-4 text-${variant}`}
-        href={`/login${prevAlbumId ? `?prevAlbum=${prevAlbumId}` : ''}`}>Login
-      </Link>
-    );
-  }
+        setOpen(open);
+      };
+
+  // if (!user) {
+  //   return (
+  //     <Link
+  //       className={`absolute z-10 top-4 right-4 text-${variant}`}
+  //       href={`/login${prevAlbumId ? `?prevAlbum=${prevAlbumId}` : ''}`}>Login
+  //     </Link>
+  //   );
+  // }
 
   return (
     <div ref={dropdownRef} className="absolute z-10 top-4 right-4 inline-block">
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="bg-none border-none cursor-pointer p-0 flex items-center"
+        className={clx({
+          "bg-none border-none cursor-pointer p-0 flex items-center": true,
+          "text-primary": variant === 'primary',
+          "text-secondary": variant === 'secondary',
+        })}
         aria-haspopup="true"
         aria-expanded={open}
         type="button"
       >
-        <span
-          style={{ backgroundColor: backgroundColor }}
-          className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-[18px] text-[${iconColor}] select-none`}
-        >
-          {/* Simple user icon SVG */}
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <circle cx="12" cy="8" r="4" fill={iconColor} />
-            <rect x="6" y="14" width="12" height="6" rx="3" fill={iconColor} />
-          </svg>
-        </span>
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-          fill="none"
-          className="ml-1"
-          aria-hidden="true"
-        >
-          <path
-            d="M5 8l5 5 5-5"
-            stroke={backgroundColor}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <MenuIcon />
       </button>
-      {open && (
-        <div
-          className="absolute right-0 mt-2 bg-white shadow-lg rounded min-w-[140px] z-[1000]"
-        >
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={toggleDrawer(false)}
+      >
+        <div className="flex flex-col bg-black text-white h-screen pt-10 pb-8 px-2">
+          <h2 className="w-full text-center !text-3xl text-primary mb-8">
+            Plurr.it
+          </h2>
           {menuItems.map((item, idx) => (
             <button
               key={item.label}
@@ -111,15 +100,55 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                 if (item.onClick) item.onClick();
                 if (item.href) router.push(item.href);
               }}
-              className={`w-full px-4 py-2 bg-none border-none text-left cursor-pointer text-[15px] text-[#333] ${idx < menuItems.length - 1 ? "border-b border-[#eee]" : ""
-                }`}
+              className={clx({
+                'w-full px-4 py-2 bg-none border-none text-left cursor-pointer text-[18px] text-gray-200': true,
+                'border-b border-[#eee]': idx < menuItems.length - 1,
+                'text-primary text-bold pointer-events-none': item.href === currentPath,
+                'pointer-events-none text-gray-600': item.needsAuth && !user,
+              })}
               type="button"
             >
               {item.label}
             </button>
           ))}
+          <Divider />
+          {user ?
+            <button
+              onClick={() => logoutUser(router)}
+              className="w-full mt-5 px-4 py-2 bg-none border-none text-left cursor-pointer text-[15px] text-gray-400"
+            >
+              Logout
+            </button> :
+            <Link href={`/login${prevAlbumId ? `?prevLobby=${prevAlbumId}` : ''}`}>
+              <button
+                className="w-full mt-5 px-4 py-2 bg-none border-none text-left cursor-pointer text-[15px] text-gray-200"
+              >
+                Login
+              </button>
+            </Link>
+          }
+          <div className="flex flex-col grow w-full justify-end items-center gap-2">
+            
+            <Image
+              priority
+              alt="Plurr Logo"
+              className="opacity-70"
+              width={60}
+              height={58}
+              src="/logo.svg"
+            />
+            <p className="text-center leading-[20px] opacity-70 mb-3">
+              Do now.<br />Connect later
+            </p>
+            <Button
+              variant="secondary"
+              href={`/waitlist${prevAlbumId ? `?prevLobby=${prevAlbumId}` : ''}`}
+            >
+              Join the waitlist!
+            </Button>
+          </div>
         </div>
-      )}
+      </Drawer>
     </div>
   );
 };

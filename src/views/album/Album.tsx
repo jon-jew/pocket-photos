@@ -17,10 +17,12 @@ import ImageIcon from '@mui/icons-material/Image';
 import SaveIcon from '@mui/icons-material/Save';
 import TuneIcon from '@mui/icons-material/Tune';
 import ShareIcon from '@mui/icons-material/Share';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 
-import { generateQR, compressFile } from '@/library/utils';
+import { generateQR, compressFile, getAlbumHoursRemaining } from '@/library/utils';
 import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/image";
-import { setViewedAlbums } from "@/library/firebase/user";
+import { setJoinedAlbums } from "@/library/firebase/userClient";
 
 import Loading from "@/components/loading";
 import ImageGallery from "@/components/imageGallery";
@@ -42,6 +44,7 @@ interface AlbumProps {
   albumId: string;
   initialAlbumInfo: AlbumInfo;
   initialImages: GalleryImageEntry[];
+  initialJoined: boolean;
   currentUser: UserInfo | undefined;
 }
 
@@ -49,19 +52,22 @@ export default function AlbumPage({
   albumId,
   initialAlbumInfo,
   initialImages,
+  initialJoined,
   currentUser,
 }: AlbumProps) {
   const router = useRouter();
-  const searchParams = useSearchParams()
- 
-  const isScanned = searchParams.get('scanned') === 'true';
+  const searchParams = useSearchParams();
 
-  const initialHoursRemaining = 42 - Math.floor((Date.now() - initialAlbumInfo.createdOn) / 600000);
+  const isScanned = searchParams.get('scanned') === 'true';
+  const fromWaitlist = searchParams.get('waitlist') === 'true';
+
+  const initialHoursRemaining = getAlbumHoursRemaining(initialAlbumInfo.createdOn);
 
   const [loading, setLoading] = useState<boolean>(true);
 
   const [imageList, setImageList] = useState<GalleryImageEntry[]>(initialImages || []);
   const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(initialAlbumInfo);
+  const [joined, setJoined] = useState<boolean>(initialJoined);
 
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -177,6 +183,13 @@ export default function AlbumPage({
     setEditMode(false);
   };
 
+  const handleJoinClick = async () => {
+    if (currentUser?.uid) {
+      await setJoinedAlbums(albumId, currentUser?.uid, joined);
+      setJoined(!joined);
+    }
+  }
+
   const getQrCode = async () => {
     const qrLink = window.location.host + window.location.pathname + '?scanned=true';
     const qrRes = await generateQR(qrLink);
@@ -190,17 +203,20 @@ export default function AlbumPage({
       toast.error('This lobby has expired!');
     }
     if (isScanned && currentUser) {
-      setViewedAlbums(albumId, currentUser?.uid);
+      setJoinedAlbums(albumId, currentUser?.uid, false);
+    }
+    if (fromWaitlist) {
+      toast.success('Thank you for signing up!');
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
     const checkAlbumExpiry = () => {
-      const newHoursRemaining = 42 - Math.floor((Date.now() - initialAlbumInfo.createdOn) / 600000);
+      const newHoursRemaining = getAlbumHoursRemaining(initialAlbumInfo.createdOn);
       if (newHoursRemaining < 0) {
         toast.error('This lobby has expired!');
-        router.push('/');
+        // router.push('/');
       } else {
         setHoursRemaining(newHoursRemaining);
       }
@@ -219,13 +235,33 @@ export default function AlbumPage({
   return (
     <>
       <main className="max-w-4xl mx-auto">
-        <nav className="fixed w-full max-w-4xl z-[30] transition-[height] duration-200 ease-in-out">
+        <nav className="sticky w-full max-w-4xl z-[30] transition-[height] duration-200 ease-in-out">
           <div className="w-full bg-primary">
-            <div className="pt-6 pl-5 pr-17">
-              <h2 className="text-2xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
+            <div className="pt-6 px-5">
+              <div className="flex flex-row items-center mb-3 pr-10">
+                <Image
+                  priority
+                  alt="Plurr Logo"
+                  className="mr-2"
+                  width={45}
+                  height={44}
+                  src="/logo-secondary.svg"
+                />
+                <h2 className="text-2xl text-secondary font-bold break-all text-ellipsis line-clamp-2">
+                  {albumInfo.albumName}
+                </h2>
+              </div>
               <div className="flex flex-row">
                 <p className="pl-3 text-md text-black">{albumInfo.dateString}</p>
                 <div className="flex gap-4 grow justify-end">
+                  {currentUser &&
+                    <IconButton onClick={handleJoinClick}>
+                      {joined ?
+                        <BookmarkIcon color="warning" /> :
+                        <BookmarkBorderIcon />
+                      }
+                    </IconButton>
+                  }
                   <IconButton onClick={shareContent}>
                     <ShareIcon />
                   </IconButton>
@@ -249,7 +285,11 @@ export default function AlbumPage({
                 <p className="pb-2 !text-md text-black">{albumId}</p>
               </div>
             </div>
-            <UserDropdown user={currentUser} variant="secondary" prevAlbumId={albumId} />
+            <UserDropdown
+              user={currentUser}
+              variant="secondary"
+              prevAlbumId={albumId}
+            />
           </div>
           <div className="h-[20px] w-full rotate-180 relative">
             <Image
@@ -260,11 +300,11 @@ export default function AlbumPage({
             />
           </div>
         </nav>
-        <div className="pt-30 px-2 pb-[50px]">
+        <div className="pt-3 px-2 pb-[50px]">
           <div className="flex flex-row gap-3 pl-3 pr-2 my-2">
             <ReportDropdown albumId={albumId} />
             <h4 className="text-primary">
-              {imageList.length} image{imageList.length !== 1 && 's'}
+              {imageList.length} <ImageIcon sx={{ fontSize: '16px' }} />
             </h4>
             <div className="flex justify-end items-center grow text-xs">
               {hoursRemaining} H Remaining
