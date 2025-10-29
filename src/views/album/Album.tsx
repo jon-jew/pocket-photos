@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import { toast } from "react-toastify";
 import clx from 'classnames';
@@ -19,6 +20,7 @@ import ShareIcon from '@mui/icons-material/Share';
 
 import { generateQR, compressFile } from '@/library/utils';
 import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/image";
+import { setViewedAlbums } from "@/library/firebase/user";
 
 import Loading from "@/components/loading";
 import ImageGallery from "@/components/imageGallery";
@@ -30,7 +32,8 @@ import Button from "@/components/ui/button";
 
 interface AlbumInfo {
   albumName: string;
-  created: string;
+  createdOn: number;
+  dateString: string;
   ownerId: string;
   viewersCanEdit: boolean;
 };
@@ -49,8 +52,13 @@ export default function AlbumPage({
   currentUser,
 }: AlbumProps) {
   const router = useRouter();
+  const searchParams = useSearchParams()
+ 
+  const isScanned = searchParams.get('scanned') === 'true';
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const initialHoursRemaining = 42 - Math.floor((Date.now() - initialAlbumInfo.createdOn) / 600000);
+
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [imageList, setImageList] = useState<GalleryImageEntry[]>(initialImages || []);
   const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(initialAlbumInfo);
@@ -58,6 +66,7 @@ export default function AlbumPage({
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [isOptionsOpen, setIsOptionsOpen] = useState<boolean>(false);
+  const [hoursRemaining, setHoursRemaining] = useState<number>(initialHoursRemaining);
 
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isChanged, setIsChanged] = useState<boolean>(false);
@@ -94,9 +103,10 @@ export default function AlbumPage({
       setAlbumInfo({
         albumName: imageRes.albumName,
         ownerId: imageRes.ownerId,
-        created: imageRes.createdOn,
+        createdOn: imageRes.createdOn,
+        dateString: imageRes.dateString,
         viewersCanEdit: imageRes.viewersCanEdit,
-      })
+      });
       setLoading(false);
     } else {
       toast.error('Album not found');
@@ -168,12 +178,36 @@ export default function AlbumPage({
   };
 
   const getQrCode = async () => {
-    const qrRes = await generateQR(window.location.href);
+    const qrLink = window.location.host + window.location.pathname + '?scanned=true';
+    const qrRes = await generateQR(qrLink);
     if (qrRes) setQrCode(qrRes);
   };
 
   useEffect(() => {
     getQrCode();
+    if (initialHoursRemaining < 0) {
+      router.push('/');
+      toast.error('This lobby has expired!');
+    }
+    if (isScanned && currentUser) {
+      setViewedAlbums(albumId, currentUser?.uid);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    const checkAlbumExpiry = () => {
+      const newHoursRemaining = 42 - Math.floor((Date.now() - initialAlbumInfo.createdOn) / 600000);
+      if (newHoursRemaining < 0) {
+        toast.error('This lobby has expired!');
+        router.push('/');
+      } else {
+        setHoursRemaining(newHoursRemaining);
+      }
+    };
+    const intervalId = setInterval(checkAlbumExpiry, 60 * 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   if (!albumInfo || loading) {
@@ -190,7 +224,7 @@ export default function AlbumPage({
             <div className="pt-6 pl-5 pr-17">
               <h2 className="text-2xl text-secondary font-bold mb-2">{albumInfo.albumName}</h2>
               <div className="flex flex-row">
-                <p className="pl-3 text-md text-black">{albumInfo.created}</p>
+                <p className="pl-3 text-md text-black">{albumInfo.dateString}</p>
                 <div className="flex gap-4 grow justify-end">
                   <IconButton onClick={shareContent}>
                     <ShareIcon />
@@ -215,7 +249,7 @@ export default function AlbumPage({
                 <p className="pb-2 !text-md text-black">{albumId}</p>
               </div>
             </div>
-            <UserDropdown user={currentUser} variant="secondary" />
+            <UserDropdown user={currentUser} variant="secondary" prevAlbumId={albumId} />
           </div>
           <div className="h-[20px] w-full rotate-180 relative">
             <Image
@@ -227,17 +261,22 @@ export default function AlbumPage({
           </div>
         </nav>
         <div className="pt-30 px-2 pb-[50px]">
-          <div className="flex flex-row gap-3 pl-3">
+          <div className="flex flex-row gap-3 pl-3 pr-2 my-2">
             <ReportDropdown albumId={albumId} />
             <h4 className="text-primary">
               {imageList.length} image{imageList.length !== 1 && 's'}
             </h4>
+            <div className="flex justify-end items-center grow text-xs">
+              {hoursRemaining} H Remaining
+            </div>
           </div>
           {imageList.length === 0 ?
             <div className="flex flex-col justify-center items-center p-4 gap-4 h-[calc(100vh-200px)]">
               <h3>Add images to start the fun!</h3>
               <Button variant="secondary" fullWidth>
-                Add images
+                <label htmlFor="image-upload">
+                  + Add images
+                </label>
               </Button>
             </div> :
             <ImageGallery

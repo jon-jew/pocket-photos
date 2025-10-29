@@ -35,6 +35,10 @@ body {
   font-family: var(--font-comico);
 }
 
+.grecaptcha-badge {
+  visibility: hidden;
+}
+
 .centered-col {
   display: flex;
   flex-direction: column;

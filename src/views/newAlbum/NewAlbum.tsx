@@ -234,7 +234,6 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
                 />
               </div>
             )}
-            {/* {images.length === 0 && */}
             <div className={clx({
               "sticky bottom-4 z-3 w-full flex items-center justify-center": true,
               "mt-6": images.length == 0,

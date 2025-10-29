@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 
 import Script from 'next/script';
-import { redirect, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 import Cookies from 'universal-cookie';
 import { onIdTokenChanged } from '@/library/firebase/auth';
@@ -13,7 +14,7 @@ import { toast } from 'react-toastify';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 
 import { auth } from '@/library/firebase/clientApp';
-import useUserSession from '@/components/hooks/useUserSesssion';
+import { createUserEntry } from '@/library/firebase/user';
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer/TornContainer';
 import Textfield from '@/components/ui/textfield';
@@ -28,7 +29,8 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ initialUser }) => {
   const cookies = new Cookies(null, { path: '/' });
   const router = useRouter();
-  // const user = useUserSession(initialUser);
+  const searchParams = useSearchParams();
+  const prevAlbum = searchParams.get('prevAlbum');
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [otpCode, setOtpCode] = useState<string>('');
@@ -61,12 +63,16 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
   const handleOtpSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (window.confirmationResult) {
-      window.confirmationResult.confirm(otpCode).then((res) => {
+      window.confirmationResult.confirm(otpCode).then(async (res) => {
         // User signed in successfully.
-
-        // window.location.reload();
-
-        // router.back();
+        await createUserEntry(res.user.uid);
+        if (prevAlbum) {
+          router.push(`/album/${prevAlbum}`);
+          router.refresh();
+        } else {
+          router.push('/');
+          router.refresh();
+        }
       }).catch((error: { message: string }) => {
         // User couldn't sign in (bad verification code?)
         console.error(error.message);
@@ -90,7 +96,11 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
   useEffect(() => {
     if (initialUser) {
       toast.info('User already logged in');
-      router.push('/');
+      if (prevAlbum) {
+        router.push(`/album/${prevAlbum}`);
+      } else {
+        router.push('/');
+      }
     } else if (!initialUser) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
         'size': 'invisible',
@@ -151,11 +161,11 @@ const Login: React.FC<LoginProps> = ({ initialUser }) => {
         }
         {mode == 'code' &&
           <form onSubmit={handleOtpSubmit} className="centered-col w-full">
-            <h3 className="mb-3">
+            <h3 className="mb-4">
               Enter one time code<br />
               texted to your phone
             </h3>
-            <div className="mb-3 relative h-[66px]">
+            <div className="mb-8 relative h-[66px]">
               <div className="absolute top-[50%] left-[10px] -translate-1/2">
                 <NumberInput
                   onChange={handleChangeOtp}

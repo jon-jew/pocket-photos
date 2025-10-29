@@ -66,7 +66,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           if (i === idx) {
             if (reaction === 'like') {
               return {
-                selectedReaction: reactionEntry.selectedReaction === null ? 'like' : null,
+                selectedReaction: !reactionEntry.selectedReaction ? 'like' : null,
                 reactionString: newReactionString,
               }
             }
@@ -80,7 +80,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         });
         setReactionList(newReactionList);
       }
-
       return newReactionString;
     }
   };

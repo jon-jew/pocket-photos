@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { User } from "firebase/auth";
 
 import CollectionsIcon from '@mui/icons-material/Collections';
+import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 
 import { getUserAlbums } from '@/library/firebase/image';
@@ -26,6 +27,7 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
 
   const [albums, setAlbums] = useState<UserAlbum[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
   const fetchUserAlbums = async () => {
     const albumsRes = await getUserAlbums(userId);
     if (albumsRes) {
@@ -61,9 +63,12 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
         </div>
       </nav>
       <h4 className="text-primary mt-2 ml-10 mb-3">{albums.length} lobbies</h4>
-      <div className="flex flex-row flex-wrap gap-x-10 gap-y-15 px-2 py-6 justify-center items-center">
+      <div className="flex flex-row flex-wrap gap-x-10 gap-y-15 px-2 py-6 justify-center items-start min-h-[calc(100vh-240px)]">
         {albums.map((album, index) => (
           <Link key={`album-${index}`} href={`/album/${album.id}`} className="max-w-[150px] relative">
+            <div className="absolute -top-3 -right-3 z-[20] text-xs bg-secondary text-primary border-1 border-primary px-2 py-1 rounded-lg">
+              <HourglassTopIcon sx={{ fontSize: 16 }}/> {album.hoursRemaining} HRs
+            </div>
             <div className="bg-polaroid shadow-lg w-[150px] p-[5px] pb-[20px] relative z-3">
               <div className="h-[140px] w-[140px] flex gap-2 justify-center items-center relative bg-[#292929]">
                 {album.thumbnailImage ?
@@ -94,7 +99,7 @@ const UserAlbums: React.FC<UserAlbumsProps> = ({ userId, currentUser }) => {
       </div>
       <div className="w-full sticky bottom-0 text-right pr-5 pb-5 z-[25]">
         <Link href='/new-album'>
-          <button className="bg-secondary text-primary border-3 border-primary px-4 py-5 rounded-full">
+          <button className="bg-secondary text-primary border-3 border-primary px-4 py-5 rounded-xl">
             <span className="text-md">+</span><CollectionsIcon /> New Lobby
           </button>
         </Link>

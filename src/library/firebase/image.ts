@@ -24,7 +24,8 @@ declare global {
   interface UserAlbum {
     id: string;
     albumName: string;
-    created: string;
+    hoursRemaining: number;
+    createdOn: string;
     thumbnailImage: string;
   }
 
@@ -243,7 +244,8 @@ export const getAlbumImages = async (albumId: string) => {
       const dateString = new Date(data.createdOn.toDate()).toDateString();
 
       return ({
-        createdOn: dateString,
+        createdOn: new Date(data.createdOn.toDate()).getTime(),
+        dateString: dateString,
         albumName: data.albumName,
         ownerId: data.ownerId,
         viewersCanEdit: data.viewersCanEdit,
@@ -269,17 +271,22 @@ export const getUserAlbums = async (userId: string) => {
     const querySnapshot = await getDocs(q);
     const promises = querySnapshot.docs.map(async (doc) => {
       const data = doc.data();
-      return ({
-        id: doc.id,
-        albumName: data.albumName as string,
-        thumbnailImage: data.imageList.length !== 0 ?
-          data.imageList[0].imageUrl :
-          null,
-        created: new Date(data.created).toDateString(),
-      });
+
+      const hoursRemaining = 42 - Math.floor((Date.now() - data.createdOn.toDate().getTime()) / 600000);
+      if (hoursRemaining > 0) {
+        return ({
+          id: doc.id,
+          albumName: data.albumName as string,
+          hoursRemaining,
+          thumbnailImage: data.imageList.length !== 0 ?
+            data.imageList[0].imageUrl :
+            null,
+          createdOn: new Date(data.createdOn).toDateString(),
+        });
+      }
     });
     const res = await Promise.all(promises);
-    return res as UserAlbum[];
+    return res.filter((album) => album);
 
   } catch (error) {
     console.error(error);

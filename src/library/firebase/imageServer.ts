@@ -13,7 +13,8 @@ export const getAlbumImages = async (albumId: string) => {
       const dateString = new Date(data.createdOn.toDate()).toDateString();
       return ({
         albumInfo: {
-          created: dateString,
+          createdOn: new Date(data.createdOn.toDate()).getTime(),
+          dateString: dateString,
           albumName: data.albumName,
           ownerId: data.ownerId,
           viewersCanEdit: data.viewersCanEdit,

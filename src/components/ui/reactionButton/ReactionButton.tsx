@@ -42,8 +42,8 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   };
 
   const handleReactionSelect = async (reaction: string) => {
-    await onReactionSelect(reaction);
     setIsOpen(false);
+    await onReactionSelect(reaction);
   };
 
   const handleClick = async () => {
@@ -66,7 +66,11 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
   }, []);
 
   return (
-    <div className="relative" ref={buttonRef}>
+    <div
+      onContextMenu={(e) => e.preventDefault()}
+      className="relative"
+      ref={buttonRef}
+    >
       <button
         className={clx({
           "pointer-events-none": disableClick,
@@ -81,6 +85,7 @@ const ReactionButton: React.FC<ReactionButtonProps> = ({
         {selectedReaction ? <FavoriteIcon /> : <FavoriteBorderIcon />} <span className="text-gray-600">{displayString}</span>
       </button>
       <div
+        onContextMenu={(e) => e.preventDefault()}
         className={clx({
           "reaction-menu shadow-lg fade-component": true,
           "hide": !isOpen,

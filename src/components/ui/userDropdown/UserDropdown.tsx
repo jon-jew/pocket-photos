@@ -16,11 +16,13 @@ interface MenuItem {
 interface UserDropdownProps {
   variant?: 'primary' | 'secondary';
   user?: User | undefined;
+  prevAlbumId?: string;
 };
 
 export const UserDropdown: React.FC<UserDropdownProps> = ({
   variant = 'primary',
   user,
+  prevAlbumId,
 }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -56,7 +58,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     return (
       <Link
         className={`absolute z-10 top-4 right-4 text-${variant}`}
-        href="/login">Login
+        href={`/login${prevAlbumId ? `?prevAlbum=${prevAlbumId}` : ''}`}>Login
       </Link>
     );
   }
