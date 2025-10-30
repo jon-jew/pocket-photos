@@ -14,6 +14,8 @@ import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
 import Modal from '@mui/material/Modal';
 
+import LockIcon from '@mui/icons-material/Lock';
+import DeleteIcon from '@mui/icons-material/Delete';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import EditIcon from '@mui/icons-material/Edit';
 import ImageIcon from '@mui/icons-material/Image';
@@ -24,7 +26,13 @@ import ShareIcon from '@mui/icons-material/Share';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 
-import { generateQR, compressFile, getAlbumHoursRemaining } from '@/library/utils';
+import {
+  generateQR,
+  compressFile,
+  getTimeDifference,
+  getAlbumHoursRemaining,
+  getAlbumDaysRemaining,
+} from '@/library/utils';
 import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/imageClient";
 import { setJoinedAlbums } from "@/library/firebase/userClient";
 
@@ -36,11 +44,7 @@ import ReportDropdown from "@/components/ui/reportDropdown";
 import IconButton from "@/components/ui/iconButton";
 import Button from "@/components/ui/button";
 
-interface AlbumInfo {
-  albumName: string;
-  createdOn: number;
-  dateString: string;
-  ownerId: string;
+interface AlbumInfo extends AlbumEntry {
   viewersCanEdit: boolean;
 }
 
@@ -65,14 +69,12 @@ export default function AlbumPage({
   const isScanned = searchParams.get('scanned') === 'true';
   const fromWaitlist = searchParams.get('waitlist') === 'true';
 
-  const initialHoursRemaining = getAlbumHoursRemaining(initialAlbumInfo.createdOn);
-
   const [loading, setLoading] = useState<boolean>(true);
 
   const [imageList, setImageList] = useState<GalleryImageEntry[]>(initialImages || []);
-  const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(initialAlbumInfo);
-  const [hoursRemaining, setHoursRemaining] = useState<number>(initialHoursRemaining);
+  const [albumInfo, setAlbumInfo] = useState<AlbumInfo>(initialAlbumInfo);
   const [joined, setJoined] = useState<boolean>(initialJoined);
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
 
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -117,9 +119,9 @@ export default function AlbumPage({
       setImageList(imageRes.imageList);
       setAlbumInfo({
         albumName: imageRes.albumName,
+        firstUploadOn: imageRes.firstUploadOn,
+        id: albumId,
         ownerId: imageRes.ownerId,
-        createdOn: imageRes.createdOn,
-        dateString: imageRes.dateString,
         viewersCanEdit: imageRes.viewersCanEdit,
       });
       setLoading(false);
@@ -207,7 +209,7 @@ export default function AlbumPage({
 
   useEffect(() => {
     getQrCode();
-    if (initialHoursRemaining < 0) {
+    if (getAlbumDaysRemaining(Date.now(), albumInfo.firstUploadOn) < 0 && albumInfo.firstUploadOn !== null) {
       router.push('/');
       toast.error('This lobby has expired!');
     }
@@ -226,12 +228,12 @@ export default function AlbumPage({
 
   useEffect(() => {
     const checkAlbumExpiry = () => {
-      const newHoursRemaining = getAlbumHoursRemaining(initialAlbumInfo.createdOn);
-      if (newHoursRemaining < 0) {
+      const newDaysRemaining = getAlbumDaysRemaining(Date.now(), initialAlbumInfo.firstUploadOn);
+      if (newDaysRemaining < 0 && albumInfo.firstUploadOn !== null) {
         toast.error('This lobby has expired!');
-        // router.push('/');
+        router.push('/');
       } else {
-        setHoursRemaining(newHoursRemaining);
+        setCurrentTime(Date.now());
       }
     };
     const intervalId = setInterval(checkAlbumExpiry, 60 * 1000);
@@ -245,6 +247,9 @@ export default function AlbumPage({
     );
   }
 
+  const hoursRemaining = getAlbumHoursRemaining(currentTime, albumInfo.firstUploadOn);
+  const daysRemaining = getAlbumDaysRemaining(currentTime, albumInfo.firstUploadOn);
+
   return (
     <>
       <div className="max-w-4xl mx-auto relative">
@@ -253,13 +258,18 @@ export default function AlbumPage({
           title={
             <>
               <h2 className="text-2xl text-secondary font-bold break-all text-ellipsis line-clamp-2">
+                {hoursRemaining < 0 && <LockIcon sx={{ fontSize: 20, mr: 1 }} />}
                 {albumInfo.albumName}
               </h2>
             </>
           }
         >
           <div className="flex flex-row mt-2">
-            <p className="pl-3 text-md text-black">{albumInfo.dateString}</p>
+            <p className="pl-3 text-md text-black">
+              {albumInfo.firstUploadOn !== null ?
+                getTimeDifference(albumInfo.firstUploadOn, false) : 'New Lobby'
+              }
+            </p>
             <div className="flex gap-4 grow justify-end">
               {currentUser &&
                 <IconButton onClick={handleJoinClick}>
@@ -298,12 +308,23 @@ export default function AlbumPage({
             <h4 className="text-primary">
               {imageList.length} <ImageIcon sx={{ fontSize: '16px' }} />
             </h4>
-            <div className="flex justify-end items-center grow text-xs">
-              {hoursRemaining} H Remaining
-            </div>
+            {albumInfo.firstUploadOn !== null &&
+              <div className="flex justify-end content-center grow gap-2 text-xs">
+                {hoursRemaining >= 0 ?
+                  <>
+                    <p>{hoursRemaining} H Until</p>
+                    <LockIcon sx={{ fontSize: 14 }} />
+                  </> :
+                  <>
+                    <p>{daysRemaining} D Until</p>
+                    <DeleteIcon sx={{ fontSize: 14 }} />
+                  </>
+                }
+              </div>
+            }
           </div>
           {imageList.length === 0 ?
-            <div className="flex flex-col justify-center items-center p-4 gap-4 h-[calc(100vh-200px)]">
+            <div className="flex flex-col justify-center items-center p-4 gap-4 h-[calc(100vh-260px)]">
               <h3>Add images to start the fun!</h3>
               <Button variant="secondary" fullWidth>
                 <label htmlFor="image-upload">
@@ -341,7 +362,7 @@ export default function AlbumPage({
                 Save <SaveIcon sx={{ fontSize: '18px' }} />
               </button>
             }
-            {!editMode &&
+            {!editMode && hoursRemaining >= 0 &&
               <>
                 <button type="button" className="bg-primary ring-blue-500/50 shadow-xl px-2 py-3 rounded-[50%]">
                   <label htmlFor="image-upload">
@@ -359,7 +380,7 @@ export default function AlbumPage({
                 />
               </>
             }
-            {(currentUser?.uid === albumInfo.ownerId) &&
+            {(currentUser?.uid === albumInfo.ownerId && hoursRemaining >= 0) &&
               <button
                 className={`bg-primary ring-blue-500/50 shadow-xl px-${editMode ? '2' : '3'} py-3 rounded-[50%]`}
                 type="button"

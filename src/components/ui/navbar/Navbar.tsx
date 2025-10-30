@@ -20,14 +20,16 @@ const Navbar: React.FC<NavbarProps> = ({
   <nav className="sticky top-0 w-full max-w-4xl z-[30] transition-[height] duration-200 ease-in-out">
     <div className="relative bg-primary pt-6 pl-3 pr-8 z-4 flex flex-col gap-1">
       <div className="flex flex-row items-center pr-8">
-        <Image
-          priority
-          alt="Plurr Logo"
-          className="mr-2"
-          width={45}
-          height={44}
-          src="/logo-secondary.svg"
-        />
+        <Link href="/">
+          <Image
+            priority
+            alt="Plurr Logo"
+            className="mr-2"
+            width={45}
+            height={44}
+            src="/logo-secondary.svg"
+          />
+        </Link>
         {title}
       </div>
       {children}

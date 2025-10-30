@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction } from 'react';
 import { useRouter } from 'next/navigation';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import { toast } from 'react-toastify';
 
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import IconButton from '@mui/material/IconButton';
@@ -71,7 +72,11 @@ const QrScanner: React.FC<QrScannerProps> = ({
         {isOpen &&
           <Scanner
             onScan={handleScan}
-            onError={(error) => console.error(error)}
+            onError={(error) => {
+              console.error(error);
+              toast.error('Failed to open camera. Check permissions');
+              setIsOpen(false);
+            }}
           />
         }
       </div>

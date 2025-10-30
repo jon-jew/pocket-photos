@@ -8,12 +8,11 @@ import { User } from "firebase/auth";
 import clx from 'classnames';
 
 import CollectionsIcon from '@mui/icons-material/Collections';
-import HourglassTopIcon from '@mui/icons-material/HourglassTop';
-import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
+import LockIcon from '@mui/icons-material/Lock';
 import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
-import { getAlbumHoursRemaining } from '@/library/utils';
+import { getAlbumHoursRemaining, getAlbumDaysRemaining, getTimeDifference } from '@/library/utils';
 
 import QrScanner from '@/components/qrScanner';
 import Button from '@/components/ui/button';
@@ -25,7 +24,7 @@ interface AlbumGalleryProps {
   title: string;
   currentUser: User;
   path: string;
-  initialAlbumList: UserAlbum[];
+  initialAlbumList: AlbumEntry[];
   showNewAlbumBtn?: boolean;
 };
 
@@ -36,18 +35,14 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
   initialAlbumList,
   showNewAlbumBtn = false,
 }) => {
-  const [albums, setAlbums] = useState<UserAlbum[]>(initialAlbumList);
+  const [albums, setAlbums] = useState<AlbumEntry[]>(initialAlbumList);
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
   const [qrScannerOpen, setQrScannerOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    // Update hours remaining for albums every 1 minute
-    const checkAlbumExpiry = () => {
-      const newAlbums = albums.map((album) => ({
-        ...album,
-        hoursRemaining: getAlbumHoursRemaining(album.createdOn),
-      }));
-      setAlbums(newAlbums);
-    };
+    // Update current time to check for locked/expired lobbies
+    const checkAlbumExpiry = () => setCurrentTime(Date.now());
+
     const intervalId = setInterval(checkAlbumExpiry, 60 * 1000);
 
     return () => clearInterval(intervalId);
@@ -72,19 +67,23 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
       />
 
       <main className={clx({
-        'flex flex-col min-h-[calc(100vh-150px)] items-center text-center py-4': true,
+        'flex flex-col min-h-[calc(100vh-150px)] px-2 py-4': true,
         'justify-center': albums.length === 0,
       })}
       >
-        {showNewAlbumBtn && albums.length !== 0 &&
-          <Button href="/new-lobby" variant="outlinedSecondary">
-            +<CollectionsIcon sx={{ mr: 1 }} /> Create New Lobby
-          </Button>
-        }
-        {path === '/joined-lobbies' && albums.length !== 0 &&
-          <Button onClick={() => setQrScannerOpen(true)} variant="outlinedSecondary">
-            <QrCodeScannerIcon sx={{ mr: 1 }} /> Scan Code
-          </Button>
+        {albums.length !== 0 &&
+          <div className="pl-6 py-1">
+            {showNewAlbumBtn && albums.length !== 0 &&
+              <Button href="/new-lobby" variant="outlinedSecondary">
+                +<CollectionsIcon sx={{ mr: 1 }} /> New Lobby
+              </Button>
+            }
+            {path === '/joined-lobbies' && albums.length !== 0 &&
+              <Button onClick={() => setQrScannerOpen(true)} variant="outlinedSecondary">
+                <QrCodeScannerIcon sx={{ mr: 1 }} /> Scan Code
+              </Button>
+            }
+          </div>
         }
         {albums.length > 0 ?
           <div className="flex flex-row flex-wrap gap-x-10 gap-y-12 px-4 py-8 justify-center items-start content-start min-h-[calc(100vh-240px)]">
@@ -94,15 +93,21 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
                 href={`/lobby/${album.id}`}
                 className="max-w-[150px] relative"
               >
-                {album.hoursRemaining >= 0 ?
-                  <div className="absolute -top-3 -right-3 z-[20] text-xs bg-secondary text-primary border-1 border-primary px-2 py-1 rounded-lg">
-                    {album.hoursRemaining > 21 ? <HourglassTopIcon sx={{ fontSize: 16 }} /> : <HourglassBottomIcon sx={{ fontSize: 16 }} />}
-                    <span className="ml-1">{album.hoursRemaining} H</span>
-                  </div> :
-                  <div className="absolute -top-3 -right-3 z-[20] text-xs bg-warning text-white border-1 border-white px-2 py-1 rounded-lg">
-                    Expired
-                  </div>
+                {album.firstUploadOn &&
+                  <>
+                    {getAlbumDaysRemaining(Date.now(), album.firstUploadOn) >= 0 ?
+                      <div className="absolute -top-3 -right-3 z-[20] text-xs bg-secondary text-primary border-1 border-primary px-2 py-1 rounded-lg">
+                        <span className="ml-1">
+                          {getTimeDifference(album.firstUploadOn, true)}
+                        </span>
+                      </div> :
+                      <div className="absolute -top-3 -right-3 z-[20] text-xs bg-warning text-white border-1 border-white px-2 py-1 rounded-lg">
+                        Expired
+                      </div>
+                    }
+                  </>
                 }
+
                 <div className="shadow-lg polaroid-container top shadow-lg">
                   <div className="polaroid-image">
                     {album.thumbnailImage ?
@@ -126,7 +131,11 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
                   <div className={`polaroid-image !bg-black`} />
                 </div>
                 <div className="absolute bottom-[-5px] left-[-20px] z-[20] px-3 py-2 bg-primary shadow-lg rounded-full">
+
                   <h5 className="text-xs text-black break-all text-ellipsis line-clamp-2">
+                    {getAlbumHoursRemaining(Date.now(), album.firstUploadOn) < 0 && album.firstUploadOn !== null &&
+                      <LockIcon sx={{ fontSize: 12, mr: 0.5 }} />
+                    }
                     {album.albumName}
                   </h5>
                 </div>

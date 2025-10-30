@@ -9,9 +9,9 @@ import {
 } from 'firebase/firestore';
 
 import { db } from './serverApp';
-import { getAlbumHoursRemaining } from '../utils';
+import { getAlbumDaysRemaining } from '../utils';
 
-export const getJoinedAlbums = async (userId: string): Promise<UserAlbum[] | null> => {
+export const getJoinedAlbums = async (userId: string): Promise<AlbumEntry[] | null> => {
   try {
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
@@ -31,19 +31,19 @@ export const getJoinedAlbums = async (userId: string): Promise<UserAlbum[] | nul
 
       const res = querySnapshot.docs.map((doc) => {
         const data = doc.data();
-        const createdOn = data.createdOn.toDate().getTime();
-        const hoursRemaining = getAlbumHoursRemaining(createdOn);
+        const firstUploadOn = data.firstUploadOn !== undefined ? data.firstUploadOn : data.createdOn;
+        const firstUploadTime = firstUploadOn !== null ? firstUploadOn.toDate().getTime() : null;
+        const daysUntilDelete = firstUploadTime !== null ? getAlbumDaysRemaining(Date.now(), firstUploadTime) : -1;
 
-        if (hoursRemaining >= 0) {
+        if (firstUploadTime === null || daysUntilDelete >= 0) {
           return ({
             id: doc.id,
             albumName: data.albumName as string,
             ownerId: data.ownerId,
-            hoursRemaining,
+            firstUploadOn: firstUploadTime,
             thumbnailImage: data.imageList.length !== 0 ?
               data.imageList[0].imageUrl :
               null,
-            createdOn,
           });
         }
       });

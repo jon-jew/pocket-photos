@@ -13,15 +13,15 @@ import { ref, deleteObject } from 'firebase/storage';
 import { toast } from 'react-toastify';
 
 import { storage, db } from './clientApp';
-import { streamToObject } from '../utils';
+import { streamToObject, getTimeDifference } from '../utils';
 
 declare global {
-  interface UserAlbum {
-    id: string;
+  interface AlbumEntry {
+    id?: string;
+    ownerId: string;
     albumName: string;
-    hoursRemaining: number;
-    createdOn: number;
-    thumbnailImage: string;
+    firstUploadOn: number;
+    thumbnailImage?: string;
   }
 
   interface Image {
@@ -86,7 +86,12 @@ export const uploadImagesToAlbum = async (
     const albumRef = doc(db, 'albums', albumId);
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
-      const { viewersCanEdit, ownerId, imageList } = docSnap.data();
+      const {
+        viewersCanEdit,
+        ownerId,
+        imageList,
+        firstUploadOn,
+      } = docSnap.data();
       let userToken: string | undefined = undefined;
 
       if (
@@ -119,6 +124,7 @@ export const uploadImagesToAlbum = async (
       const addedImageList = await Promise.all(imagePromises);
 
       await updateDoc(albumRef, {
+        firstUploadOn: firstUploadOn ? firstUploadOn : serverTimestamp(),
         imageList: [...imageList, ...addedImageList],
       });
       return true;
@@ -200,6 +206,7 @@ export const uploadImageAlbum = async (
       ownerId: currentUser?.uid,
       viewersCanEdit: viewersCanEdit,
       createdOn: serverTimestamp(),
+      firstUploadOn: imageList.length !== 0 ? serverTimestamp() : null,
       imageList: imageList,
       isFullQuality
     };
@@ -236,12 +243,15 @@ export const getAlbumImages = async (albumId: string) => {
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const dateString = new Date(data.createdOn.toDate()).toDateString();
+      const createdOn = new Date(data.createdOn.toDate()).getTime();
+      const firstUploadOn = data.firstUploadOn !== undefined ? data.firstUploadOn : data.createdOn;
+      const firstUploadTime = firstUploadOn !== null ? firstUploadOn.toDate().getTime() : null;
 
       return ({
-        createdOn: new Date(data.createdOn.toDate()).getTime(),
-        dateString: dateString,
+        createdOn,
+        dateString: getTimeDifference(createdOn, false),
         albumName: data.albumName,
+        firstUploadOn: firstUploadTime,
         ownerId: data.ownerId,
         viewersCanEdit: data.viewersCanEdit,
         imageList: data.imageList,

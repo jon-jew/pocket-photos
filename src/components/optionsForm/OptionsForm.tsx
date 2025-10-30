@@ -44,7 +44,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
     closeOptions(false, true);
     const delRes = await deleteAlbum(albumId);
     if (delRes) {
-      router.push(`/user-albums/${currentUser?.uid}`);
+      router.push('/my-lobbies');
       toast.success('Album deleted');
     } else {
       closeOptions(false, false);

@@ -5,7 +5,7 @@ import { v4 as generateRandomId } from 'uuid';
 import { ref, uploadBytes, getDownloadURL, } from 'firebase/storage';
 import sharp from 'sharp';
 
-import { storage } from '@/library/firebase/serverApp';
+import { getAuthenticatedAppForUser } from '@/library/firebase/serverApp';
 import { validateJwt } from '@/library/validateJwt';
 
 export async function POST(req: NextRequest) {
@@ -22,17 +22,24 @@ export async function POST(req: NextRequest) {
     } else {
       return NextResponse.json({ error: 'Unauthorized: missing token' }, { status: 401 });
     }
+
     const formData = await req.formData();
     const imageFile = formData.get('image') as File;
     const info = formData.get('info') as string;
     const { albumId, isFullQuality } = JSON.parse(info);
-    // const albumId = formData.get('albumId') as string;
+
+    if (imageFile.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size too large' }, { status: 400 });
+    }
     if (!imageFile || !albumId) {
       return NextResponse.json({ error: 'Missing file or albumId' }, { status: 400 });
     }
+
+    const { storage } = await getAuthenticatedAppForUser();
+    
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
     const webpFile = await sharp(imageBuffer).jpeg({
-      quality: isFullQuality ? 100 : 75,
+      quality: isFullQuality ? 100 : 80,
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();
@@ -41,6 +48,7 @@ export async function POST(req: NextRequest) {
       contentType: 'image/jpeg',
     });
     const imageUrl = await getDownloadURL(imageRef);
+    console.log(imageUrl);
 
     return NextResponse.json({
       id: imageId, imageUrl,

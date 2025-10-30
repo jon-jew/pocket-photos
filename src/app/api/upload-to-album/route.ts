@@ -6,24 +6,11 @@ import { getDoc, doc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, } from 'firebase/storage';
 import sharp from 'sharp';
 
-import { storage, db } from '@/library/firebase/serverApp';
+import { getAuthenticatedAppForUser } from '@/library/firebase/serverApp';
 import { validateJwt } from '@/library/validateJwt';
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const imageFile = formData.get('image') as File;
-    const albumId = formData.get('albumId') as string;
-    if (!imageFile || !albumId) {
-      return NextResponse.json({ error: 'Missing file or albumId' }, { status: 400 });
-    }
-    const albumRef = doc(db, 'albums', albumId);
-    const docsnap = await getDoc(albumRef);
-    if (!docsnap.exists()) {
-      return NextResponse.json({ error: 'Album does not exist' }, { status: 404 });
-    }
-    const { viewersCanEdit, ownerId } = docsnap.data();
-
     let userId = null;
     const authHeader = req.headers.get('Authorization');
     if (authHeader) {
@@ -33,13 +20,34 @@ export async function POST(req: NextRequest) {
       }
       userId = jwtRes.user_id;
     }
+
+    const formData = await req.formData();
+    const imageFile = formData.get('image') as File;
+    const albumId = formData.get('albumId') as string;
+
+    if (imageFile.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size too large' }, { status: 400 });
+    }
+    if (!imageFile || !albumId) {
+      return NextResponse.json({ error: 'Missing file or albumId' }, { status: 400 });
+    }
+
+    const { db, storage } = await getAuthenticatedAppForUser();
+
+    const albumRef = doc(db, 'albums', albumId);
+    const docsnap = await getDoc(albumRef);
+    if (!docsnap.exists()) {
+      return NextResponse.json({ error: 'Album does not exist' }, { status: 404 });
+    }
+    const { viewersCanEdit, ownerId } = docsnap.data();
+    
     if (!viewersCanEdit && userId !== ownerId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
     const webpFile = await sharp(imageBuffer).jpeg({
-      quality: 50,
+      quality: 80,
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();

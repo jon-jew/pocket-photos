@@ -11,15 +11,7 @@ import {
 } from 'firebase/firestore';
 
 import { db } from './serverApp';
-import { getAlbumHoursRemaining } from '../utils';
-
-function formatDateToMMDDYY(date: Date) {
-  const month = date.getMonth() + 1; // getMonth() returns 0-11
-  const day = date.getDate();
-  const year = date.getFullYear().toString().slice(-2); // Get last two digits of the year
-
-  return `${month}/${day}/${year}`;
-}
+import { getAlbumDaysRemaining, getTimeDifference } from '../utils';
 
 export const getAlbumImages = async (albumId: string) => {
   try {
@@ -27,12 +19,16 @@ export const getAlbumImages = async (albumId: string) => {
     const docSnap = await getDoc(albumRef);
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const dateString = formatDateToMMDDYY(data.createdOn.toDate());
+      const createdOn = new Date(data.createdOn.toDate()).getTime();
+      const firstUploadOn = data.firstUploadOn !== undefined ? data.firstUploadOn : data.createdOn;
+      const firstUploadTime = firstUploadOn !== null ? firstUploadOn.toDate().getTime() : null;
+
       return ({
         albumInfo: {
-          createdOn: new Date(data.createdOn.toDate()).getTime(),
-          dateString: dateString,
+          createdOn,
+          dateString: getTimeDifference(createdOn, false),
           albumName: data.albumName,
+          firstUploadOn: firstUploadTime,
           ownerId: data.ownerId,
           viewersCanEdit: data.viewersCanEdit,
         },
@@ -50,7 +46,7 @@ export const getAlbumImages = async (albumId: string) => {
   }
 };
 
-export const getUserAlbums = async (userId: string) => {
+export const getUserAlbums = async (userId: string): Promise<AlbumEntry[] | false> => {
   try {
     const albumsRef = collection(db, 'albums');
     const q = query(albumsRef, where("ownerId", "==", userId), orderBy('createdOn', 'desc'));
@@ -58,19 +54,19 @@ export const getUserAlbums = async (userId: string) => {
     const querySnapshot = await getDocs(q);
     const res = querySnapshot.docs.map((doc) => {
       const data = doc.data();
-      const createdOn = data.createdOn.toDate().getTime();
-      const hoursRemaining = getAlbumHoursRemaining(createdOn);
+      const firstUploadOn = data.firstUploadOn !== undefined ? data.firstUploadOn : data.createdOn;
+      const firstUploadTime = firstUploadOn !== null ? firstUploadOn.toDate().getTime() : null;
+      const daysUntilDelete = firstUploadTime !== null ? getAlbumDaysRemaining(Date.now(), firstUploadTime) : -1;
 
-      if (hoursRemaining >= 0) {
+      if (firstUploadTime === null || daysUntilDelete >= 0) {
         return ({
           id: doc.id,
           albumName: data.albumName as string,
           ownerId: data.ownerId,
-          hoursRemaining,
+          firstUploadOn: firstUploadTime,
           thumbnailImage: data.imageList.length !== 0 ?
             data.imageList[0].imageUrl :
             null,
-          createdOn,
         });
       }
     });
