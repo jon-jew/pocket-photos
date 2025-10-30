@@ -9,7 +9,7 @@ import Modal from '@mui/material/Modal';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReportIcon from '@mui/icons-material/Report';
 
-import { createReport } from "@/library/firebase/report";
+import { createReport } from "@/library/firebase/reportClient";
 import Button from '@/components/ui/button';
 import Textfield from "@/components/ui/textfield";
 

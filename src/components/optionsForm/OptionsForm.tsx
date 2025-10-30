@@ -9,7 +9,7 @@ import Switch from '@mui/material/Switch';
 import TuneIcon from '@mui/icons-material/Tune';
 // import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 
-import { editAlbumFields, deleteAlbum } from '@/library/firebase/image';
+import { editAlbumFields, deleteAlbum } from '@/library/firebase/imageClient';
 import Button from '@/components/ui/button';
 import Textfield from '@/components/ui/textfield';
 
@@ -52,7 +52,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
   };
 
   return (
-    <div className="bg-secondary text-white rounded-lg relative px-2 py-4 w-[85%] max-w-[500px] z-[1000]">
+    <div className="bg-black text-white rounded-lg relative px-2 py-4 w-[85%] max-w-[500px] z-[1000]">
       <h2 className="text-2xl text-primary mb-10">
         <TuneIcon /> Options
       </h2>

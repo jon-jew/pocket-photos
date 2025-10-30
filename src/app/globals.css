@@ -63,6 +63,10 @@ body {
   transition-duration: 150ms;
 }
 
+.fade-in {
+  transition: opacity 0.3s cubic-bezier(0.3, 0.2, 0.2, 0.8);
+}
+
 h1 {
   font-size: 48px;
 }

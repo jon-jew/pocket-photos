@@ -13,7 +13,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   onClick?: () => void;
   href?: string;
   fullWidth?: boolean;
-  variant?: 'primary' | 'secondary' | 'warning';
+  variant?: 'primary' | 'secondary' | 'warning' | 'outlinedPrimary' | 'outlinedSecondary';
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -29,6 +29,8 @@ const Button: React.FC<ButtonProps> = ({
   const classes = clx({
     'btn px-4 py-2 max-w-[400px] rounded-md shadow-lg focus:shadow-xl': true,
     'w-full': fullWidth,
+    'border-2 border-secondary bg-primary text-secondary': variant === 'outlinedPrimary',
+    'border-2 border-primary text-primary': variant === 'outlinedSecondary',
     'bg-secondary text-primary hover:not-disabled:bg-secondary-hover': variant === 'primary',
     'bg-primary text-secondary hover:not-disabled:bg-primary-hover': variant === 'secondary',
     'bg-warning text-white hover:not-disabled:bg-warning-hover': variant === 'warning',

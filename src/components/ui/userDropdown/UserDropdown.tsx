@@ -59,15 +59,6 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
         setOpen(open);
       };
 
-  // if (!user) {
-  //   return (
-  //     <Link
-  //       className={`absolute z-10 top-4 right-4 text-${variant}`}
-  //       href={`/login${prevAlbumId ? `?prevAlbum=${prevAlbumId}` : ''}`}>Login
-  //     </Link>
-  //   );
-  // }
-
   return (
     <div ref={dropdownRef} className="absolute z-10 top-4 right-4 inline-block">
       <button

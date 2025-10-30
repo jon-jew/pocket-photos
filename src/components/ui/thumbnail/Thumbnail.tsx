@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState } from 'react';
 import Image from 'next/image';
 import clx from 'classnames';
 import { useInView } from 'react-intersection-observer';
@@ -9,6 +10,7 @@ import ImageIcon from '@mui/icons-material/Image';
 import ReactionButton from '@/components/ui/reactionButton';
 
 import './thumbnail.scss';
+
 
 interface ThumbnailProps {
   idx: number;
@@ -66,26 +68,32 @@ export default function Thumbnail({
           <span>x</span><ImageIcon sx={{ fontSize: '18px' }} />
         </button>
       }
-      <button
-        type="button"
-        onClick={openModal}
-        className="thumbnail"
+      <div
+        className={clx({
+          'thumbnail': true,
+          'animate-pulse': !inView,
+        })}
       >
-        <Image
-          ref={ref}
-          src={src}
-          quality={quality}
-          fill
-          priority={idx < 6}
-          alt={`Image ${idx + 1}`}
-          sizes='157.2px'
-          style={{
-            opacity: inView ? 1 : 0,
-            transition: "opacity 0.2s cubic-bezier(0.3, 0.2, 0.2, 0.8)",
-            objectFit: 'cover',
-          }}
-        />
-      </button>
+        <button
+          className={clx({
+            'h-full w-full fade-in': true,
+            'opacity-0': !inView,
+          })}
+          type="button"
+          onClick={openModal}
+        >
+          <Image
+            ref={ref}
+            src={src}
+            quality={quality}
+            fill
+            priority={idx < 6}
+            alt={`Image ${idx + 1}`}
+            sizes='160px'
+            style={{ objectFit: 'cover' }}
+          />
+        </button>
+      </div>
       {albumId && reactionEntry &&
         <div className={clx({
           "hide": editMode,

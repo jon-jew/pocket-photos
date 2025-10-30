@@ -8,7 +8,7 @@ import { Slide } from '@mui/material';
 import Carousel from '@/components/carousel';
 import Thumbnail from '@/components/ui/thumbnail';
 
-import { handleImageReaction } from '@/library/firebase/image';
+import { handleImageReaction } from '@/library/firebase/imageClient';
 
 import './imageGallery.scss';
 

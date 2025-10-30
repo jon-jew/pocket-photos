@@ -3,17 +3,21 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import Image from 'next/image';
+import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 
 import { toast } from "react-toastify";
 import clx from 'classnames';
 
+import Snackbar from '@mui/material/Snackbar';
+import Slide from '@mui/material/Slide';
 import Modal from '@mui/material/Modal';
 
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import EditIcon from '@mui/icons-material/Edit';
 import ImageIcon from '@mui/icons-material/Image';
+import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 import TuneIcon from '@mui/icons-material/Tune';
 import ShareIcon from '@mui/icons-material/Share';
@@ -21,13 +25,13 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 
 import { generateQR, compressFile, getAlbumHoursRemaining } from '@/library/utils';
-import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/image";
+import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/imageClient";
 import { setJoinedAlbums } from "@/library/firebase/userClient";
 
 import Loading from "@/components/loading";
+import Navbar from "@/components/ui/navbar";
 import ImageGallery from "@/components/imageGallery";
 import OptionsForm from "@/components/optionsForm";
-import UserDropdown from "@/components/ui/userDropdown";
 import ReportDropdown from "@/components/ui/reportDropdown";
 import IconButton from "@/components/ui/iconButton";
 import Button from "@/components/ui/button";
@@ -38,7 +42,7 @@ interface AlbumInfo {
   dateString: string;
   ownerId: string;
   viewersCanEdit: boolean;
-};
+}
 
 interface AlbumProps {
   albumId: string;
@@ -67,23 +71,28 @@ export default function AlbumPage({
 
   const [imageList, setImageList] = useState<GalleryImageEntry[]>(initialImages || []);
   const [albumInfo, setAlbumInfo] = useState<AlbumInfo | undefined>(initialAlbumInfo);
+  const [hoursRemaining, setHoursRemaining] = useState<number>(initialHoursRemaining);
   const [joined, setJoined] = useState<boolean>(initialJoined);
 
   const [isQrOpen, setIsQrOpen] = useState<boolean>(false);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [isOptionsOpen, setIsOptionsOpen] = useState<boolean>(false);
-  const [hoursRemaining, setHoursRemaining] = useState<number>(initialHoursRemaining);
+  const [waitlistMsgOpen, setWaitlistMsgOpen] = useState<boolean>(false);
 
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isChanged, setIsChanged] = useState<boolean>(false);
-  const [uploadProgress, setUploadProgress] = useState<number>(-1);
   const [editedImageList, setEditedImageList] = useState<GalleryImageEntry[]>([]);
   const [deletedImageIds, setDeletedImageIds] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<number>(-1);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
 
   const handleQr = () => {
     setIsQrOpen(!isQrOpen);
+  };
+  const handleWaitlistClose = () => {
+    setWaitlistMsgOpen(false);
   };
 
   async function shareContent() {
@@ -204,11 +213,15 @@ export default function AlbumPage({
     }
     if (isScanned && currentUser) {
       setJoinedAlbums(albumId, currentUser?.uid, false);
+      setJoined(true);
     }
     if (fromWaitlist) {
       toast.success('Thank you for signing up!');
     }
     setLoading(false);
+    timeoutRef.current = setTimeout(() => {
+      setWaitlistMsgOpen(true);
+    }, 2000);
   }, []);
 
   useEffect(() => {
@@ -234,73 +247,52 @@ export default function AlbumPage({
 
   return (
     <>
-      <main className="max-w-4xl mx-auto">
-        <nav className="sticky w-full max-w-4xl z-[30] transition-[height] duration-200 ease-in-out">
-          <div className="w-full bg-primary">
-            <div className="pt-6 px-5">
-              <div className="flex flex-row items-center mb-3 pr-10">
-                <Image
-                  priority
-                  alt="Plurr Logo"
-                  className="mr-2"
-                  width={45}
-                  height={44}
-                  src="/logo-secondary.svg"
-                />
-                <h2 className="text-2xl text-secondary font-bold break-all text-ellipsis line-clamp-2">
-                  {albumInfo.albumName}
-                </h2>
-              </div>
-              <div className="flex flex-row">
-                <p className="pl-3 text-md text-black">{albumInfo.dateString}</p>
-                <div className="flex gap-4 grow justify-end">
-                  {currentUser &&
-                    <IconButton onClick={handleJoinClick}>
-                      {joined ?
-                        <BookmarkIcon color="warning" /> :
-                        <BookmarkBorderIcon />
-                      }
-                    </IconButton>
+      <div className="max-w-4xl mx-auto relative">
+        <Navbar
+          currentUser={currentUser}
+          title={
+            <>
+              <h2 className="text-2xl text-secondary font-bold break-all text-ellipsis line-clamp-2">
+                {albumInfo.albumName}
+              </h2>
+            </>
+          }
+        >
+          <div className="flex flex-row mt-2">
+            <p className="pl-3 text-md text-black">{albumInfo.dateString}</p>
+            <div className="flex gap-4 grow justify-end">
+              {currentUser &&
+                <IconButton onClick={handleJoinClick}>
+                  {joined ?
+                    <BookmarkIcon color="warning" /> :
+                    <BookmarkBorderIcon />
                   }
-                  <IconButton onClick={shareContent}>
-                    <ShareIcon />
-                  </IconButton>
-                  <IconButton
-                    chevronState={isQrOpen ? 'up' : 'down'}
-                    onClick={handleQr}
-                  >
-                    <QrCodeIcon />
-                  </IconButton>
+                </IconButton>
+              }
+              <IconButton onClick={shareContent}>
+                <ShareIcon />
+              </IconButton>
+              <IconButton
+                chevronState={isQrOpen ? 'up' : 'down'}
+                onClick={handleQr}
+              >
+                <QrCodeIcon />
+              </IconButton>
 
-                </div>
-              </div>
             </div>
-            <div className={clx({
-              "h-0": !isQrOpen,
-              "h-[225px]": isQrOpen,
-              "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
-            })}>
-              <div className="text-center bg-white rounded-lg overflow-hidden">
-                {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
-                <p className="pb-2 !text-md text-black">{albumId}</p>
-              </div>
+          </div>
+          <div className={clx({
+            "h-0": !isQrOpen,
+            "h-[225px]": isQrOpen,
+            "w-full transition-[height] bg-primary duration-200 ease-in-out overflow-hidden gap-2 flex flex-col items-center justify-center": true,
+          })}>
+            <div className="text-center bg-white rounded-lg overflow-hidden">
+              {qrCode && <Image alt="QR code" width={160} height={160} src={qrCode} />}
+              <p className="pb-2 !text-md text-black">{albumId}</p>
             </div>
-            <UserDropdown
-              user={currentUser}
-              variant="secondary"
-              prevAlbumId={albumId}
-            />
           </div>
-          <div className="h-[20px] w-full rotate-180 relative">
-            <Image
-              priority
-              src="/tornEdge.png"
-              alt="torn edge"
-              fill
-            />
-          </div>
-        </nav>
-        <div className="pt-3 px-2 pb-[50px]">
+        </Navbar>
+        <main className="pt-3 px-2 pb-[50px]">
           <div className="flex flex-row gap-3 pl-3 pr-2 my-2">
             <ReportDropdown albumId={albumId} />
             <h4 className="text-primary">
@@ -335,9 +327,9 @@ export default function AlbumPage({
               handleReorderImage={handleReorderImage}
             />
           }
-        </div>
+        </main>
 
-        <div className="fixed w-full max-w-4xl pb-5 bottom-0 z-10">
+        <footer className="fixed w-full max-w-4xl pb-5 bottom-0 z-10">
           <div className="text-secondary h-[50px] flex flex-row items-center justify-center gap-20 pb-4">
             {editMode &&
               <button
@@ -386,8 +378,28 @@ export default function AlbumPage({
               </button>
             }
           </div>
+        </footer>
+      </div>
+      <Snackbar
+        key="waitlist-snack"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        open={waitlistMsgOpen}
+        // autoHideDuration={5000}
+        slots={{ transition: Slide }}
+        onClose={handleWaitlistClose}
+      >
+        <div className="flex flex-row items-center justify-center px-6 py-4 bg-gray-900">
+          <p className="text-xs">Wanna stay in the loop?</p>
+          <Link href={`/waitlist?prevAlbumId=${albumId}`}>
+            <button type="button" className="text-sm text-primary underline ml-3 mr-5">
+              Join Waitlist
+            </button>
+          </Link>
+          <IconButton onClick={handleWaitlistClose}>
+            <CloseIcon sx={{ color: '#FFF', fontSize: 18 }} />
+          </IconButton>
         </div>
-      </main>
+      </Snackbar>
       <Modal open={isOptionsOpen} onClose={() => closeOptions(false, false)}>
         <div
           className="fixed inset-0 flex items-center justify-center z-[1000]"

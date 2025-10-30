@@ -1,0 +1,69 @@
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { User } from "firebase/auth";
+import UserDropdown from '@/components/ui/userDropdown';
+
+interface NavbarProps {
+  children?: React.ReactNode;
+  currentUser?: User;
+  title: React.ReactElement;
+  path?: string;
+}
+
+const Navbar: React.FC<NavbarProps> = ({
+  children,
+  currentUser,
+  title,
+  path,
+}) => (
+  <nav className="sticky top-0 w-full max-w-4xl z-[30] transition-[height] duration-200 ease-in-out">
+    <div className="relative bg-primary pt-6 pl-3 pr-8 z-4 flex flex-col gap-1">
+      <div className="flex flex-row items-center pr-8">
+        <Image
+          priority
+          alt="Plurr Logo"
+          className="mr-2"
+          width={45}
+          height={44}
+          src="/logo-secondary.svg"
+        />
+        {title}
+      </div>
+      {children}
+      <UserDropdown variant="secondary" user={currentUser} currentPath={path} />
+    </div>
+    <svg
+      viewBox="0.0 0.0 500.0 50.0"
+      preserveAspectRatio="none"
+      width="100%"
+      height="20px"
+      fill="none"
+      stroke="none"
+      strokeLinecap="square"
+      strokeMiterlimit={10}
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      xmlns="http://www.w3.org/2000/svg"
+      transform="matrix(-1,1.2246467991473532e-16,-1.2246467991473532e-16,-1,0,0)"
+    >
+      <clipPath id="p.0">
+        <path d="m0 0l500.0 0l0 50.0l-500.0 0l0 -50.0z" clipRule="nonzero" />
+      </clipPath>
+      <g clipPath="url(#p.0)">
+        <path
+          fill="#000000"
+          fillOpacity={0}
+          d="m0 0l500.0 0l0 50.0l-500.0 0z"
+          fillRule="evenodd"
+        />
+        <path
+          fill="#bd9cea"
+          d="m0.037467718 50.093174l0 -47.351704l30.245813 4.699475l77.18506 -5.2217846l60.938126 7.0183725l16.721527 -2.4107609l63.780975 -2.8110237l53.029297 11.446195l63.062866 -12.450131l14.631134 2.1089237l12.362793 -2.7112858l17.19925 -1.355643l16.48111 7.0787396l50.89676 -7.51706l23.468842 -0.45931756l0 49.961945z"
+          fillRule="evenodd"
+        />
+      </g>
+    </svg>
+  </nav >
+);
+
+export default Navbar;

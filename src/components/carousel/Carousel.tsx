@@ -6,7 +6,7 @@ import clx from 'classnames';
 
 import DownloadIcon from '@mui/icons-material/Download';
 
-import { XHRRequest } from '@/library/firebase/image';
+import { XHRRequest } from '@/library/firebase/imageClient';
 import ReactionButton from '@/components/ui/reactionButton';
 import Button from '@/components/ui/button';
 
