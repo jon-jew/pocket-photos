@@ -35,6 +35,7 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
   albumList,
   showNewAlbumBtn = false,
 }) => {
+  'use client';
   const user = useUserSession(initialUser);
 
   const [currentTime, setCurrentTime] = useState<number>(Date.now());

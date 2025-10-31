@@ -37,7 +37,7 @@ import {
 } from '@/library/utils';
 import { getAlbumImages, editAlbumImages, uploadImagesToAlbum, } from "@/library/firebase/imageClient";
 import { setJoinedAlbums } from "@/library/firebase/userClient";
-import { analytics } from "@/library/firebase/clientApp";
+// import { analytics } from "@/library/firebase/clientApp";
 
 import useUserSession from "@/components/hooks/useUserSesssion";
 
@@ -222,15 +222,15 @@ export default function AlbumPage({
     if (isScanned && user) {
       setJoinedAlbums(albumId, user?.uid, false);
       setJoined(true);
-      logEvent(analytics, 'scanned_code', {
-        is_logged_in: true,
-        lobby_id: albumId,
-      });
+      // logEvent(analytics, 'scanned_code', {
+      //   is_logged_in: true,
+      //   lobby_id: albumId,
+      // });
     } else if (isScanned) {
-      logEvent(analytics, 'scanned_code', {
-        is_logged_in: false,
-        lobby_id: albumId,
-      });
+      // logEvent(analytics, 'scanned_code', {
+      //   is_logged_in: false,
+      //   lobby_id: albumId,
+      // });
     }
     if (fromWaitlist) {
       toast.success('Thank you for signing up!');
@@ -340,9 +340,18 @@ export default function AlbumPage({
             <div className="flex flex-col justify-center items-center p-4 gap-4 h-[calc(100vh-260px)]">
               <h3>Add images to start the fun!</h3>
               <Button variant="secondary" fullWidth>
-                <label htmlFor="image-upload">
+                <label htmlFor="image-upload-empty">
                   + Add images
                 </label>
+                <input
+                  id="image-upload-empty"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={handleFilesChange}
+                  className="hidden"
+                />
               </Button>
             </div> :
             <ImageGallery
@@ -422,7 +431,7 @@ export default function AlbumPage({
         slots={{ transition: Slide }}
         onClose={handleWaitlistClose}
       >
-        <div className="flex flex-row items-center justify-center px-6 py-4 bg-gray-900">
+        <div className="flex flex-row items-center justify-center mb-20 px-6 py-4 bg-gray-900">
           <p className="text-xs">Wanna stay in the loop?</p>
           <Link href={`/waitlist?prevAlbumId=${albumId}`}>
             <button type="button" className="text-sm text-primary underline ml-3 mr-5">

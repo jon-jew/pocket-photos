@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { logEvent } from 'firebase/analytics';
+// import { logEvent } from 'firebase/analytics';
 
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
@@ -13,7 +13,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DialpadIcon from '@mui/icons-material/Dialpad';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
-import { analytics } from "@/library/firebase/clientApp";
+// import { analytics } from "@/library/firebase/clientApp";
 import useUserSession from '@/components/hooks/useUserSesssion';
 
 import QrScanner from '@/components/qrScanner';
@@ -43,10 +43,10 @@ export default function Home({ initialUser }: { initialUser: UserInfo | undefine
   const handleJoinClick = (e: React.FormEvent) => {
     e.preventDefault();
     if (lobbyCode.trim() !== "") {
-      logEvent(analytics, 'entered_code', {
-        is_logged_in: user !== undefined,
-        lobby_id: lobbyCode,
-      });
+      // logEvent(analytics, 'entered_code', {
+      //   is_logged_in: user !== undefined,
+      //   lobby_id: lobbyCode,
+      // });
       // Navigate to the album page with the room code
       router.push(`/lobby/${lobbyCode}`);
     }

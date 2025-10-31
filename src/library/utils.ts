@@ -49,7 +49,7 @@ export const generateQR = async (text: string) => {
 
 export const compressFile = async (file: File, fullQuality: boolean): Promise<NewImageEntry> => {
   const options = {
-    maxSizeMB: fullQuality ? 8 : 2,
+    maxSizeMB: fullQuality ? 8 : 1,
     maxWidthOrHeight: fullQuality ? 3200 : 2000,
     useWebWorker: true,
   };

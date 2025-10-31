@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
     const webpFile = await sharp(imageBuffer).jpeg({
-      quality: isFullQuality ? 100 : 60,
+      quality: isFullQuality ? 80 : 60,
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();
