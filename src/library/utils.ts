@@ -49,8 +49,8 @@ export const generateQR = async (text: string) => {
 
 export const compressFile = async (file: File, fullQuality: boolean): Promise<NewImageEntry> => {
   const options = {
-    maxSizeMB: fullQuality ? 8 : 0.75,
-    maxWidthOrHeight: fullQuality ? 3200 : 1200,
+    maxSizeMB: fullQuality ? 8 : 2,
+    maxWidthOrHeight: fullQuality ? 3200 : 2000,
     useWebWorker: true,
   };
 

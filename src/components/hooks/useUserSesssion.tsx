@@ -2,10 +2,9 @@
 
 import { useEffect } from 'react';
 import Cookies from 'universal-cookie';
-import { User } from 'firebase/auth';
 import { onIdTokenChanged } from '@/library/firebase/auth';
 
-export default function useUserSession(initialUser: User | undefined) {
+export default function useUserSession(initialUser: UserInfo | undefined) {
   const cookies = new Cookies(null, { path: '/' });
 
   useEffect(() => {

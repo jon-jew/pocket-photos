@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import { User } from "firebase/auth";
 import { redirect } from "next/navigation";
 
 import { getAuthenticatedAppForUser } from "@/library/firebase/serverApp";
@@ -30,9 +29,9 @@ export default async function Page() {
 
   return <AlbumGallery
     title="My Lobbies"
-    currentUser={currentUser?.toJSON() as User}
+    initialUser={currentUser?.toJSON() as UserInfo}
     path="/my-lobbies"
-    initialAlbumList={albumList}
+    albumList={albumList}
     showNewAlbumBtn
   />;
 };

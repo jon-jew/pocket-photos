@@ -164,7 +164,7 @@ export const uploadImageAlbum = async (
       albumId = generateRandomId();
     } while (!doesAlbumExist(albumId));
 
-    const progressIncrement: number = 1 / (images.length * 1) * 100;
+    const progressIncrement: number = 1 / images.length * 100;
     const apiPromises = images.map(async (image, index) => {
       const formData = new FormData();
       formData.append(`image`, image, `album-img-${index}`);

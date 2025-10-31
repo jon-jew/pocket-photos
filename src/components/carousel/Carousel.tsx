@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 
 import Image from 'next/image';
@@ -7,6 +8,7 @@ import clx from 'classnames';
 import DownloadIcon from '@mui/icons-material/Download';
 
 import { XHRRequest } from '@/library/firebase/imageClient';
+import useBackButton from '@/components/hooks/useBackButton';
 import ReactionButton from '@/components/ui/reactionButton';
 import Button from '@/components/ui/button';
 
@@ -17,10 +19,10 @@ interface CarouselProps {
   imageList: GalleryImageEntry[] | NewImageEntry[];
   reactionList?: ImageReactionEntry[];
   albumId?: string,
-  currentUserId: string | undefined;
+  userId: string | undefined;
   showDownload?: boolean;
   hideReactionBtn?: boolean;
-  closeModal?: () => void;
+  closeModal: () => void;
   onReactionSelect: (reaction: string, idx: number) => Promise<string | false | undefined>;
 };
 
@@ -29,12 +31,17 @@ const Carousel: React.FC<CarouselProps> = ({
   imageList,
   reactionList,
   albumId,
-  currentUserId,
+  userId,
   showDownload = false,
   hideReactionBtn = true,
   closeModal,
   onReactionSelect,
 }) => {
+  useBackButton((e) => {
+    e.preventDefault();
+    console.log(e)
+    closeModal();
+  });
   const [current, setCurrent] = useState(initialCurrent);
   const [confirmDownload, setConfirmDownload] = useState(false);
   const [downloadBlob, setDownloadBlob] = useState<Blob | null>(null);
@@ -91,7 +98,7 @@ const Carousel: React.FC<CarouselProps> = ({
               className="w-full"
             >
               <div className="w-[100vw] flex justify-center items-center">
-                <div className="gallery-slide rounded-sm">
+                <div className="gallery-slide">
                   <div className="img-container">
                     <Image
                       priority={idx === current}
@@ -115,7 +122,7 @@ const Carousel: React.FC<CarouselProps> = ({
                         <ReactionButton
                           displayString={reactionList[idx].reactionString}
                           selectedReaction={reactionList[idx].selectedReaction}
-                          disableClick={currentUserId === undefined}
+                          disableClick={userId === undefined}
                           onReactionSelect={(reaction: string) => onReactionSelect(reaction, idx)}
                         />
                       </div>

@@ -9,12 +9,14 @@ import { useSearchParams } from 'next/navigation';
 
 import { toast } from "react-toastify";
 import clx from 'classnames';
+import { logEvent } from 'firebase/analytics';
 
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
 import Modal from '@mui/material/Modal';
 
 import LockIcon from '@mui/icons-material/Lock';
+import PersonIcon from '@mui/icons-material/Person';
 import DeleteIcon from '@mui/icons-material/Delete';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import EditIcon from '@mui/icons-material/Edit';
@@ -33,8 +35,11 @@ import {
   getAlbumHoursRemaining,
   getAlbumDaysRemaining,
 } from '@/library/utils';
-import { getAlbumImages, editAlbumImages, uploadImagesToAlbum } from "@/library/firebase/imageClient";
+import { getAlbumImages, editAlbumImages, uploadImagesToAlbum, } from "@/library/firebase/imageClient";
 import { setJoinedAlbums } from "@/library/firebase/userClient";
+import { analytics } from "@/library/firebase/clientApp";
+
+import useUserSession from "@/components/hooks/useUserSesssion";
 
 import Loading from "@/components/loading";
 import Navbar from "@/components/ui/navbar";
@@ -53,7 +58,7 @@ interface AlbumProps {
   initialAlbumInfo: AlbumInfo;
   initialImages: GalleryImageEntry[];
   initialJoined: boolean;
-  currentUser: UserInfo | undefined;
+  initialUser: UserInfo | undefined;
 }
 
 export default function AlbumPage({
@@ -61,10 +66,11 @@ export default function AlbumPage({
   initialAlbumInfo,
   initialImages,
   initialJoined,
-  currentUser,
+  initialUser,
 }: AlbumProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const user = useUserSession(initialUser);
 
   const isScanned = searchParams.get('scanned') === 'true';
   const fromWaitlist = searchParams.get('waitlist') === 'true';
@@ -177,7 +183,7 @@ export default function AlbumPage({
       await uploadImagesToAlbum(
         albumId,
         newImages.map((image) => image.file),
-        currentUser,
+        user,
         setUploadProgress,
       );
       await getImages();
@@ -188,15 +194,15 @@ export default function AlbumPage({
 
   const handleSubmitChanges = async () => {
     setLoading(true);
-    await editAlbumImages(albumId, currentUser?.uid, editedImageList, deletedImageIds);
+    await editAlbumImages(albumId, user?.uid, editedImageList, deletedImageIds);
     await getImages();
     toast.success('Saved changes!');
     setEditMode(false);
   };
 
   const handleJoinClick = async () => {
-    if (currentUser?.uid) {
-      await setJoinedAlbums(albumId, currentUser?.uid, joined);
+    if (user?.uid) {
+      await setJoinedAlbums(albumId, user?.uid, joined);
       setJoined(!joined);
     }
   }
@@ -213,9 +219,18 @@ export default function AlbumPage({
       router.push('/');
       toast.error('This lobby has expired!');
     }
-    if (isScanned && currentUser) {
-      setJoinedAlbums(albumId, currentUser?.uid, false);
+    if (isScanned && user) {
+      setJoinedAlbums(albumId, user?.uid, false);
       setJoined(true);
+      logEvent(analytics, 'scanned_code', {
+        is_logged_in: true,
+        lobby_id: albumId,
+      });
+    } else if (isScanned) {
+      logEvent(analytics, 'scanned_code', {
+        is_logged_in: false,
+        lobby_id: albumId,
+      });
     }
     if (fromWaitlist) {
       toast.success('Thank you for signing up!');
@@ -254,24 +269,23 @@ export default function AlbumPage({
     <>
       <div className="max-w-4xl mx-auto relative">
         <Navbar
-          currentUser={currentUser}
+          user={user}
           title={
-            <>
-              <h2 className="text-2xl text-secondary font-bold break-all text-ellipsis line-clamp-2">
-                {hoursRemaining < 0 && <LockIcon sx={{ fontSize: 20, mr: 1 }} />}
-                {albumInfo.albumName}
-              </h2>
-            </>
+            <h2 className="text-2xl text-secondary font-bold break-all text-ellipsis line-clamp-2">
+              {albumInfo.ownerId === user?.uid && <PersonIcon sx={{ fontSize: 20, mr: 1 }} />}
+              {hoursRemaining < 0 && <LockIcon sx={{ fontSize: 20, mr: 1 }} />}
+              {albumInfo.albumName}
+            </h2>
           }
         >
-          <div className="flex flex-row mt-2">
-            <p className="pl-3 text-md text-black">
+          <div className="flex flex-row mt-2 items-end">
+            <p className="pl-3 text-md text-black opacity-80">
               {albumInfo.firstUploadOn !== null ?
                 getTimeDifference(albumInfo.firstUploadOn, false) : 'New Lobby'
               }
             </p>
             <div className="flex gap-4 grow justify-end">
-              {currentUser &&
+              {user &&
                 <IconButton onClick={handleJoinClick}>
                   {joined ?
                     <BookmarkIcon color="warning" /> :
@@ -288,7 +302,6 @@ export default function AlbumPage({
               >
                 <QrCodeIcon />
               </IconButton>
-
             </div>
           </div>
           <div className={clx({
@@ -333,15 +346,15 @@ export default function AlbumPage({
               </Button>
             </div> :
             <ImageGallery
-              currentUserId={currentUser?.uid}
+              userId={user?.uid}
               imageList={editMode ? editedImageList : imageList}
               initialReactions={imageList.map((image) => ({
-                selectedReaction: currentUser?.uid ?
-                  image.reactions?.find((reaction) => reaction.userId === currentUser.uid)?.reaction : null,
+                selectedReaction: user?.uid ?
+                  image.reactions?.find((reaction) => reaction.userId === user.uid)?.reaction : null,
                 reactionString: image.reactions ? `${image.reactionString} ${image.reactions?.length}` : '',
               }))}
               albumId={albumId}
-              editMode={albumInfo.ownerId === currentUser?.uid ? editMode : false}
+              editMode={albumInfo.ownerId === user?.uid ? editMode : false}
               showDownload
               onModalOpen={() => setIsQrOpen(false)}
               handleRemoveImage={handleRemoveImage}
@@ -380,7 +393,7 @@ export default function AlbumPage({
                 />
               </>
             }
-            {(currentUser?.uid === albumInfo.ownerId && hoursRemaining >= 0) &&
+            {(user?.uid === albumInfo.ownerId && hoursRemaining >= 0) &&
               <button
                 className={`bg-primary ring-blue-500/50 shadow-xl px-${editMode ? '2' : '3'} py-3 rounded-[50%]`}
                 type="button"
@@ -389,7 +402,7 @@ export default function AlbumPage({
                 {editMode && <span className="text-xs">x</span>}<EditIcon />
               </button>
             }
-            {(currentUser?.uid === albumInfo.ownerId && !editMode) &&
+            {(user?.uid === albumInfo.ownerId && !editMode) &&
               <button
                 className="bg-primary  ring-blue-500/50 shadow-xl px-3 py-3 rounded-[50%]"
                 type="button"
@@ -438,7 +451,7 @@ export default function AlbumPage({
           />
           <OptionsForm
             albumId={albumId}
-            currentUser={currentUser}
+            user={user}
             initialAlbumName={albumInfo.albumName}
             initialViewersCanEdit={albumInfo.viewersCanEdit}
             closeOptions={closeOptions}

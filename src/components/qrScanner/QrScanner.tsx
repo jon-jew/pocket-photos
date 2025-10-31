@@ -2,6 +2,9 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { useRouter } from 'next/navigation';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { toast } from 'react-toastify';
+import { logEvent } from 'firebase/analytics';
+
+import { analytics } from "@/library/firebase/clientApp";
 
 import SwipeableDrawer from '@mui/material/SwipeableDrawer';
 import IconButton from '@mui/material/IconButton';
@@ -32,6 +35,9 @@ const QrScanner: React.FC<QrScannerProps> = ({
         if (match) {
           const lobbyCode = code.rawValue.replace('plurr.it/lobby/', '').replace('?scanned=true', '');
           if (/^[a-zA-Z0-9]{6}$/.test(lobbyCode)) {
+            logEvent(analytics, 'qr_scanner_used', {
+              lobby_id: lobbyCode,
+            });
             router.push(`/lobby/${lobbyCode}?scanned=true`);
           }
         }

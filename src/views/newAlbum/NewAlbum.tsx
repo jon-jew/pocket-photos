@@ -15,6 +15,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 
 import { uploadImageAlbum } from '@/library/firebase/imageClient';
 import { generateQR, compressFile } from '@/library/utils';
+import useUserSession from '@/components/hooks/useUserSesssion';
 
 import IconHeader from '@/components/iconHeader';
 import TornContainer from '@/components/tornContainer';
@@ -25,14 +26,16 @@ import IconButton from '@/components/ui/iconButton';
 import Textfield from '@/components/ui/textfield';
 
 interface NewAlbumProps {
-  currentUser: UserInfo | undefined;
+  initialUser: UserInfo | undefined;
 }
 
 interface NewImageEntry extends Image {
   file: File;
 };
 
-const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
+const NewAlbumPage: React.FC<NewAlbumProps> = ({ initialUser }) => {
+  const user = useUserSession(initialUser);
+
   const [albumName, setAlbumName] = useState('');
   const [albumId, setAlbumId] = useState<string | null>(null);
 
@@ -55,11 +58,11 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!user) {
       router.push('/');
       toast.info('Please login to create album.');
     }
-  }, [router, currentUser]);
+  }, [router, user]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -77,7 +80,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
     return () => {
       observer.disconnect();
     };
-  }, [loading, currentUser]);
+  }, [loading, user]);
 
   const handleAlbumNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAlbumName(e.target.value);
@@ -98,11 +101,11 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    if (currentUser) {
+    if (user) {
       const uploadRes = await uploadImageAlbum(
         albumName,
         images.map((image) => image.file),
-        currentUser,
+        user,
         viewersCanEdit,
         fullQuality,
         setUploadProgress,
@@ -160,7 +163,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
 
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
-      <IconHeader showLogin currentUser={currentUser} />
+      <IconHeader showLogin user={user} />
       <TornContainer smallXPadding={images.length > 0} isLoading={uploadLoading}>
         <>
           <h3 className={clx({
@@ -228,7 +231,7 @@ const NewAlbumPage: React.FC<NewAlbumProps> = ({ currentUser }) => {
               <div className="mb-4 w-full">
                 <ImageGallery
                   imageList={images}
-                  currentUserId={currentUser?.uid}
+                  userId={user?.uid}
                   handleRemoveImage={handleRemoveImage}
                   handleReorderImage={handleReorderImage}
                 />

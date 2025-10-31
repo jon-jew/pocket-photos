@@ -16,7 +16,7 @@ interface ThumbnailProps {
   idx: number;
   src: string;
   albumId?: string;
-  currentUserId: string | undefined;
+  userId: string | undefined;
   reactionEntry?: ImageReactionEntry;
   imagesLength: number;
   editMode?: boolean;
@@ -31,7 +31,7 @@ export default function Thumbnail({
   idx,
   src,
   albumId,
-  currentUserId,
+  userId,
   reactionEntry,
   imagesLength,
   editMode = false,
@@ -76,7 +76,7 @@ export default function Thumbnail({
       >
         <button
           className={clx({
-            'h-full w-full fade-in': true,
+            'h-full w-full fade-in relative': true,
             'opacity-0': !inView,
           })}
           type="button"
@@ -102,7 +102,7 @@ export default function Thumbnail({
           <ReactionButton
             displayString={reactionEntry.reactionString}
             selectedReaction={reactionEntry.selectedReaction ? reactionEntry.selectedReaction : null}
-            disableClick={currentUserId === undefined}
+            disableClick={userId === undefined}
             onReactionSelect={(reaction: string) => onReactionSelect(reaction, idx)}
           />
         </div>

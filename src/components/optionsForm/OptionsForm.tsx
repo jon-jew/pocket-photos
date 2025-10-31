@@ -1,13 +1,11 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User } from 'firebase/auth';
 import { toast } from 'react-toastify';
 
 import Switch from '@mui/material/Switch';
 
 import TuneIcon from '@mui/icons-material/Tune';
-// import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 
 import { editAlbumFields, deleteAlbum } from '@/library/firebase/imageClient';
 import Button from '@/components/ui/button';
@@ -15,7 +13,7 @@ import Textfield from '@/components/ui/textfield';
 
 interface OptionsFormProps {
   albumId: string;
-  currentUser: User | undefined;
+  user: UserInfo | undefined;
   initialAlbumName: string;
   initialViewersCanEdit: boolean;
   closeOptions: (reload: boolean, loading: boolean) => void;
@@ -23,7 +21,7 @@ interface OptionsFormProps {
 
 const OptionsForm: React.FC<OptionsFormProps> = ({
   albumId,
-  currentUser,
+  user,
   initialAlbumName = '',
   initialViewersCanEdit = true,
   closeOptions,

@@ -6,14 +6,14 @@ import UserDropdown from '@/components/ui/userDropdown';
 
 interface NavbarProps {
   children?: React.ReactNode;
-  currentUser?: User;
+  user?: User;
   title: React.ReactElement;
   path?: string;
 }
 
 const Navbar: React.FC<NavbarProps> = ({
   children,
-  currentUser,
+  user,
   title,
   path,
 }) => (
@@ -28,12 +28,13 @@ const Navbar: React.FC<NavbarProps> = ({
             width={45}
             height={44}
             src="/logo-secondary.svg"
+            style={{ opacity: 0.65 }}
           />
         </Link>
         {title}
       </div>
       {children}
-      <UserDropdown variant="secondary" user={currentUser} currentPath={path} />
+      <UserDropdown variant="secondary" user={user} currentPath={path} />
     </div>
     <svg
       viewBox="0.0 0.0 500.0 50.0"

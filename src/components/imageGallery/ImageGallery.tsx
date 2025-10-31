@@ -16,7 +16,7 @@ interface ImageGalleryProps {
   imageList: GalleryImageEntry[] | NewImageEntry[];
   initialReactions?: ImageReactionEntry[];
   albumId?: string;
-  currentUserId: string | undefined;
+  userId: string | undefined;
   editMode?: boolean;
   showDownload?: boolean;
   onModalOpen?: () => void;
@@ -28,7 +28,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   imageList,
   initialReactions,
   albumId,
-  currentUserId,
+  userId,
   editMode = false,
   showDownload = false,
   onModalOpen,
@@ -53,9 +53,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   };
 
   const onReactionSelect = async (reaction: string, idx: number) => {
-    if (currentUserId && albumId && reactionList) {
+    if (userId && albumId && reactionList) {
       const newReactionString = await handleImageReaction(
-        currentUserId,
+        userId,
         reaction,
         albumId,
         idx,
@@ -86,14 +86,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
   return (
     <>
-      <ul className="py-4 polaroids w-full gallery-container">
+      <ul className="pt-4 pb-8 polaroids w-full gallery-container">
         {imageList.map((image, idx) => (
           <Thumbnail
             key={`thumbnail-${idx}`}
             idx={idx}
             src={image.imageUrl}
             albumId={albumId}
-            currentUserId={currentUserId}
+            userId={userId}
             reactionEntry={reactionList ? reactionList[idx] : undefined}
             imagesLength={imageList.length}
             editMode={editMode}
@@ -117,7 +117,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
               imageList={imageList}
               reactionList={reactionList}
               albumId={albumId}
-              currentUserId={currentUserId}
+              userId={userId}
               showDownload={showDownload}
               hideReactionBtn={editMode}
               closeModal={closeModal}

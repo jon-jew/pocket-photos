@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const info = formData.get('info') as string;
     const { albumId, isFullQuality } = JSON.parse(info);
 
-    if (imageFile.size > 20 * 1024 * 1024) {
+    if (imageFile.size > 25 * 1024 * 1024) {
       return NextResponse.json({ error: 'File size too large' }, { status: 400 });
     }
     if (!imageFile || !albumId) {
@@ -36,10 +36,10 @@ export async function POST(req: NextRequest) {
     }
 
     const { storage } = await getAuthenticatedAppForUser();
-    
+
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
     const webpFile = await sharp(imageBuffer).jpeg({
-      quality: isFullQuality ? 100 : 80,
+      quality: isFullQuality ? 100 : 60,
     }).toBuffer({ resolveWithObject: true });
 
     const imageId = generateRandomId();
@@ -48,7 +48,6 @@ export async function POST(req: NextRequest) {
       contentType: 'image/jpeg',
     });
     const imageUrl = await getDownloadURL(imageRef);
-    console.log(imageUrl);
 
     return NextResponse.json({
       id: imageId, imageUrl,

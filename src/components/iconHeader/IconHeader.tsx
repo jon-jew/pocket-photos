@@ -1,19 +1,18 @@
 import React from "react";
 
 import Image from "next/image";
-import { User } from "firebase/auth";
 
 import UserDropdown from '@/components/ui/userDropdown';
 
 interface IconHeaderProps {
   showLogin?: boolean;
-  currentUser?: User | undefined;
+  user?: UserInfo | undefined;
 };
 
-const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, currentUser }) => {
+const IconHeader: React.FC<IconHeaderProps> = ({ showLogin = false, user }) => {
   return (
     <div className="centered-col relative w-full max-w-xl !justify-end h-[300px] text-primary mb-8">
-      {showLogin && <UserDropdown user={currentUser} />}
+      {showLogin && <UserDropdown user={user} />}
       <Image
         priority
         alt="Plurr Logo"

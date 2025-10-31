@@ -42,7 +42,7 @@ export default async function AlbumPage({
       initialAlbumInfo={albumData?.albumInfo}
       initialImages={albumData?.imageList || []}
       initialJoined={foundJoinedAlbum}
-      currentUser={currentUser?.toJSON() as UserInfo}
+      initialUser={currentUser?.toJSON() as UserInfo}
     />
   );
 }

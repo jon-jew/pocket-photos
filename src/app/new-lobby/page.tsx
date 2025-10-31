@@ -14,5 +14,5 @@ export default async function NewAlbumPage() {
   
   const { currentUser } = await getAuthenticatedAppForUser();
 
-  return <NewAlbum currentUser={currentUser?.toJSON() as UserInfo} />;
+  return <NewAlbum initialUser={currentUser?.toJSON() as UserInfo} />;
 };

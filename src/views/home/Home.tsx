@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
-import { User } from 'firebase/auth';
 import { toast } from 'react-toastify';
+import { logEvent } from 'firebase/analytics';
 
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
@@ -13,6 +13,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import DialpadIcon from '@mui/icons-material/Dialpad';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
+import { analytics } from "@/library/firebase/clientApp";
+import useUserSession from '@/components/hooks/useUserSesssion';
+
 import QrScanner from '@/components/qrScanner';
 import IconHeader from "@/components/iconHeader";
 import IconButton from "@/components/ui/iconButton";
@@ -20,9 +23,10 @@ import TornContainer from "@/components/tornContainer/TornContainer";
 import Button from "@/components/ui/button";
 import Textfield from "@/components/ui/textfield";
 
-export default function Home({ currentUser }: { currentUser: User | undefined }) {
+export default function Home({ initialUser }: { initialUser: UserInfo | undefined }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const user = useUserSession(initialUser);
 
   const fromWaitlist = searchParams.get('waitlist') === 'true';
 
@@ -39,13 +43,17 @@ export default function Home({ currentUser }: { currentUser: User | undefined })
   const handleJoinClick = (e: React.FormEvent) => {
     e.preventDefault();
     if (lobbyCode.trim() !== "") {
+      logEvent(analytics, 'entered_code', {
+        is_logged_in: user !== undefined,
+        lobby_id: lobbyCode,
+      });
       // Navigate to the album page with the room code
       router.push(`/lobby/${lobbyCode}`);
     }
   };
 
   const handleLobbyClick = () => {
-    if (currentUser) {
+    if (user) {
       router.push('/new-lobby');
     } else {
       toast.info('Please login to create a lobby');
@@ -65,7 +73,7 @@ export default function Home({ currentUser }: { currentUser: User | undefined })
   return (
     <div className="flex flex-col min-h-screen items-center justify-center">
       <QrScanner isOpen={qrScannerOpen} setIsOpen={setQrScannerOpen} />
-      <IconHeader showLogin currentUser={currentUser} />
+      <IconHeader showLogin user={user} />
       <TornContainer>
         <h3 className="mb-2">
           Got a code from a friend?<br />
@@ -82,7 +90,7 @@ export default function Home({ currentUser }: { currentUser: User | undefined })
           />
         </form>
         <Button onClick={() => setQrScannerOpen(!qrScannerOpen)} variant="outlinedPrimary">
-          <QrCodeScannerIcon sx={{ mr: 1 }}/> Scan Code
+          <QrCodeScannerIcon sx={{ mr: 1 }} /> Scan Code
         </Button>
         <span className="mt-4">or</span>
         <h3>Want to create a new lobby?</h3>

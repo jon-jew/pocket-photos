@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { User } from "firebase/auth";
 import clx from 'classnames';
 
 import CollectionsIcon from '@mui/icons-material/Collections';
@@ -13,6 +12,7 @@ import ImageNotSupportedIcon from '@mui/icons-material/ImageNotSupported';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
 import { getAlbumHoursRemaining, getAlbumDaysRemaining, getTimeDifference } from '@/library/utils';
+import useUserSession from '@/components/hooks/useUserSesssion';
 
 import QrScanner from '@/components/qrScanner';
 import Button from '@/components/ui/button';
@@ -22,20 +22,21 @@ import './albumGallery.scss';
 
 interface AlbumGalleryProps {
   title: string;
-  currentUser: User;
+  initialUser: UserInfo;
   path: string;
-  initialAlbumList: AlbumEntry[];
+  albumList: AlbumEntry[];
   showNewAlbumBtn?: boolean;
 };
 
 const AlbumGallery: React.FC<AlbumGalleryProps> = ({
   title,
-  currentUser,
+  initialUser,
   path,
-  initialAlbumList,
+  albumList,
   showNewAlbumBtn = false,
 }) => {
-  const [albums, setAlbums] = useState<AlbumEntry[]>(initialAlbumList);
+  const user = useUserSession(initialUser);
+
   const [currentTime, setCurrentTime] = useState<number>(Date.now());
   const [qrScannerOpen, setQrScannerOpen] = useState<boolean>(false);
 
@@ -52,12 +53,12 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
     <div className="max-w-4xl mx-auto min-h-screen">
       <QrScanner isOpen={qrScannerOpen} setIsOpen={setQrScannerOpen} />
       <Navbar
-        currentUser={currentUser}
+        user={user}
         title={
           <>
             <h2 className="text-2xl text-secondary font-bold">{title}</h2>
             <h4 className="ml-2 text-secondary opacity-70">
-              {'('}{albums.length}
+              {'('}{albumList.length}
               <CollectionsIcon sx={{ marginLeft: '4px', fontSize: '16px' }} />
               {')'}
             </h4>
@@ -68,26 +69,26 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
 
       <main className={clx({
         'flex flex-col min-h-[calc(100vh-150px)] px-2 py-4': true,
-        'justify-center': albums.length === 0,
+        'justify-center': albumList.length === 0,
       })}
       >
-        {albums.length !== 0 &&
+        {albumList.length !== 0 &&
           <div className="pl-6 py-1">
-            {showNewAlbumBtn && albums.length !== 0 &&
+            {showNewAlbumBtn && albumList.length !== 0 &&
               <Button href="/new-lobby" variant="outlinedSecondary">
                 +<CollectionsIcon sx={{ mr: 1 }} /> New Lobby
               </Button>
             }
-            {path === '/joined-lobbies' && albums.length !== 0 &&
+            {path === '/joined-lobbies' && albumList.length !== 0 &&
               <Button onClick={() => setQrScannerOpen(true)} variant="outlinedSecondary">
                 <QrCodeScannerIcon sx={{ mr: 1 }} /> Scan Code
               </Button>
             }
           </div>
         }
-        {albums.length > 0 ?
+        {albumList.length > 0 ?
           <div className="flex flex-row flex-wrap gap-x-10 gap-y-12 px-4 py-8 justify-center items-start content-start min-h-[calc(100vh-240px)]">
-            {albums.map((album, index) => (
+            {albumList.map((album, index) => (
               <Link
                 key={`album-${index}`}
                 href={`/lobby/${album.id}`}
@@ -95,7 +96,7 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
               >
                 {album.firstUploadOn &&
                   <>
-                    {getAlbumDaysRemaining(Date.now(), album.firstUploadOn) >= 0 ?
+                    {getAlbumDaysRemaining(currentTime, album.firstUploadOn) >= 0 ?
                       <div className="absolute -top-3 -right-3 z-[20] text-xs bg-secondary text-primary border-1 border-primary px-2 py-1 rounded-lg">
                         <span className="ml-1">
                           {getTimeDifference(album.firstUploadOn, true)}
@@ -109,11 +110,12 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
                 }
 
                 <div className="shadow-lg polaroid-container top shadow-lg">
-                  <div className="polaroid-image">
+                  <div className="polaroid-image relative">
                     {album.thumbnailImage ?
                       <Image
                         src={album.thumbnailImage}
                         fill
+                        sizes="130px"
                         alt={`Album Thumbnail ${index}`}
                         style={{ objectFit: 'cover' }}
                       /> :
@@ -133,7 +135,7 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
                 <div className="absolute bottom-[-5px] left-[-20px] z-[20] px-3 py-2 bg-primary shadow-lg rounded-full">
 
                   <h5 className="text-xs text-black break-all text-ellipsis line-clamp-2">
-                    {getAlbumHoursRemaining(Date.now(), album.firstUploadOn) < 0 && album.firstUploadOn !== null &&
+                    {getAlbumHoursRemaining(currentTime, album.firstUploadOn) < 0 && album.firstUploadOn !== null &&
                       <LockIcon sx={{ fontSize: 12, mr: 0.5 }} />
                     }
                     {album.albumName}
