@@ -40,7 +40,7 @@ export default async function WaitlistPage({
         <h2 className="text-primary !text-2xl">Join the waitlist!</h2>
         <p className="!text-xs mt-2 text-gray-200">
           Sign up with either<br />
-          your email or mobile number<br />
+          your email and mobile number<br />
           to stay in the loop for<br />
           all our exciting updates.
         </p>
@@ -73,7 +73,7 @@ export default async function WaitlistPage({
             name="phoneNumber"
             className="bg-gray-50 font-secondary border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="212-555-1234"
-            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+            pattern="[0-9]{3}[0-9]{3}[0-9]{4}|[0-9]{3}-[0-9]{3}-[0-9]{4}"
             title="212-555-1234"
             required
           />
