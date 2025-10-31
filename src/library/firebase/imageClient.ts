@@ -103,24 +103,52 @@ export const uploadImagesToAlbum = async (
         toast.error('Unauthorized to upload photos');
         return false;
       }
-      const imagePromises = images.map(async (image: File, index: number) => {
-        const endpoint = `/api/upload-to-album`;
-        const headers = new Headers();
-        if (userToken) headers.append('Authorization', `Bearer ${userToken}`);
-        const formData = new FormData();
-        formData.append(`image`, image, `album-img-${index}`);
-        formData.append('albumId', albumId);
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers,
-          body: formData,
-        });
-        if (res.body && res.ok) {
-          const body = await streamToObject(res.body);
-          // setUploadProgress((prev) => prev + (1 / images.length) * 100);
-          return body;
+      const totalBytes = images.reduce((sum, f) => sum + f.size, 0);
+      let uploadedBytes = 0;
+
+      const imagePromises = images.map((image: File, index: number) => {
+        return new Promise(async (resolve, reject) => {
+          const formData = new FormData();
+          formData.append(`image`, image, `album-img-${index}`);
+          formData.append('albumId', albumId);
+
+          const xhr = new XMLHttpRequest();
+          let prevLoaded = 0;
+
+          xhr.upload.onprogress = (e: ProgressEvent) => {
+        if (e.lengthComputable) {
+          const delta = e.loaded - prevLoaded;
+          prevLoaded = e.loaded;
+          uploadedBytes += delta;
+          if (totalBytes > 0) {
+            const percent = (uploadedBytes / totalBytes) * 100;
+            setUploadProgress(Math.min(100, percent));
+          }
         }
-      })
+          };
+
+          xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const body = JSON.parse(xhr.responseText || '{}');
+            resolve(body);
+          } catch (err) {
+            reject(err);
+          }
+        } else {
+          reject(new Error(`Upload failed with status ${xhr.status}`));
+        }
+          };
+
+          xhr.onerror = () => reject(new Error('Network error during upload'));
+
+          xhr.open('POST', '/api/upload-to-album');
+          if (userToken) {
+        xhr.setRequestHeader('Authorization', `Bearer ${userToken}`);
+          }
+          xhr.send(formData);
+        });
+      });
       const addedImageList = await Promise.all(imagePromises);
 
       await updateDoc(albumRef, {
@@ -164,29 +192,73 @@ export const uploadImageAlbum = async (
       albumId = generateRandomId();
     } while (!doesAlbumExist(albumId));
 
-    const progressIncrement: number = 1 / images.length * 100;
-    const apiPromises = images.map(async (image, index) => {
-      const formData = new FormData();
-      formData.append(`image`, image, `album-img-${index}`);
-      formData.append('info', JSON.stringify({
-        isFullQuality, albumId,
-      }));
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${idToken}`,
-        },
-        body: formData,
+    const totalBytes = images.reduce((sum, f) => sum + f.size, 0);
+    let uploadedBytes = 0;
+
+    const apiPromises = images.map((image, index) => {
+      return new Promise(async (resolve, reject) => {
+        const formData = new FormData();
+        formData.append(`image`, image, `album-img-${index}`);
+        formData.append('info', JSON.stringify({
+          isFullQuality, albumId,
+        }));
+
+        const xhr = new XMLHttpRequest();
+        let prevLoaded = 0;
+
+        xhr.upload.onprogress = (e: ProgressEvent) => {
+          if (e.lengthComputable) {
+            const delta = e.loaded - prevLoaded;
+            prevLoaded = e.loaded;
+            uploadedBytes += delta;
+            if (totalBytes > 0) {
+              const percent = (uploadedBytes / totalBytes) * 100;
+              setUploadProgress(Math.min(100, percent));
+            }
+          } else {
+            // fallback: estimate using file size
+            const estimatedUploaded = uploadedBytes + e.loaded;
+            if (totalBytes > 0) {
+              const percent = (estimatedUploaded / totalBytes) * 100;
+              setUploadProgress(Math.min(100, percent));
+            }
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const body = JSON.parse(xhr.responseText || '{}');
+              // ensure this file is fully accounted for (in case onprogress didn't reach file.size)
+              if (prevLoaded < (image.size || 0)) {
+                uploadedBytes += ((image.size || 0) - prevLoaded);
+                prevLoaded = image.size || 0;
+                if (totalBytes > 0) {
+                  const percent = (uploadedBytes / totalBytes) * 100;
+                  setUploadProgress(Math.min(100, percent));
+                }
+              }
+              resolve({
+                ...body,
+                reactions: [],
+                reactionString: '',
+              });
+            } catch (err) {
+              reject(err);
+            }
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}`));
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Network error during upload'));
+        };
+
+        xhr.open('POST', '/api/upload');
+        xhr.setRequestHeader('Authorization', `Bearer ${idToken}`);
+        xhr.send(formData);
       });
-      if (res.body && res.ok) {
-        const body = await streamToObject(res.body);
-        setUploadProgress((prev) => prev + progressIncrement);
-        return ({
-          ...body,
-          reactions: [],
-          reactionString: '',
-        });
-      }
     });
     const imageList = await Promise.all(apiPromises);
     // const promises = images.map(async (image, index) => {

@@ -9,7 +9,7 @@ import { useSearchParams } from 'next/navigation';
 
 import { toast } from "react-toastify";
 import clx from 'classnames';
-import { logEvent } from 'firebase/analytics';
+// import { logEvent } from 'firebase/analytics';
 
 import Snackbar from '@mui/material/Snackbar';
 import Slide from '@mui/material/Slide';
@@ -173,6 +173,7 @@ export default function AlbumPage({
 
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isChanged) setIsChanged(true);
+    setUploadProgress(0);
     setLoading(true);
     const files = Array.from(e.target.files || []);
     if (files.length + imageList.length > 75) {
@@ -190,6 +191,7 @@ export default function AlbumPage({
       toast.success(`Added ${files.length} images`);
     }
     setLoading(false);
+    setUploadProgress(0);
   };
 
   const handleSubmitChanges = async () => {
@@ -238,7 +240,7 @@ export default function AlbumPage({
     setLoading(false);
     timeoutRef.current = setTimeout(() => {
       setWaitlistMsgOpen(true);
-    }, 2000);
+    }, 1000);
   }, []);
 
   useEffect(() => {
@@ -427,11 +429,12 @@ export default function AlbumPage({
         key="waitlist-snack"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         open={waitlistMsgOpen}
+        sx={{ pointerEvents: 'none' }}
         // autoHideDuration={5000}
         slots={{ transition: Slide }}
         onClose={handleWaitlistClose}
       >
-        <div className="flex flex-row items-center justify-center mb-20 px-6 py-4 bg-gray-900">
+        <div className="flex flex-row items-center justify-center mb-20 pointer-events-auto px-6 py-4 bg-gray-900">
           <p className="text-xs">Wanna stay in the loop?</p>
           <Link href={`/waitlist?prevAlbumId=${albumId}`}>
             <button type="button" className="text-sm text-primary underline ml-3 mr-5">
