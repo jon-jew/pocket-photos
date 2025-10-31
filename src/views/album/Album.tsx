@@ -275,7 +275,7 @@ export default function AlbumPage({
           title={
             <h2 className="text-2xl text-secondary font-bold break-all text-ellipsis line-clamp-2">
               {albumInfo.ownerId === user?.uid && <PersonIcon sx={{ fontSize: 20, mr: 1 }} />}
-              {hoursRemaining < 0 && <LockIcon sx={{ fontSize: 20, mr: 1 }} />}
+              {(albumInfo.firstUploadOn !== null && hoursRemaining < 0) && <LockIcon sx={{ fontSize: 20, mr: 1 }} />}
               {albumInfo.albumName}
             </h2>
           }
@@ -341,8 +341,16 @@ export default function AlbumPage({
           {imageList.length === 0 ?
             <div className="flex flex-col justify-center items-center p-4 gap-4 h-[calc(100vh-260px)]">
               <h3>Add images to start the fun!</h3>
-              <Button variant="secondary" fullWidth>
-                <label htmlFor="image-upload-empty">
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={() => {
+                  if (!user?.uid) {
+                    toast.info('Please sign in to upload images.');
+                  }
+                }}
+              >
+                <label htmlFor={user?.uid ? 'image-upload-empty' : ''}>
                   + Add images
                 </label>
                 <input
@@ -388,8 +396,16 @@ export default function AlbumPage({
             }
             {!editMode && hoursRemaining >= 0 &&
               <>
-                <button type="button" className="bg-primary ring-blue-500/50 shadow-xl px-2 py-3 rounded-[50%]">
-                  <label htmlFor="image-upload">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!user?.uid) {
+                      toast.info('Please sign in to upload images.');
+                    }
+                  }}
+                  className="bg-primary ring-blue-500/50 shadow-xl px-2 py-3 rounded-[50%]"
+                >
+                  <label htmlFor={user?.uid ? 'image-upload' : ''}>
                     <span>+</span><ImageIcon />
                   </label>
                 </button>

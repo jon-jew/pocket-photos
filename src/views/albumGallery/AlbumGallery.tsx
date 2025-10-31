@@ -69,8 +69,8 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
       />
 
       <main className={clx({
-        'flex flex-col min-h-[calc(100vh-150px)] px-2 py-4': true,
-        'justify-center': albumList.length === 0,
+        'flex flex-col min-h-[calc(100vh-150px)] px-2 py-4 text-center': true,
+        'justify-center px-12': albumList.length === 0,
       })}
       >
         {albumList.length !== 0 &&
@@ -148,7 +148,7 @@ const AlbumGallery: React.FC<AlbumGalleryProps> = ({
           <>
             {path === '/joined-lobbies' &&
               <>
-                <h5 className="text-primary !text-xl mb-6">
+                <h5 className="text-primary !text-xl mb-12">
                   Your have no joined lobbies!
                 </h5>
                 <p className="!text-sm mb-4">
