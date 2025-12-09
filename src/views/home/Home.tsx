@@ -97,6 +97,11 @@ export default function Home({ initialUser }: { initialUser: UserInfo | undefine
         <Button onClick={handleLobbyClick} variant="primary" fullWidth>
           Host Lobby
         </Button>
+        <div className="mt-2 text-xs">
+          <p>Plurr Inc.</p>
+          <p>42 Clinton Place</p>
+          <p>Hackensack, NJ 07601</p>
+        </div>
       </TornContainer>
       <Snackbar
         key="waitlist-snack"
