@@ -13,8 +13,6 @@ export default function PrivacyPolicyPage() {
           Privacy Policy
         </h1>
         <p className="mt-2">Plurr Inc.</p>
-        <p>42 Clinton Place</p>
-        <p>Hackensack, NJ 07601</p>
         <p className="mt-4 text-lg text-gray-500">
           Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
