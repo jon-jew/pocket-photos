@@ -99,9 +99,6 @@ export default function Home({ initialUser }: { initialUser: UserInfo | undefine
         </Button>
         <div className="mt-2 text-xs">
           <p>Plurr Inc.</p>
-          <p>42 Clinton Place</p>
-          <p>Hackensack, NJ 07601</p>
-          <p>(732) 979-4563</p>
           <p>dev@plurr.io</p>
         </div>
       </TornContainer>
